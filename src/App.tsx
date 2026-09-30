@@ -822,7 +822,8 @@ function AppContent() {
     closeAllMainViews();
   };
 
-  const unreadNotificationCount = notifications.filter((n) => !n.read).length;
+  const customerNotifications = notifications.filter(n => ['drop', 'promo', 'wishlist'].includes(n.type));
+  const unreadNotificationCount = customerNotifications.filter((n) => !n.read).length;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const wishlistCount = wishlistIds.length;
 
@@ -860,7 +861,7 @@ function AppContent() {
       ) : (
         <StorefrontView
           {...{
-            user, products, orders, notifications, cartItems, wishlistIds, searchQuery,
+            user, products, orders, notifications: customerNotifications, cartItems, wishlistIds, searchQuery,
             selectedCategory, sortBy, isCategoriesPageOpen, isAboutUsPageOpen, isTermsPageOpen,
             isRefundPolicyPageOpen,
             isStoreLocatorPageOpen, isBrandPageOpen, isCollectionsPageOpen, isOrdersPageOpen,
@@ -898,4 +899,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 
