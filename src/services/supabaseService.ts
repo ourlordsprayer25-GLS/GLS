@@ -1,3 +1,10 @@
+
+const localFetch = (url: string | URL | Request, init?: RequestInit) => {
+  if (import.meta.env.PROD) {
+    return Promise.resolve(new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+  }
+  return fetch(url, init);
+};
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Product, Order, UserProfile, StoreNotification, StoreSettings } from '../types/store';
 import { INITIAL_PRODUCTS } from '../data/products';
@@ -695,5 +702,6 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
   }
   return null;
 }
+
 
 
