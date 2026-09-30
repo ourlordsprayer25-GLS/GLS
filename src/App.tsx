@@ -153,6 +153,8 @@ function AppContent() {
   });
 
   const [brands, setBrands] = useState(() => {
+    const saved = localStorage.getItem('store_brands');
+    if (saved) return JSON.parse(saved);
     const unique = INITIAL_PRODUCTS.reduce((acc, p) => {
       if (p.brand && !acc.some((b) => b.name === p.brand)) {
         acc.push({ name: p.brand, origin: p.brandOrigin || 'Unknown' });
@@ -161,6 +163,10 @@ function AppContent() {
     }, [] as { name: string; origin: string }[]);
     return unique;
   });
+
+  useEffect(() => {
+    localStorage.setItem('store_brands', JSON.stringify(brands));
+  }, [brands]);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
