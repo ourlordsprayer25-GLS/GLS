@@ -51,10 +51,10 @@ export const AdminReviews: React.FC<AdminReviewsProps> = ({ products, setProduct
 
   const filteredReviews = allReviews.filter(review => {
     const matchesSearch = 
-      review.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.comment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.productName.toLowerCase().includes(searchQuery.toLowerCase());
+      review.author?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      review.title?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      review.comment?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+      review.productName?.toLowerCase().includes(searchQuery?.toLowerCase());
     
     const matchesRating = filterRating === 'all' || review.rating === filterRating;
     
@@ -213,3 +213,4 @@ export const AdminReviews: React.FC<AdminReviewsProps> = ({ products, setProduct
     </div>
   );
 };
+

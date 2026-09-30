@@ -67,3 +67,4 @@ export const AdminInventoryForecasting: React.FC<{ products: Product[], orders: 
     </div>
   );
 };
+

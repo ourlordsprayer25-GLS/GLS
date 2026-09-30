@@ -148,7 +148,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key?.toLowerCase() === 'k') {
         e.preventDefault();
         searchInputRef.current?.focus();
         setIsSearchOpen(true);
@@ -179,7 +179,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   };
 
   const handleNavigateToProduct = (productId: string) => {
-    const targetProduct = products.find(p => p.id === productId || p.slug === productId || p.name.toLowerCase() === productId.toLowerCase());
+    const targetProduct = products.find(p => p.id === productId || p.slug === productId || p.name?.toLowerCase() === productId?.toLowerCase());
     setActiveTab('products');
     setIsNotificationsOpen(false);
     if (targetProduct) {
@@ -197,7 +197,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setActiveTab('orders');
     setIsNotificationsOpen(false);
     if (orderNumber) {
-      const targetOrder = orders.find(o => o.orderNumber.toLowerCase() === orderNumber.toLowerCase() || o.id === orderNumber);
+      const targetOrder = orders.find(o => o.orderNumber?.toLowerCase() === orderNumber?.toLowerCase() || o.id === orderNumber);
       if (targetOrder) {
         setOrderSearchQuery(targetOrder.orderNumber);
       } else {
@@ -211,39 +211,39 @@ export const AdminView: React.FC<AdminViewProps> = ({
   };
 
   // Real-time Global Search matching
-  const cleanQ = searchQuery.toLowerCase().trim();
+  const cleanQ = searchQuery?.toLowerCase().trim();
 
   const matchingProducts = useMemo(() => {
     if (!cleanQ) return [];
     return products.filter(p =>
-      p.name.toLowerCase().includes(cleanQ) ||
-      p.id.toLowerCase().includes(cleanQ) ||
-      (p.sku && p.sku.toLowerCase().includes(cleanQ)) ||
-      p.categoryLabel.toLowerCase().includes(cleanQ) ||
-      (p.brand && p.brand.toLowerCase().includes(cleanQ))
+      p.name?.toLowerCase().includes(cleanQ) ||
+      p.id?.toLowerCase().includes(cleanQ) ||
+      (p.sku && p.sku?.toLowerCase().includes(cleanQ)) ||
+      p.categoryLabel?.toLowerCase().includes(cleanQ) ||
+      (p.brand && p.brand?.toLowerCase().includes(cleanQ))
     );
   }, [products, cleanQ]);
 
   const matchingOrders = useMemo(() => {
     if (!cleanQ) return [];
     return orders.filter(o =>
-      o.orderNumber.toLowerCase().includes(cleanQ) ||
-      o.id.toLowerCase().includes(cleanQ) ||
-      (o.trackingNumber && o.trackingNumber.toLowerCase().includes(cleanQ)) ||
-      o.shippingAddress.firstName.toLowerCase().includes(cleanQ) ||
-      o.shippingAddress.lastName.toLowerCase().includes(cleanQ) ||
-      `${o.shippingAddress.firstName} ${o.shippingAddress.lastName}`.toLowerCase().includes(cleanQ) ||
-      o.shippingAddress.email.toLowerCase().includes(cleanQ)
+      o.orderNumber?.toLowerCase().includes(cleanQ) ||
+      o.id?.toLowerCase().includes(cleanQ) ||
+      (o.trackingNumber && o.trackingNumber?.toLowerCase().includes(cleanQ)) ||
+      o.shippingAddress.firstName?.toLowerCase().includes(cleanQ) ||
+      o.shippingAddress.lastName?.toLowerCase().includes(cleanQ) ||
+      `${o.shippingAddress.firstName} ${o.shippingAddress.lastName}`?.toLowerCase().includes(cleanQ) ||
+      o.shippingAddress.email?.toLowerCase().includes(cleanQ)
     );
   }, [orders, cleanQ]);
 
   const matchingCustomers = useMemo(() => {
     if (!cleanQ) return [];
     return users.filter(u =>
-      `${u.firstName} ${u.lastName}`.toLowerCase().includes(cleanQ) ||
-      u.email.toLowerCase().includes(cleanQ) ||
-      u.id.toLowerCase().includes(cleanQ) ||
-      (u.phone && u.phone.toLowerCase().includes(cleanQ))
+      `${u.firstName} ${u.lastName}`?.toLowerCase().includes(cleanQ) ||
+      u.email?.toLowerCase().includes(cleanQ) ||
+      u.id?.toLowerCase().includes(cleanQ) ||
+      (u.phone && u.phone?.toLowerCase().includes(cleanQ))
     );
   }, [users, cleanQ]);
 
@@ -895,3 +895,4 @@ export const AdminView: React.FC<AdminViewProps> = ({
     </div>
   );
 };
+

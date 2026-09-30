@@ -324,7 +324,7 @@ export function subscribeToSettings(defaultSettings: StoreSettings, onUpdate: (s
       .from('settings')
       .select('*')
       .eq('id', 'store_config')
-      .single()
+      .maybeSingle()
       .then(({ data, error }) => {
         if (!error && data?.config) {
           onUpdate(data.config as StoreSettings);
@@ -493,7 +493,7 @@ export async function updateRealtimeUserActivity(userId: string, actionText: str
 
   if (isSupabaseConfigured) {
     try {
-      const { data } = await supabase.from('users').select('recentActivity').eq('id', userId).single();
+      const { data } = await supabase.from('users').select('recentActivity').eq('id', userId).maybeSingle();
       const existing = data?.recentActivity || [];
       const recent = [newActivity, ...existing].slice(0, 15);
       await supabase.from('users').update({
@@ -576,7 +576,7 @@ export async function markRealtimeNotificationRead(notificationId: string) {
 export async function fetchRealtimeCart(userId: string): Promise<any[]> {
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.from('users').select('cart_items').eq('id', userId).single();
+      const { data, error } = await supabase.from('users').select('cart_items').eq('id', userId).maybeSingle();
       if (!error && data?.cart_items && Array.isArray(data.cart_items)) {
         return data.cart_items;
       }
@@ -624,7 +624,7 @@ export async function saveRealtimeCart(userId: string, items: any[]) {
 export async function fetchRealtimeWishlist(userId: string): Promise<string[]> {
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.from('users').select('wishlist_ids').eq('id', userId).single();
+      const { data, error } = await supabase.from('users').select('wishlist_ids').eq('id', userId).maybeSingle();
       if (!error && data?.wishlist_ids && Array.isArray(data.wishlist_ids)) {
         return data.wishlist_ids;
       }
@@ -672,7 +672,7 @@ export async function saveRealtimeWishlist(userId: string, ids: string[]) {
 export async function fetchRealtimeUserProfile(userId: string): Promise<UserProfile | null> {
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
+      const { data, error } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
       if (!error && data) {
         return data as UserProfile;
       }
@@ -695,3 +695,4 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
   }
   return null;
 }
+

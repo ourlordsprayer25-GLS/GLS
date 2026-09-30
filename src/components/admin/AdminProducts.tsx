@@ -274,7 +274,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
         const product: Product = {
           ...finalFormData,
           id: `prod-${Date.now()}`,
-          slug: (formData.name || '').toLowerCase().replace(/\s+/g, '-'),
+          slug: (formData.name || '')?.toLowerCase().replace(/\s+/g, '-'),
         };
         setProducts(prev => [product, ...prev]);
         saveRealtimeProduct(product);
@@ -296,15 +296,15 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
   };
 
   const filteredProducts = products.filter(product => {
-    const q = searchQuery.toLowerCase().trim();
+    const q = searchQuery?.toLowerCase().trim();
     if (!q) return categoryFilter === 'all' || product.category === categoryFilter;
 
     const matchesSearch = 
-      product.name.toLowerCase().includes(q) ||
-      product.id.toLowerCase().includes(q) ||
-      (product.sku && product.sku.toLowerCase().includes(q)) ||
-      product.categoryLabel.toLowerCase().includes(q) ||
-      (product.brand && product.brand.toLowerCase().includes(q));
+      product.name?.toLowerCase().includes(q) ||
+      product.id?.toLowerCase().includes(q) ||
+      (product.sku && product.sku?.toLowerCase().includes(q)) ||
+      product.categoryLabel?.toLowerCase().includes(q) ||
+      (product.brand && product.brand?.toLowerCase().includes(q));
     
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
     
@@ -1013,3 +1013,4 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     </div>
   );
 };
+

@@ -146,15 +146,15 @@ export const AdminInventory: React.FC<AdminInventoryProps> = ({
   // Filtering & Sorting
   const filteredProducts = products.filter(p => {
     const stock = p.stockLevel !== undefined ? p.stockLevel : 10;
-    const q = searchQuery.toLowerCase().trim();
+    const q = searchQuery?.toLowerCase().trim();
 
     const matchesSearch = !q ||
-      p.name.toLowerCase().includes(q) ||
-      p.id.toLowerCase().includes(q) ||
-      (p.sku && p.sku.toLowerCase().includes(q)) ||
-      (p.barcode && p.barcode.toLowerCase().includes(q)) ||
-      (p.brand && p.brand.toLowerCase().includes(q)) ||
-      p.categoryLabel.toLowerCase().includes(q);
+      p.name?.toLowerCase().includes(q) ||
+      p.id?.toLowerCase().includes(q) ||
+      (p.sku && p.sku?.toLowerCase().includes(q)) ||
+      (p.barcode && p.barcode?.toLowerCase().includes(q)) ||
+      (p.brand && p.brand?.toLowerCase().includes(q)) ||
+      p.categoryLabel?.toLowerCase().includes(q);
 
     const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
 
@@ -668,3 +668,4 @@ export const AdminInventory: React.FC<AdminInventoryProps> = ({
     </div>
   );
 };
+

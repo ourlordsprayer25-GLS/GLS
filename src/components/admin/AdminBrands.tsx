@@ -59,8 +59,8 @@ export const AdminBrands: React.FC<AdminBrandsProps> = ({ brands, setBrands }) =
   };
 
   const filteredBrands = brands.filter(brand => 
-    brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    brand.origin.toLowerCase().includes(searchQuery.toLowerCase())
+    brand.name?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+    brand.origin?.toLowerCase().includes(searchQuery?.toLowerCase())
   );
 
   return (
@@ -225,3 +225,4 @@ export const AdminBrands: React.FC<AdminBrandsProps> = ({ brands, setBrands }) =
     </div>
   );
 };
+

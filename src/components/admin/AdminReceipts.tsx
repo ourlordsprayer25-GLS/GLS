@@ -25,9 +25,9 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const filteredOrders = orders.filter(order => 
-    order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.shippingAddress.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.shippingAddress.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+    order.orderNumber?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+    order.shippingAddress.firstName?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+    order.shippingAddress.lastName?.toLowerCase().includes(searchQuery?.toLowerCase())
   );
 
   return (
@@ -210,3 +210,4 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders }) => {
     </div>
   );
 };
+

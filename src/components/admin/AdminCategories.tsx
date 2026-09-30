@@ -79,9 +79,9 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({ categories, se
   };
 
   const filteredCategories = categories.filter(cat => 
-    cat.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cat.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (cat.description && cat.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    cat.label?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+    cat.id?.toLowerCase().includes(searchQuery?.toLowerCase()) ||
+    (cat.description && cat.description?.toLowerCase().includes(searchQuery?.toLowerCase()))
   );
 
   const getProductCountForCategory = (catId: string) => {
@@ -149,7 +149,7 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({ categories, se
                     onChange={(e) => setFormData({
                       ...formData, 
                       label: e.target.value, 
-                      id: editingCategory ? formData.id : e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+                      id: editingCategory ? formData.id : e.target.value?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
                     })}
                   />
                 </div>
@@ -370,3 +370,4 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({ categories, se
     </div>
   );
 };
+

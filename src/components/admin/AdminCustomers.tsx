@@ -142,13 +142,13 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
 
   // Filter customers
   const filteredUsers = users.filter(u => {
-    const q = searchTerm.toLowerCase().trim();
+    const q = searchTerm?.toLowerCase().trim();
     if (!q) return tierFilter === 'all' || u.tier === tierFilter;
 
-    const nameMatch = `${u.firstName} ${u.lastName}`.toLowerCase().includes(q);
-    const emailMatch = u.email.toLowerCase().includes(q);
-    const phoneMatch = u.phone.toLowerCase().includes(q);
-    const idMatch = u.id.toLowerCase().includes(q);
+    const nameMatch = `${u.firstName} ${u.lastName}`?.toLowerCase().includes(q);
+    const emailMatch = u.email?.toLowerCase().includes(q);
+    const phoneMatch = u.phone?.toLowerCase().includes(q);
+    const idMatch = u.id?.toLowerCase().includes(q);
 
     const matchesSearch = nameMatch || emailMatch || phoneMatch || idMatch;
     const matchesTier = tierFilter === 'all' || u.tier === tierFilter;
@@ -448,3 +448,4 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
     </div>
   );
 };
+

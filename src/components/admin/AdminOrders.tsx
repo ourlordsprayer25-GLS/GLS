@@ -51,15 +51,15 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, setOrders, ini
   };
 
   const filteredOrders = orders.filter(order => {
-    const q = searchQuery.toLowerCase().trim();
+    const q = searchQuery?.toLowerCase().trim();
     const matchesSearch = !q ||
-      order.orderNumber.toLowerCase().includes(q) ||
-      order.id.toLowerCase().includes(q) ||
-      (order.trackingNumber && order.trackingNumber.toLowerCase().includes(q)) ||
-      order.shippingAddress.firstName.toLowerCase().includes(q) ||
-      order.shippingAddress.lastName.toLowerCase().includes(q) ||
-      `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`.toLowerCase().includes(q) ||
-      order.shippingAddress.email.toLowerCase().includes(q);
+      order.orderNumber?.toLowerCase().includes(q) ||
+      order.id?.toLowerCase().includes(q) ||
+      (order.trackingNumber && order.trackingNumber?.toLowerCase().includes(q)) ||
+      order.shippingAddress.firstName?.toLowerCase().includes(q) ||
+      order.shippingAddress.lastName?.toLowerCase().includes(q) ||
+      `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`?.toLowerCase().includes(q) ||
+      order.shippingAddress.email?.toLowerCase().includes(q);
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     
@@ -249,3 +249,5 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, setOrders, ini
     </div>
   );
 };
+
+

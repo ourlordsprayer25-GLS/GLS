@@ -428,3 +428,4 @@ export const AdminSections: React.FC<AdminSectionsProps> = ({ storeSettings, set
     </div>
   );
 };
+

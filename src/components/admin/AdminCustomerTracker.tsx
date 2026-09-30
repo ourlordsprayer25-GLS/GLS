@@ -58,13 +58,13 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
   // Filtered list
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
-      const q = searchQuery.toLowerCase().trim();
-      const name = `${u.firstName} ${u.lastName}`.toLowerCase();
-      const email = u.email.toLowerCase();
-      const phone = u.phone.toLowerCase();
-      const country = (u.location?.country || '').toLowerCase();
-      const city = (u.location?.city || '').toLowerCase();
-      const ip = (u.location?.ipAddress || '').toLowerCase();
+      const q = searchQuery?.toLowerCase().trim();
+      const name = `${u.firstName} ${u.lastName}`?.toLowerCase();
+      const email = u.email?.toLowerCase();
+      const phone = u.phone?.toLowerCase();
+      const country = (u.location?.country || '')?.toLowerCase();
+      const city = (u.location?.city || '')?.toLowerCase();
+      const ip = (u.location?.ipAddress || '')?.toLowerCase();
 
       const matchesSearch = !q || name.includes(q) || email.includes(q) || phone.includes(q) || country.includes(q) || city.includes(q) || ip.includes(q);
 
@@ -756,3 +756,4 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
     </div>
   );
 };
+
