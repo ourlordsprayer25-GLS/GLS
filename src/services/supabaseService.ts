@@ -26,7 +26,7 @@ function initSSE() {
   isSseInitialized = true;
 
   try {
-    const eventSource = new EventSource('/api/sync/events');
+    const eventSource = import.meta.env.PROD ? { addEventListener: ()=>{}, onerror: null } as unknown as EventSource : new EventSource('/api/sync/events');
 
     eventSource.addEventListener('init', (e) => {
       try {
@@ -108,7 +108,7 @@ export async function initServerSync(defaults: {
   brands: any[];
 }) {
   try {
-    await fetch('/api/sync/init', {
+    await localFetch('/api/sync/init', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(defaults),
@@ -126,7 +126,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
   listeners.products.add(onUpdate);
 
   // 1. Fetch from Server Central Database
-  fetch('/api/sync/products')
+  localFetch('/api/sync/products')
     .then(r => r.json())
     .then(serverProducts => {
       if (Array.isArray(serverProducts) && serverProducts.length > 0) {
@@ -173,7 +173,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
   initSSE();
   listeners.orders.add(onUpdate);
 
-  fetch('/api/sync/orders')
+  localFetch('/api/sync/orders')
     .then(r => r.json())
     .then(serverOrders => {
       if (Array.isArray(serverOrders) && serverOrders.length > 0) {
@@ -218,7 +218,7 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
   initSSE();
   listeners.users.add(onUpdate);
 
-  fetch('/api/sync/users')
+  localFetch('/api/sync/users')
     .then(r => r.json())
     .then(serverUsers => {
       if (Array.isArray(serverUsers) && serverUsers.length > 0) {
@@ -262,7 +262,7 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
   initSSE();
   listeners.notifications.add(onUpdate);
 
-  fetch('/api/sync/notifications')
+  localFetch('/api/sync/notifications')
     .then(r => r.json())
     .then(serverNotifs => {
       if (Array.isArray(serverNotifs) && serverNotifs.length > 0) {
@@ -307,7 +307,7 @@ export function subscribeToSettings(defaultSettings: StoreSettings, onUpdate: (s
   initSSE();
   listeners.settings.add(onUpdate);
 
-  fetch('/api/sync/settings')
+  localFetch('/api/sync/settings')
     .then(r => r.json())
     .then(serverSettings => {
       if (serverSettings && serverSettings.storeName) {
@@ -353,7 +353,7 @@ export function subscribeToSettings(defaultSettings: StoreSettings, onUpdate: (s
 export async function addRealtimeOrder(order: Order) {
   // Sync to Central Server
   try {
-    await fetch('/api/sync/orders', {
+    await localFetch('/api/sync/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(order),
@@ -374,7 +374,7 @@ export async function addRealtimeOrder(order: Order) {
 
 export async function updateRealtimeOrderStatus(orderId: string, status: Order['status']) {
   try {
-    await fetch(`/api/sync/orders/${orderId}/status`, {
+    await localFetch(`/api/sync/orders/${orderId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -394,7 +394,7 @@ export async function updateRealtimeOrderStatus(orderId: string, status: Order['
 
 export async function deleteRealtimeOrder(orderId: string) {
   try {
-    await fetch(`/api/sync/orders/${orderId}`, {
+    await localFetch(`/api/sync/orders/${orderId}`, {
       method: 'DELETE',
     });
   } catch (err) {
@@ -412,7 +412,7 @@ export async function deleteRealtimeOrder(orderId: string) {
 
 export async function saveRealtimeProduct(product: Product) {
   try {
-    await fetch('/api/sync/products', {
+    await localFetch('/api/sync/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(product),
@@ -432,7 +432,7 @@ export async function saveRealtimeProduct(product: Product) {
 
 export async function deleteRealtimeProduct(productId: string) {
   try {
-    await fetch(`/api/sync/products/${productId}`, {
+    await localFetch(`/api/sync/products/${productId}`, {
       method: 'DELETE',
     });
   } catch (err) {
@@ -451,7 +451,7 @@ export async function deleteRealtimeProduct(productId: string) {
 export async function updateRealtimeUserProfile(userProfile: UserProfile) {
   if (!userProfile.id) return;
   try {
-    await fetch('/api/sync/users', {
+    await localFetch('/api/sync/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userProfile),
@@ -479,7 +479,7 @@ export async function updateRealtimeUserActivity(userId: string, actionText: str
   };
 
   try {
-    await fetch('/api/sync/users', {
+    await localFetch('/api/sync/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -509,7 +509,7 @@ export async function updateRealtimeUserActivity(userId: string, actionText: str
 
 export async function saveRealtimeSettings(settings: StoreSettings) {
   try {
-    await fetch('/api/sync/settings', {
+    await localFetch('/api/sync/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settings),
@@ -533,7 +533,7 @@ export async function saveRealtimeSettings(settings: StoreSettings) {
 
 export async function addRealtimeNotification(notification: StoreNotification) {
   try {
-    await fetch('/api/sync/notifications', {
+    await localFetch('/api/sync/notifications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(notification),
@@ -553,7 +553,7 @@ export async function addRealtimeNotification(notification: StoreNotification) {
 
 export async function markRealtimeNotificationRead(notificationId: string) {
   try {
-    await fetch(`/api/sync/notifications/${notificationId}/read`, {
+    await localFetch(`/api/sync/notifications/${notificationId}/read`, {
       method: 'PATCH',
     });
   } catch (err) {
@@ -586,7 +586,7 @@ export async function fetchRealtimeCart(userId: string): Promise<any[]> {
   }
 
   try {
-    const res = await fetch(`/api/sync/cart/${userId}`);
+    const res = await localFetch(`/api/sync/cart/${userId}`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) return data;
@@ -599,7 +599,7 @@ export async function fetchRealtimeCart(userId: string): Promise<any[]> {
 
 export async function saveRealtimeCart(userId: string, items: any[]) {
   try {
-    await fetch(`/api/sync/cart/${userId}`, {
+    await localFetch(`/api/sync/cart/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items }),
@@ -634,7 +634,7 @@ export async function fetchRealtimeWishlist(userId: string): Promise<string[]> {
   }
 
   try {
-    const res = await fetch(`/api/sync/wishlist/${userId}`);
+    const res = await localFetch(`/api/sync/wishlist/${userId}`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) return data;
@@ -647,7 +647,7 @@ export async function fetchRealtimeWishlist(userId: string): Promise<string[]> {
 
 export async function saveRealtimeWishlist(userId: string, ids: string[]) {
   try {
-    await fetch(`/api/sync/wishlist/${userId}`, {
+    await localFetch(`/api/sync/wishlist/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids }),
@@ -682,7 +682,7 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
   }
 
   try {
-    const res = await fetch('/api/sync/users');
+    const res = await localFetch('/api/sync/users');
     if (res.ok) {
       const users = await res.json();
       if (Array.isArray(users)) {
@@ -695,4 +695,5 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
   }
   return null;
 }
+
 
