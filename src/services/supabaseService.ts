@@ -136,7 +136,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
   localFetch('/api/sync/products')
     .then(r => r.json())
     .then(serverProducts => {
-      if (Array.isArray(serverProducts) && serverProducts.length > 0) {
+      if (Array.isArray(serverProducts)) {
         onUpdate(serverProducts);
       } else {
         onUpdate(INITIAL_PRODUCTS);
@@ -151,7 +151,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
       .from('products')
       .select('*')
       .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           onUpdate(data as Product[]);
         }
       });
@@ -160,7 +160,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
       .channel('products_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
         const { data } = await supabase.from('products').select('*');
-        if (data && data.length > 0) {
+        if (data) {
           onUpdate(data as Product[]);
         }
       })
@@ -183,7 +183,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
   localFetch('/api/sync/orders')
     .then(r => r.json())
     .then(serverOrders => {
-      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+      if (Array.isArray(serverOrders)) {
         onUpdate(serverOrders);
       } else {
         onUpdate(INITIAL_ORDERS);
@@ -198,7 +198,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
       .select('*')
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           onUpdate(data as Order[]);
         }
       });
@@ -228,7 +228,7 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
   localFetch('/api/sync/users')
     .then(r => r.json())
     .then(serverUsers => {
-      if (Array.isArray(serverUsers) && serverUsers.length > 0) {
+      if (Array.isArray(serverUsers)) {
         onUpdate(serverUsers);
       } else {
         onUpdate(INITIAL_CUSTOMERS);
@@ -242,7 +242,7 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
       .from('users')
       .select('*')
       .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           onUpdate(data as UserProfile[]);
         }
       });
@@ -251,7 +251,7 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
       .channel('users_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, async () => {
         const { data } = await supabase.from('users').select('*');
-        if (data && data.length > 0) onUpdate(data as UserProfile[]);
+        if (data) onUpdate(data as UserProfile[]);
       })
       .subscribe();
   }
@@ -272,7 +272,7 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
   localFetch('/api/sync/notifications')
     .then(r => r.json())
     .then(serverNotifs => {
-      if (Array.isArray(serverNotifs) && serverNotifs.length > 0) {
+      if (Array.isArray(serverNotifs)) {
         onUpdate(serverNotifs);
       } else {
         onUpdate(INITIAL_NOTIFICATIONS);
@@ -287,7 +287,7 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
       .select('*')
       .order('timestamp', { ascending: false })
       .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           onUpdate(data as StoreNotification[]);
         }
       });
@@ -702,6 +702,7 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
   }
   return null;
 }
+
 
 
 
