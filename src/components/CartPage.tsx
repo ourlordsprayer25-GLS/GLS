@@ -189,7 +189,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                       onClick={() => onSelectProduct && onSelectProduct(item.product)}
                       className="w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden bg-zinc-100 shrink-0 cursor-pointer border border-zinc-200"
                     >
-                      <img src={item.selectedColor.image} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <img src={item.selectedColor.image || item.product.primaryImage} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
 
                     <div className="flex-1 min-w-0 space-y-1.5">
