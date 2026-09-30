@@ -837,7 +837,7 @@ function AppContent() {
     closeAllMainViews();
   };
 
-  const customerNotifications = notifications.filter(n => ['drop', 'promo', 'wishlist'].includes(n.type));
+  const customerNotifications = notifications.filter(n => ['drop', 'promo', 'wishlist', 'order'].includes(n.type));
   const unreadNotificationCount = customerNotifications.filter((n) => !n.read).length;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const wishlistCount = wishlistIds.length;
@@ -914,5 +914,6 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 
 
