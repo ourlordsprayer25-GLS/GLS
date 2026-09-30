@@ -306,6 +306,9 @@ function AppContent() {
   // Premium elegant synthesizer chime using Web Audio API (cross-browser & local-offline compatible)
   const playPremiumChime = () => {
     try {
+      if (typeof navigator !== 'undefined' && (navigator as any).userActivation && !(navigator as any).userActivation.hasBeenActive) {
+        return; // Suppress chime if user hasn't interacted yet to prevent AudioContext warnings
+      }
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContextClass) return;
       const ctx = new AudioContextClass();
