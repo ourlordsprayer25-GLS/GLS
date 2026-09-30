@@ -117,6 +117,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const newOrder: Order = {
         id: `ord-${Date.now()}`,
         orderNumber,
+        customerId: user?.id,
         date: new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         items: [...items],
         shippingAddress: address,

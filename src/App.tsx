@@ -762,18 +762,30 @@ function AppContent() {
       setUser(updatedUser);
       updateRealtimeUserProfile(updatedUser);
     }
-    const orderNotification: StoreNotification = {
-      id: `notif-${Date.now()}`,
+    const customerNotification: StoreNotification = {
+      id: `notif-${Date.now()}-c`,
       title: `Order ${newOrder.orderNumber} Placed`,
       message: `Payment authorized. Fulfillment has commenced.`,
       timestamp: Date.now(),
       read: false,
       type: 'order',
       linkTarget: newOrder.orderNumber,
+      customerId: user?.id,
     };
-    setNotifications((prev) => [orderNotification, ...prev]);
-    addRealtimeNotification(orderNotification);
-    setActiveToast({ id: orderNotification.id, title: orderNotification.title, message: orderNotification.message, orderNumber: newOrder.orderNumber });
+    const adminNotification: StoreNotification = {
+      id: `notif-${Date.now()}-a`,
+      title: `New Order Received: ${newOrder.orderNumber}`,
+      message: `A new order has been placed for ${newOrder.items.length} item(s) totaling $${newOrder.total.toFixed(2)}.`,
+      timestamp: Date.now(),
+      read: false,
+      type: 'order',
+      linkTarget: newOrder.orderNumber,
+      isAdminOnly: true,
+    };
+    setNotifications((prev) => [customerNotification, adminNotification, ...prev]);
+    addRealtimeNotification(customerNotification);
+    addRealtimeNotification(adminNotification);
+    setActiveToast({ id: customerNotification.id, title: customerNotification.title, message: customerNotification.message, orderNumber: newOrder.orderNumber });
     setInitialInvoiceNumber(newOrder.orderNumber);
     if (user?.email) dispatchOrderStatusEmail(user.email, newOrder.orderNumber, 'PLACED', `Order for $${newOrder.total.toFixed(2)} received.`);
     setIsOrdersPageOpen(true);
@@ -837,7 +849,12 @@ function AppContent() {
     closeAllMainViews();
   };
 
-  const customerNotifications = notifications.filter(n => ['drop', 'promo', 'wishlist', 'order'].includes(n.type));
+  const customerNotifications = notifications.filter(n => {
+    if (n.isAdminOnly) return false;
+    if (n.type === 'order' && n.customerId !== user?.id) return false;
+    return ['drop', 'promo', 'wishlist', 'order'].includes(n.type);
+  });
+  const adminNotifications = notifications.filter(n => n.isAdminOnly || n.type !== 'order' || !n.customerId);
   const unreadNotificationCount = customerNotifications.filter((n) => !n.read).length;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const wishlistCount = wishlistIds.length;
@@ -864,7 +881,7 @@ function AppContent() {
           setUsers={setUsers}
           orders={orders}
           setOrders={setOrders}
-          notifications={notifications}
+          notifications={adminNotifications}
           setNotifications={setNotifications}
           storeSettings={storeSettings}
           setStoreSettings={setStoreSettings}

@@ -341,7 +341,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           ) : isOrdersPageOpen ? (
             <OrdersPage
               user={user}
-              orders={orders}
+              orders={user ? orders.filter(o => o.customerId === user.id) : []}
               products={products}
               wishlistIds={wishlistIds}
               onCancelOrder={handleCancelOrder}
@@ -360,7 +360,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           ) : isProfilePageOpen ? (
             <ProfilePage
               user={user}
-              orders={orders}
+              orders={user ? orders.filter(o => o.customerId === user.id) : []}
               products={products}
               wishlistIds={wishlistIds}
               initialTab={profileTab as any}

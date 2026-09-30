@@ -85,7 +85,9 @@ export interface StoreNotification {
   timestamp: number;
   read: boolean;
   type: 'order' | 'drop' | 'restock' | 'promo' | 'wishlist';
-  linkTarget?: string; // e.g. "product-chore-coat"
+  linkTarget?: string;
+    customerId?: string;
+    isAdminOnly?: boolean; // e.g. "product-chore-coat"
 }
 
 export interface ShippingAddress {
@@ -124,6 +126,7 @@ export interface Order {
   paymentMethod: 'card' | 'apple-pay' | 'klarna' | 'cod';
   status: 'placed' | 'confirmed' | 'processing' | 'shipping' | 'shipped' | 'delivered' | 'cancelled';
   trackingNumber: string;
+  customerId?: string;
   carrier?: string;
   estimatedDelivery: string;
   timeline?: OrderTimelineStep[];
@@ -284,3 +287,5 @@ export interface UserProfile {
   sessionDurationMinutes?: number;
   recentActivity?: UserActivityEvent[];
 }
+
+
