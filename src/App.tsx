@@ -143,6 +143,8 @@ function AppContent() {
   }, []);
 
   const [categories, setCategories] = useState(() => {
+    const saved = localStorage.getItem('store_categories');
+    if (saved) return JSON.parse(saved);
     const unique = INITIAL_PRODUCTS.reduce((acc, p) => {
       if (!acc.some((c) => c.id === p.category)) {
         acc.push({ id: p.category, label: p.categoryLabel });
@@ -151,6 +153,10 @@ function AppContent() {
     }, [] as { id: string; label: string }[]);
     return unique;
   });
+
+  useEffect(() => {
+    localStorage.setItem('store_categories', JSON.stringify(categories));
+  }, [categories]);
 
   const [brands, setBrands] = useState(() => {
     const saved = localStorage.getItem('store_brands');
