@@ -1,0 +1,1158 @@
+{
+  "products": [
+    {
+      "id": "prod-analog-synth",
+      "slug": "polyphonic-analog-synthesizer",
+      "name": "Polyphonic Analog Synthesizer",
+      "subtitle": "8-voice analog synthesizer with walnut end cheeks and discrete filters.",
+      "tagline": "Pure analog warmth and sound design capability.",
+      "price": 1890,
+      "category": "musical",
+      "categoryLabel": "Musical Instruments",
+      "department": "Music & Studio",
+      "brand": "GLADYNS Studio",
+      "tag": "Spotlight",
+      "description": "A genuine 8-voice polyphonic analog synthesizer featuring discrete VCOs, classic ladder low-pass filters, dual LFOs, and custom walnut side panels. Built for professional composers, sound designers, and stage performers.",
+      "details": [
+        "8 Discrete True-Analog Voices",
+        "Solid American Walnut End Cheeks",
+        "Dual multi-wave VCOs per voice with hard sync",
+        "61-key semi-weighted keybed with polyphonic aftertouch",
+        "Stereo analog BBD chorus and studio reverb"
+      ],
+      "materials": "Brushed Aluminum Chassis, Solid Walnut",
+      "care": "Keep in dry studio environment; clean with lint-free microfiber",
+      "primaryImage": "/src/assets/images/musical_analog_synthesizer_1790694264160.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/musical_analog_synthesizer_1790694264160.jpg",
+          "alt": "Polyphonic Analog Synthesizer"
+        }
+      ],
+      "colors": [
+        {
+          "id": "walnut-silver",
+          "name": "Walnut & Silver",
+          "colorHex": "#451a03",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "61-Key",
+          "inStock": true
+        }
+      ],
+      "rating": 5,
+      "reviewCount": 34,
+      "reviews": [],
+      "featured": true,
+      "madeIn": "Germany"
+    },
+    {
+      "id": "prod-vinyl-turntable",
+      "slug": "direct-drive-audiophile-turntable",
+      "name": "Direct-Drive Audiophile Turntable",
+      "subtitle": "Precision decoupled direct-drive turntable with carbon tonearm.",
+      "tagline": "Pure vinyl acoustics and silent motor engineering.",
+      "price": 1450,
+      "category": "musical",
+      "categoryLabel": "Musical Instruments & Hi-Fi",
+      "department": "Music & Studio",
+      "brand": "GLADYNS Acoustics",
+      "tag": "Bestseller",
+      "description": "Engineered for true analog purists. Features a coreless direct-drive motor, high-mass resonance-damped aluminum platter, 9-inch carbon fiber tonearm, and pre-mounted microline diamond cartridge.",
+      "details": [
+        "Coreless Ultra-Silent Direct Drive Motor",
+        "Solid Walnut & High-Mass MDF Plinth",
+        "9-inch Carbon Fiber Low-Resonance Tonearm",
+        "Gold-plated RCA outputs and built-in switchable phono stage",
+        "33 1/3, 45, and 78 RPM speed selector"
+      ],
+      "materials": "Solid Walnut Plinth, Carbon Fiber, Anodized Aluminum",
+      "care": "Dust gently with antistatic brush",
+      "primaryImage": "/src/assets/images/musical_vinyl_turntable_1790694276533.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/musical_vinyl_turntable_1790694276533.jpg",
+          "alt": "Direct-Drive Audiophile Turntable"
+        }
+      ],
+      "colors": [
+        {
+          "id": "walnut-gold",
+          "name": "Walnut Gold",
+          "colorHex": "#78350f",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Standard",
+          "inStock": true
+        }
+      ],
+      "rating": 4.9,
+      "reviewCount": 48,
+      "reviews": [],
+      "featured": true,
+      "madeIn": "Japan"
+    },
+    {
+      "id": "prod-audiophile-headphones",
+      "slug": "planar-magnetic-headphones",
+      "name": "Planar Magnetic Studio Headphones",
+      "subtitle": "High-fidelity acoustic precision with open-back architecture.",
+      "tagline": "Studio-grade audio for the discerning ear.",
+      "price": 1200,
+      "category": "electronics",
+      "categoryLabel": "Electronics & Audio",
+      "department": "Electronics",
+      "brand": "GLADYNS Sound",
+      "tag": "Bestseller",
+      "description": "Featuring massive 100mm planar magnetic drivers and a suspension head-strap for extreme comfort during long mastering sessions. Wide acoustic soundstage and transparent response.",
+      "details": [
+        "100mm Planar Magnetic Drivers",
+        "Open-back planar transducer architecture",
+        "Hand-stitched breathable lambskin ear cushions",
+        "Ultra-wide frequency response: 5Hz – 50kHz",
+        "Balanced 4.4mm Pentaconn & 6.35mm braided OFC cables included"
+      ],
+      "materials": "Aerospace Magnesium, Fine Italian Leather",
+      "care": "Wipe with microfiber cloth",
+      "primaryImage": "/src/assets/images/audiophile_headphones_1790153788692.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/audiophile_headphones_1790153788692.jpg",
+          "alt": "Planar Magnetic Studio Headphones"
+        }
+      ],
+      "colors": [
+        {
+          "id": "onyx",
+          "name": "Onyx Black",
+          "colorHex": "#18181b",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "One Size",
+          "inStock": true
+        }
+      ],
+      "rating": 5,
+      "reviewCount": 62,
+      "reviews": [],
+      "featured": true,
+      "madeIn": "USA"
+    },
+    {
+      "id": "prod-studio-monitors",
+      "slug": "active-ribbon-studio-monitors",
+      "name": "Active Ribbon Studio Monitors (Pair)",
+      "subtitle": "Bi-amplified reference nearfield monitors with AMT ribbon tweeters.",
+      "tagline": "Transparent acoustics for mixing and audiophile listening.",
+      "price": 1650,
+      "category": "electronics",
+      "categoryLabel": "Electronics & Audio",
+      "department": "Electronics",
+      "brand": "GLADYNS Acoustics",
+      "tag": "Studio Grade",
+      "description": "A pair of bi-amplified active reference monitors designed for critical mastering, home recording, and reference music listening. Powered by Class-D amplification with DSP acoustic room-tuning.",
+      "details": [
+        "Air Motion Transformer (AMT) Ribbon Tweeters",
+        "7-inch Carbon Fiber/Rohacell Sandwich Woofers",
+        "Bi-amplified 250W Class-D RMS per speaker",
+        "XLR, TRS Balanced, and Optical Digital inputs",
+        "Integrated OLED room calibration EQ"
+      ],
+      "materials": "Birch Plywood Enclosure, Matte Black Acoustic Baffle",
+      "care": "Keep away from direct heat sources",
+      "primaryImage": "/src/assets/images/studio_monitor_speakers_1790694302203.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/studio_monitor_speakers_1790694302203.jpg",
+          "alt": "Active Ribbon Studio Monitors"
+        }
+      ],
+      "colors": [
+        {
+          "id": "birch-black",
+          "name": "Birch & Matte Black",
+          "colorHex": "#27272a",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Pair",
+          "inStock": true
+        }
+      ],
+      "rating": 4.9,
+      "reviewCount": 29,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Denmark"
+    },
+    {
+      "id": "prod-smart-espresso",
+      "slug": "dual-boiler-espresso-machine",
+      "name": "Dual-Boiler Espresso Machine",
+      "subtitle": "Commercial-grade engineering with dual PID climate control.",
+      "tagline": "The pinnacle of home barista technology.",
+      "price": 3200,
+      "category": "appliances",
+      "categoryLabel": "Home Appliances",
+      "department": "Appliances",
+      "brand": "GLADYNS Atelier",
+      "tag": "Exclusive",
+      "description": "A dual-boiler powerhouse featuring independent steam and brew boilers with PID temperature control and an integrated pressure transducer for real-time extraction profiling via smartphone app.",
+      "details": [
+        "Independent Dual Stainless Steel Boilers",
+        "Dual PID Temperature Stability (±0.2°C)",
+        "Rotary pump with direct water line connection kit",
+        "Real-time extraction profiling with digital pressure transducer",
+        "Solid walnut portafilter handles and steam knobs"
+      ],
+      "materials": "304 Mirror Polished Stainless Steel, Walnut Wood",
+      "care": "Regular backflushing and descaling recommended",
+      "primaryImage": "/src/assets/images/smart_espresso_machine_1790153803517.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/smart_espresso_machine_1790153803517.jpg",
+          "alt": "Dual-Boiler Espresso Machine"
+        }
+      ],
+      "colors": [
+        {
+          "id": "silver",
+          "name": "Mirror Stainless",
+          "colorHex": "#d4d4d8",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Standard",
+          "inStock": true
+        }
+      ],
+      "rating": 4.9,
+      "reviewCount": 56,
+      "reviews": [],
+      "featured": true,
+      "madeIn": "Italy"
+    },
+    {
+      "id": "prod-smart-air-purifier",
+      "slug": "smart-hepa-air-purifier",
+      "name": "HEPA 13 Smart Air Purifier",
+      "subtitle": "Quiet dual-turbine 360-degree filtration with real-time AQI display.",
+      "tagline": "Architectural clean air engineering for the modern home.",
+      "price": 490,
+      "category": "appliances",
+      "categoryLabel": "Home Appliances",
+      "department": "Appliances",
+      "brand": "GLADYNS Pure",
+      "tag": "Smart Home",
+      "description": "Engineered for open spaces up to 1,200 sq ft. Features a medical-grade True HEPA H13 filter with coconut shell activated carbon, laser particle sensor, and whisper-quiet brushless motor operating at 19dB in sleep mode.",
+      "details": [
+        "Medical-grade H13 True HEPA + Activated Carbon Filter",
+        "Laser PM2.5 & VOC ambient air quality sensor",
+        "Dual-turbine centrifugal fan system (CADR 550 m³/h)",
+        "App and voice assistant compatible (Wi-Fi + Matter)",
+        "Acoustic sleep mode at 19 dB"
+      ],
+      "materials": "Anodized Aluminum Cylindrical Housing, Recycled ABS",
+      "care": "Replace filter every 6-12 months",
+      "primaryImage": "/src/assets/images/smart_air_purifier_1790153815905.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/smart_air_purifier_1790153815905.jpg",
+          "alt": "HEPA 13 Smart Air Purifier"
+        }
+      ],
+      "colors": [
+        {
+          "id": "graphite",
+          "name": "Space Gray",
+          "colorHex": "#3f3f46",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Standard (Up to 1200 sq ft)",
+          "inStock": true
+        }
+      ],
+      "rating": 4.8,
+      "reviewCount": 77,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Sweden"
+    },
+    {
+      "id": "prod-robot-vacuum",
+      "slug": "lidar-smart-robot-vacuum-station",
+      "name": "LiDAR Smart Robot Vacuum & Mop Station",
+      "subtitle": "8000Pa suction with automated hot-water mop washing and auto-empty dock.",
+      "tagline": "Autonomous home cleanliness, fully hands-free.",
+      "price": 1150,
+      "category": "appliances",
+      "categoryLabel": "Home Appliances",
+      "department": "Appliances",
+      "brand": "GLADYNS Home",
+      "tag": "New Drop",
+      "description": "Experience effortless home maintenance. Featuring 8000Pa hyper-suction, dual high-speed pressurized spinning mop pads, 3D LiDAR obstacle avoidance, and an all-in-one docking station that automatically empties dust, washes mop pads with 60°C hot water, and heat-dries them.",
+      "details": [
+        "8000Pa Hyper-Suction Motor",
+        "Dual High-Speed Pressurized Rotary Mops (180 RPM)",
+        "All-in-One Auto-Empty, Hot Water Wash & Hot Air Dry Station",
+        "AI LiDAR 3.0 Real-Time 3D Obstacle Avoidance",
+        "3.5-Liter Clean & Dirty Water Tanks"
+      ],
+      "materials": "Matte Graphite Composite, Brushed Bronze Accents",
+      "care": "Empty dirty water tank weekly",
+      "primaryImage": "/src/assets/images/smart_robot_vacuum_station_1790694287531.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/smart_robot_vacuum_station_1790694287531.jpg",
+          "alt": "LiDAR Smart Robot Vacuum & Mop Station"
+        }
+      ],
+      "colors": [
+        {
+          "id": "graphite-bronze",
+          "name": "Matte Graphite",
+          "colorHex": "#27272a",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Full Station Kit",
+          "inStock": true
+        }
+      ],
+      "rating": 4.9,
+      "reviewCount": 43,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "South Korea"
+    },
+    {
+      "id": "prod-induction-kettle",
+      "slug": "precision-gooseneck-induction-kettle",
+      "name": "Precision Gooseneck Smart Kettle",
+      "subtitle": "Variable temperature control with integrated brew timer and OLED dial.",
+      "tagline": "Craft pouring precision for pour-overs and teas.",
+      "price": 195,
+      "category": "appliances",
+      "categoryLabel": "Home Appliances",
+      "department": "Appliances",
+      "brand": "GLADYNS Atelier",
+      "tag": "Barista Tool",
+      "description": "Designed for specialty coffee baristas and fine tea connoisseurs. Offers single-degree temperature adjustments (40°C – 100°C), 60-minute keep-warm mode, and an ergonomically balanced counterbalanced handle.",
+      "details": [
+        "1200W Rapid-Boil Base with OLED Display",
+        "Single-degree temperature accuracy (104°F – 212°F)",
+        "Precision fluted gooseneck spout for laminar pour flow",
+        "304 Food-grade stainless steel interior",
+        "Integrated stopwatch brew timer"
+      ],
+      "materials": "304 Stainless Steel, Matte Powdercoat, Walnut Accents",
+      "care": "Hand wash exterior; descale with vinegar periodically",
+      "primaryImage": "/src/assets/images/induction_kettle_1790153828614.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/induction_kettle_1790153828614.jpg",
+          "alt": "Precision Gooseneck Smart Kettle"
+        }
+      ],
+      "colors": [
+        {
+          "id": "matte-black",
+          "name": "Matte Black",
+          "colorHex": "#18181b",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "0.9 Liter",
+          "inStock": true
+        }
+      ],
+      "rating": 4.9,
+      "reviewCount": 112,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Japan"
+    },
+    {
+      "id": "prod-chore-coat",
+      "slug": "japanese-twill-chore-coat",
+      "name": "Japanese Selvedge Twill Chore Coat",
+      "subtitle": "Classic utility in custom-milled 14.5oz selvedge twill with corozo buttons.",
+      "tagline": "The definitive foundation of timeless utility wardrobe.",
+      "price": 245,
+      "category": "apparel",
+      "categoryLabel": "Fashion & Apparel",
+      "department": "Apparel",
+      "brand": "GLADYNS Atelier",
+      "tag": "Bestseller",
+      "description": "A structural masterpiece crafted from heavyweight Japanese selvedge twill. Featuring reinforced internal pockets, corozo nut hardware, and triple-needle stitched seams.",
+      "details": [
+        "14.5oz Japanese Selvedge Twill",
+        "Reinforced internal pockets",
+        "Corozo nut hardware",
+        "Triple-needle stitched seams"
+      ],
+      "materials": "100% Organic Cotton",
+      "care": "Dry clean or cold gentle wash, hang dry",
+      "primaryImage": "/src/assets/images/product_chore_coat_1790116559808.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/product_chore_coat_1790116559808.jpg",
+          "alt": "Japanese Selvedge Twill Chore Coat"
+        }
+      ],
+      "colors": [
+        {
+          "id": "navy",
+          "name": "Navy",
+          "colorHex": "#1e1b4b",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "S",
+          "inStock": true
+        },
+        {
+          "name": "M",
+          "inStock": true
+        },
+        {
+          "name": "L",
+          "inStock": true
+        },
+        {
+          "name": "XL",
+          "inStock": true
+        }
+      ],
+      "rating": 4.9,
+      "reviewCount": 124,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Portugal"
+    },
+    {
+      "id": "prod-wool-trench",
+      "slug": "architectural-wool-trench",
+      "name": "Architectural Wool Overcoat",
+      "subtitle": "Italian double-faced virgin wool in a structured tailored silhouette.",
+      "tagline": "Precision tailoring for cold-weather elegance.",
+      "price": 850,
+      "category": "apparel",
+      "categoryLabel": "Fashion & Apparel",
+      "department": "Apparel",
+      "brand": "GLADYNS Sartorial",
+      "tag": "Tailored Cut",
+      "description": "An unlined trench coat featuring precision split-seam construction. Crafted from double-faced virgin wool for maximum insulation without burdensome weight.",
+      "details": [
+        "Double-faced Italian virgin wool",
+        "Split-seam construction",
+        "Adjustable storm flaps",
+        "Concealed button placket"
+      ],
+      "materials": "100% Virgin Wool",
+      "care": "Professional dry clean only",
+      "primaryImage": "/src/assets/images/wool_trench_coat_1790117159378.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/wool_trench_coat_1790117159378.jpg",
+          "alt": "Architectural Wool Overcoat"
+        }
+      ],
+      "colors": [
+        {
+          "id": "camel",
+          "name": "Camel",
+          "colorHex": "#c19a6b",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "S",
+          "inStock": true
+        },
+        {
+          "name": "M",
+          "inStock": true
+        },
+        {
+          "name": "L",
+          "inStock": true
+        }
+      ],
+      "rating": 4.8,
+      "reviewCount": 42,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Italy"
+    },
+    {
+      "id": "prod-merino-knit",
+      "slug": "fisherman-merino-knit",
+      "name": "Fisherman Merino Wool Knit",
+      "subtitle": "7-gauge ribbed knit in premium Tasmanian merino wool.",
+      "tagline": "Enduring warmth, engineered silhouette.",
+      "price": 185,
+      "category": "apparel",
+      "categoryLabel": "Fashion & Apparel",
+      "department": "Apparel",
+      "brand": "GLADYNS Atelier",
+      "tag": "Archival",
+      "description": "Engineered with a heavy 7-gauge fisherman rib, this sweater provides exceptional thermoregulation and maintains its structure for years of wear.",
+      "details": [
+        "7-gauge Fisherman Rib",
+        "Tasmanian Merino Wool",
+        "RWS Certified",
+        "Hand-linked seams"
+      ],
+      "materials": "100% Merino Wool",
+      "care": "Hand wash cold, dry flat",
+      "primaryImage": "/src/assets/images/product_merino_knit_1790116576108.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/product_merino_knit_1790116576108.jpg",
+          "alt": "Fisherman Merino Wool Knit"
+        }
+      ],
+      "colors": [
+        {
+          "id": "olive",
+          "name": "Deep Olive",
+          "colorHex": "#3f6212",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "S",
+          "inStock": true
+        },
+        {
+          "name": "M",
+          "inStock": true
+        },
+        {
+          "name": "L",
+          "inStock": true
+        }
+      ],
+      "rating": 4.7,
+      "reviewCount": 89,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Portugal"
+    },
+    {
+      "id": "prod-leather-weekender",
+      "slug": "tuscan-leather-weekender",
+      "name": "Tuscan Leather Weekender Bag",
+      "subtitle": "Hand-burnished full-grain vegetable-tanned travel carry.",
+      "tagline": "Designed to patinate beautifully, built to travel.",
+      "price": 650,
+      "category": "leather-goods",
+      "categoryLabel": "Leather Goods & Accessories",
+      "department": "Accessories",
+      "brand": "GLADYNS Leathercraft",
+      "tag": "Heritage Leather",
+      "description": "A classic cabin-sized weekender crafted from 3.5mm thick Tuscan vegetable-tanned leather. Features solid brass hardware, YKK Excella zippers, and reinforced base studs.",
+      "details": [
+        "Full-grain Tuscan Leather",
+        "Solid brass hardware",
+        "Reinforced base with studs",
+        "Internal laptop sleeve and passport slot"
+      ],
+      "materials": "Vegetable-Tanned Full Grain Leather",
+      "care": "Condition once a season with beeswax balm",
+      "primaryImage": "/src/assets/images/leather_weekend_bag_1790117170382.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/leather_weekend_bag_1790117170382.jpg",
+          "alt": "Tuscan Leather Weekender Bag"
+        }
+      ],
+      "colors": [
+        {
+          "id": "mahogany",
+          "name": "Mahogany",
+          "colorHex": "#451a03",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "One Size (45L)",
+          "inStock": true
+        }
+      ],
+      "rating": 4.9,
+      "reviewCount": 67,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Italy"
+    },
+    {
+      "id": "prod-leather-tote",
+      "slug": "architectural-leather-tote",
+      "name": "Architectural Daily Leather Tote",
+      "subtitle": "Structured everyday carry in durable bridle leather.",
+      "tagline": "Minimalist architecture for daily essentials.",
+      "price": 380,
+      "category": "leather-goods",
+      "categoryLabel": "Leather Goods & Accessories",
+      "department": "Accessories",
+      "brand": "GLADYNS Leathercraft",
+      "tag": "Daily Carry",
+      "description": "Engineered with clean architectural lines, dual carry handles, magnetic top closure, and a dedicated padded 15-inch laptop compartment.",
+      "details": [
+        "Bridle Full-Grain Leather",
+        "Magnetic German Fidlock closure",
+        "Padded 15-inch laptop sleeve",
+        "Reinforced dual shoulder straps"
+      ],
+      "materials": "Full-Grain Bridle Leather",
+      "care": "Wipe with damp cloth",
+      "primaryImage": "/src/assets/images/product_leather_tote_1790116587937.jpg",
+      "images": [
+        {
+          "url": "/src/assets/images/product_leather_tote_1790116587937.jpg",
+          "alt": "Architectural Daily Leather Tote"
+        }
+      ],
+      "colors": [
+        {
+          "id": "black",
+          "name": "Matte Black",
+          "colorHex": "#18181b",
+          "inStock": true
+        }
+      ],
+      "sizes": [
+        {
+          "name": "One Size",
+          "inStock": true
+        }
+      ],
+      "rating": 4.8,
+      "reviewCount": 51,
+      "reviews": [],
+      "featured": false,
+      "madeIn": "Italy"
+    }
+  ],
+  "deletedProductIds": [],
+  "orders": [],
+  "users": [
+    {
+      "id": "usr-ci-001",
+      "firstName": "Amara",
+      "lastName": "Kouassi",
+      "email": "amara.kouassi@gladyns-patron.ci",
+      "phone": "+225 07 48 92 11 00",
+      "memberSince": "January 2025",
+      "tier": "Platinum",
+      "loyaltyPoints": 4850,
+      "lifetimePoints": 8900,
+      "registeredDateExact": "2025-01-14 09:32:18",
+      "registrationDetails": {
+        "year": 2025,
+        "month": "January",
+        "day": 14,
+        "time": "09:32:18 AM",
+        "exactTimestamp": "2025-01-14T09:32:18Z"
+      },
+      "deviceInfo": {
+        "deviceType": "mobile",
+        "os": "iOS 18.3",
+        "browser": "GLADYNS PWA Standalone",
+        "isPwa": true
+      },
+      "location": {
+        "country": "Côte d'Ivoire",
+        "countryCode": "CI",
+        "city": "Abidjan (Plateau)",
+        "flag": "🇨🇮",
+        "ipAddress": "160.154.218.12"
+      },
+      "sessionStatus": "online",
+      "lastSeen": "Active Now",
+      "sessionDurationMinutes": 38,
+      "recentActivity": [
+        {
+          "id": "act-101",
+          "action": "PWA Launched from Home Screen",
+          "page": "App Launch",
+          "timestamp": "38 mins ago"
+        },
+        {
+          "id": "act-102",
+          "action": "Viewed Product: Cashmere Overcoat",
+          "target": "prod-001",
+          "page": "Product Page",
+          "timestamp": "14 mins ago"
+        },
+        {
+          "id": "act-103",
+          "action": "Added to Bag (Size L, Noir)",
+          "target": "prod-001",
+          "page": "Product Page",
+          "timestamp": "8 mins ago"
+        },
+        {
+          "id": "act-104",
+          "action": "Applied CFA Currency (605 CFA/$)",
+          "page": "Cart Page",
+          "timestamp": "2 mins ago"
+        }
+      ],
+      "addresses": [
+        {
+          "id": "addr-1",
+          "isDefault": true,
+          "firstName": "Amara",
+          "lastName": "Kouassi",
+          "email": "amara.kouassi@gladyns-patron.ci",
+          "street": "Boulevard de la République, Tour Postel 2001",
+          "apartment": "Suite 14B",
+          "city": "Abidjan",
+          "state": "Lagunes",
+          "postalCode": "01 BP 4554",
+          "country": "Côte d'Ivoire",
+          "phone": "+225 07 48 92 11 00"
+        }
+      ],
+      "preferences": {
+        "newsletter": true,
+        "dropAlerts": true,
+        "sustainablePackaging": true,
+        "preferredSize": "L"
+      }
+    },
+    {
+      "id": "usr-ng-002",
+      "firstName": "Chukwuma",
+      "lastName": "Eze",
+      "email": "c.eze@lagos-capital.ng",
+      "phone": "+234 803 552 9182",
+      "memberSince": "March 2025",
+      "tier": "Gold",
+      "loyaltyPoints": 3120,
+      "lifetimePoints": 5200,
+      "registeredDateExact": "2025-03-22 16:45:09",
+      "registrationDetails": {
+        "year": 2025,
+        "month": "March",
+        "day": 22,
+        "time": "04:45:09 PM",
+        "exactTimestamp": "2025-03-22T16:45:09Z"
+      },
+      "deviceInfo": {
+        "deviceType": "mobile",
+        "os": "Android 15",
+        "browser": "Chrome Mobile 130",
+        "isPwa": false
+      },
+      "location": {
+        "country": "Nigeria",
+        "countryCode": "NG",
+        "city": "Lagos (Victoria Island)",
+        "flag": "🇳🇬",
+        "ipAddress": "102.89.42.119"
+      },
+      "sessionStatus": "idle",
+      "lastSeen": "12 mins ago",
+      "sessionDurationMinutes": 24,
+      "recentActivity": [
+        {
+          "id": "act-201",
+          "action": "Direct Web Visit via Google Search",
+          "page": "Landing Page",
+          "timestamp": "24 mins ago"
+        },
+        {
+          "id": "act-202",
+          "action": "Browsed Men Archival Footwear",
+          "page": "Category: Shoes",
+          "timestamp": "18 mins ago"
+        },
+        {
+          "id": "act-203",
+          "action": "Added Derby Brogues to Wishlist",
+          "target": "prod-007",
+          "page": "Product Page",
+          "timestamp": "12 mins ago"
+        }
+      ],
+      "addresses": [],
+      "preferences": {
+        "newsletter": true,
+        "dropAlerts": true,
+        "sustainablePackaging": false,
+        "preferredSize": "XL"
+      }
+    },
+    {
+      "id": "usr-sn-003",
+      "firstName": "Fatou",
+      "lastName": "Diop",
+      "email": "fatou.diop@almadies-senegal.sn",
+      "phone": "+221 77 641 29 88",
+      "memberSince": "June 2025",
+      "tier": "Patron Club",
+      "loyaltyPoints": 1950,
+      "lifetimePoints": 2800,
+      "registeredDateExact": "2025-06-08 11:10:42",
+      "registrationDetails": {
+        "year": 2025,
+        "month": "June",
+        "day": 8,
+        "time": "11:10:42 AM",
+        "exactTimestamp": "2025-06-08T11:10:42Z"
+      },
+      "deviceInfo": {
+        "deviceType": "mobile",
+        "os": "iOS 18.1",
+        "browser": "GLADYNS PWA Standalone",
+        "isPwa": true
+      },
+      "location": {
+        "country": "Senegal",
+        "countryCode": "SN",
+        "city": "Dakar (Les Almadies)",
+        "flag": "🇸🇳",
+        "ipAddress": "197.234.221.7"
+      },
+      "sessionStatus": "logged_out",
+      "lastSeen": "2 hours ago (Logged Out)",
+      "sessionDurationMinutes": 45,
+      "recentActivity": [
+        {
+          "id": "act-301",
+          "action": "Completed CFA Checkout Order (#GLD-4891)",
+          "page": "Checkout Modal",
+          "timestamp": "2 hours ago"
+        },
+        {
+          "id": "act-302",
+          "action": "Customer Safely Logged Out of Session",
+          "page": "Profile Drawer",
+          "timestamp": "2 hours ago"
+        }
+      ],
+      "addresses": [],
+      "preferences": {
+        "newsletter": false,
+        "dropAlerts": true,
+        "sustainablePackaging": true,
+        "preferredSize": "M"
+      }
+    },
+    {
+      "id": "usr-fr-004",
+      "firstName": "Éléonore",
+      "lastName": "de Saint-Germain",
+      "email": "eleonore.stgermain@haute-couture.fr",
+      "phone": "+33 6 12 34 56 78",
+      "memberSince": "September 2025",
+      "tier": "Platinum",
+      "loyaltyPoints": 7200,
+      "lifetimePoints": 14500,
+      "registeredDateExact": "2025-09-19 14:02:55",
+      "registrationDetails": {
+        "year": 2025,
+        "month": "September",
+        "day": 19,
+        "time": "02:02:55 PM",
+        "exactTimestamp": "2025-09-19T14:02:55Z"
+      },
+      "deviceInfo": {
+        "deviceType": "desktop",
+        "os": "macOS Sequoia 15.1",
+        "browser": "Chrome 131 Desktop",
+        "isPwa": false
+      },
+      "location": {
+        "country": "France",
+        "countryCode": "FR",
+        "city": "Paris (8e Arrondissement)",
+        "flag": "🇫🇷",
+        "ipAddress": "82.124.19.88"
+      },
+      "sessionStatus": "online",
+      "lastSeen": "Active Now",
+      "sessionDurationMinutes": 52,
+      "recentActivity": [
+        {
+          "id": "act-401",
+          "action": "Desktop Session Initiated",
+          "page": "Home Page",
+          "timestamp": "52 mins ago"
+        },
+        {
+          "id": "act-402",
+          "action": "Viewed 6 Limited Runway Items",
+          "page": "Runway Capsule",
+          "timestamp": "30 mins ago"
+        },
+        {
+          "id": "act-403",
+          "action": "Saved 3 Items to Private Wishlist",
+          "page": "Product Details",
+          "timestamp": "15 mins ago"
+        },
+        {
+          "id": "act-404",
+          "action": "Initiated VIP WhatsApp Concierge inquiry",
+          "page": "Concierge Widget",
+          "timestamp": "4 mins ago"
+        }
+      ],
+      "addresses": [],
+      "preferences": {
+        "newsletter": true,
+        "dropAlerts": true,
+        "sustainablePackaging": true,
+        "preferredSize": "S"
+      }
+    },
+    {
+      "id": "usr-cm-005",
+      "firstName": "Marc-Aurèle",
+      "lastName": "Tchouassi",
+      "email": "m.tchouassi@douala-group.cm",
+      "phone": "+237 6 77 89 01 23",
+      "memberSince": "February 2026",
+      "tier": "Silver",
+      "loyaltyPoints": 1650,
+      "lifetimePoints": 2100,
+      "registeredDateExact": "2026-02-10 18:20:11",
+      "registrationDetails": {
+        "year": 2026,
+        "month": "February",
+        "day": 10,
+        "time": "06:20:11 PM",
+        "exactTimestamp": "2026-02-10T18:20:11Z"
+      },
+      "deviceInfo": {
+        "deviceType": "mobile",
+        "os": "Android 15",
+        "browser": "GLADYNS PWA Standalone",
+        "isPwa": true
+      },
+      "location": {
+        "country": "Cameroon",
+        "countryCode": "CM",
+        "city": "Douala (Bonanjo)",
+        "flag": "🇨🇲",
+        "ipAddress": "154.72.166.4"
+      },
+      "sessionStatus": "online",
+      "lastSeen": "Active Now",
+      "sessionDurationMinutes": 19,
+      "recentActivity": [
+        {
+          "id": "act-501",
+          "action": "PWA Installed from Web Notification",
+          "page": "PWA Install",
+          "timestamp": "19 mins ago"
+        },
+        {
+          "id": "act-502",
+          "action": "Browsing Leather Handbags in Franc CFA",
+          "page": "Accessories",
+          "timestamp": "6 mins ago"
+        }
+      ],
+      "addresses": [],
+      "preferences": {
+        "newsletter": true,
+        "dropAlerts": true,
+        "sustainablePackaging": true,
+        "preferredSize": "L"
+      }
+    }
+  ],
+  "notifications": [],
+  "settings": {
+    "storeName": "GLADYNS DEPARTMENT STORE",
+    "storeDescription": "Curated Department House redefining modern living through audio precision, musical instruments, smart home appliances, and artisanal fashion.",
+    "contactEmail": "concierge@gladyns.com",
+    "contactPhone": "+33 1 23 45 67 89",
+    "contactAddress": "Rua Miguel Bombarda 142, 4050-377 Porto, Portugal",
+    "whatsappNumber": "+33 1 23 45 67 89",
+    "operatingHours": "Monday – Saturday: 10:00 AM – 7:00 PM CET",
+    "socialLinks": {
+      "instagram": "https://instagram.com/gladyns",
+      "twitter": "https://twitter.com/gladyns",
+      "facebook": "https://facebook.com/gladyns"
+    },
+    "aboutUs": {
+      "title": "About GLADYNS Department Store",
+      "subtitle": "Curated Multi-Department House & Living Standards",
+      "content": "GLADYNS is a modern multi-department store curating premium electronics, studio musical instruments, autonomous smart home appliances, and timeless wardrobe foundations. Every department represents uncompromising engineering, sustainable materials, and rigorous functional design.",
+      "image": "/src/assets/images/workshop_textile_banner_1790121031293.jpg",
+      "secondaryImage": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop",
+      "foundedYear": "2018",
+      "atelierLocation": "Porto, Portugal & Florence, Italy",
+      "missionStatement": "Pure Engineering, Acoustic Precision, and Enduring Quality Across Every Department."
+    },
+    "terms": {
+      "title": "Terms & Conditions of Sale",
+      "lastUpdated": "September 2025",
+      "content": "These terms and conditions apply to all purchases placed through the official GLADYNS boutique. By completing an order, the customer agrees unconditionally to all service terms and warranty protocols.",
+      "warrantyPolicy": "All curated items, studio equipment, and appliances come with a complimentary 2-year GLADYNS warranty. In the event of functional, material, or hardware issues, we repair or replace your item free of charge.",
+      "returnPolicy": "You have 30 days from delivery to return any unworn item with original tags. Prepaid carbon-neutral return labels can be generated directly from your live Order Pipeline dashboard.",
+      "privacyPolicy": "GLADYNS is committed to absolute personal data privacy adhering strictly to EU GDPR standards. Payment processing is secured using 256-bit SSL encryption, and financial credentials are never stored on our servers.",
+      "shippingPolicy": "Global express dispatch with complimentary carbon-neutral courier delivery on all qualifying orders. Live 5-stage tracking is available for all member acquisitions."
+    },
+    "refundPolicy": {
+      "title": "Return & Refund Policy",
+      "lastUpdated": "September 2025",
+      "returnWindowDays": "30",
+      "overview": "At GLADYNS, we stand behind the exceptional quality and artisanal construction of every piece. If your acquisition does not fully meet your expectations, we provide a seamless 30-day return window with 100% complimentary return shipping.",
+      "eligibility": "Items must be returned in their original condition with all GLADYNS security tags, packaging, and presentation boxes intact.",
+      "stepByStepProcess": "Initiate your return with one click in your Order Pipeline or contact our Concierge. Print your complimentary prepaid carbon-neutral shipping label, pack your items, and drop off at any authorized regional point. Upon swift verification by our team, your refund is processed immediately.",
+      "processingTime": "Refunds are issued to your original payment method (Credit Card, PayPal, Apple Pay) within 24 to 48 hours of inspection. Funds typically reflect in your account within 2-5 business days depending on your financial institution.",
+      "returnShipping": "Complimentary on all orders. GLADYNS covers all courier and return shipping charges worldwide.",
+      "exceptions": "Custom-tailored bespoke creations, personalized engraved pieces, and intimate garments with broken sanitary seals cannot be returned unless a manufacturing imperfection exists."
+    },
+    "announcementBar": {
+      "enabled": true,
+      "text": "GLOBAL EXPRESS DISPATCH ACTIVE — CARBON NEUTRAL COURIER ON ALL DEPARTMENTS"
+    },
+    "heroContent": {
+      "title": "ELECTRONICS, MUSIC, APPLIANCES & ATELIER",
+      "subtitle": "Curated studio analog synthesizers, planar acoustics, smart living tech, and timeless apparel.",
+      "buttonText": "EXPLORE CATALOG",
+      "image": "/src/assets/images/workshop_textile_banner_1790121031293.jpg"
+    },
+    "moreToLoveSection": {
+      "enabled": true,
+      "title": "More to Love",
+      "subtitle": "Explore curated alternatives featuring pristine cuts and high-fashion engineering from our global archive.",
+      "tagLabel": "ARCHIVAL DISCOVERIES",
+      "itemCount": 4
+    },
+    "sections": [
+      {
+        "id": "announcement",
+        "name": "Announcement Bar",
+        "subtitle": "Top promotional ticker",
+        "enabled": true,
+        "position": 1,
+        "type": "announcement"
+      },
+      {
+        "id": "hero",
+        "name": "Hero Campaign",
+        "subtitle": "Main landing banner and CTA",
+        "enabled": true,
+        "position": 2,
+        "type": "hero"
+      },
+      {
+        "id": "collections",
+        "name": "Featured Collections",
+        "subtitle": "Curated category showcase",
+        "enabled": true,
+        "position": 3,
+        "type": "collections"
+      },
+      {
+        "id": "new_arrivals",
+        "name": "New Arrivals Grid",
+        "subtitle": "Latest drops and releases",
+        "enabled": true,
+        "position": 4,
+        "type": "grid"
+      },
+      {
+        "id": "heritage",
+        "name": "Brand Heritage & Craft",
+        "subtitle": "Store story and values",
+        "enabled": true,
+        "position": 5,
+        "type": "about"
+      },
+      {
+        "id": "reviews",
+        "name": "Patron Testimonials",
+        "subtitle": "Client reviews and trust",
+        "enabled": true,
+        "position": 6,
+        "type": "testimonials"
+      },
+      {
+        "id": "newsletter",
+        "name": "VIP Newsletter Club",
+        "subtitle": "Subscriber acquisition banner",
+        "enabled": true,
+        "position": 7,
+        "type": "newsletter"
+      },
+      {
+        "id": "more_to_love",
+        "name": "More to Love Recommendations",
+        "subtitle": "Product page cross-sell section",
+        "enabled": true,
+        "position": 8,
+        "type": "more_to_love"
+      }
+    ]
+  },
+  "categories": [
+    {
+      "id": "all",
+      "label": "All Departments"
+    },
+    {
+      "id": "electronics",
+      "label": "Electronics & Audio"
+    },
+    {
+      "id": "musical",
+      "label": "Musical Instruments & Gear"
+    },
+    {
+      "id": "appliances",
+      "label": "Home Appliances & Living"
+    },
+    {
+      "id": "apparel",
+      "label": "Fashion & Apparel"
+    },
+    {
+      "id": "leather-goods",
+      "label": "Leather Goods & Accessories"
+    }
+  ],
+  "brands": [],
+  "carts": {
+    "usr-guest": []
+  },
+  "wishlists": {
+    "usr-guest": []
+  },
+  "lastUpdated": 1790774128923
+}

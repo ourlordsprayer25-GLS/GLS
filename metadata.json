@@ -1,0 +1,7 @@
+{
+  "name": "GLADYNS",
+  "description": "Explore curated high-end fashion, precision electronics, and smart home appliances with bespoke customer support and live tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
