@@ -164,7 +164,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
         materials: 'Premium Materials',
         care: 'Professional dry clean only',
         madeIn: 'Portugal',
-        primaryImage: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1000&auto=format&fit=crop',
+        primaryImage: '',
         featured: false,
         isNewArrival: true,
         isHotDeal: false,
@@ -1013,4 +1013,5 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     </div>
   );
 };
+
 
