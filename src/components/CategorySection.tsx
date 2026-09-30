@@ -18,6 +18,17 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     onSelectCategory(category);
   };
 
+  const activeCategories = VISUAL_CATEGORIES.map(cat => ({
+    cat,
+    categoryProducts: products.filter(p => 
+      p.category === cat.id || 
+      p.category.toLowerCase() === cat.id.toLowerCase() || 
+      p.categoryLabel.toLowerCase().includes(cat.id.toLowerCase())
+    )
+  })).filter(c => c.categoryProducts.length > 0);
+
+  if (activeCategories.length === 0) return null;
+
   return (
     <section className="w-full border-b border-zinc-200/80">
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -40,16 +51,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
         {/* Categories Grid with Dynamic First Product Image & Count */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-5 pt-5">
-          {VISUAL_CATEGORIES.map((cat) => {
-            // Find products belonging to this category
-            const categoryProducts = products.filter(
-              (p) =>
-                p.category === cat.id ||
-                p.category.toLowerCase() === cat.id.toLowerCase() ||
-                p.categoryLabel.toLowerCase().includes(cat.id.toLowerCase())
-            );
-
-            // The first product added to the category (first item in array or fallback)
+          {activeCategories.map(({ cat, categoryProducts }) => {
             const firstProduct = categoryProducts[0];
 
             // Display image: prioritize the first product's primary image, falling back to static visual category image
@@ -105,3 +107,4 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     </section>
   );
 };
+
