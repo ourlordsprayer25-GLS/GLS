@@ -1,6 +1,21 @@
 {
   "rewrites": [
     {
+      "source": "/product/:slug",
+      "has": [
+        {
+          "type": "query",
+          "key": "_r",
+          "value": "1"
+        }
+      ],
+      "destination": "/index.html"
+    },
+    {
+      "source": "/product/:slug",
+      "destination": "/api/product"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
