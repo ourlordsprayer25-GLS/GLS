@@ -119,33 +119,9 @@ function AppContent() {
   
   const [isInitialBootLoading, setIsInitialBootLoading] = useState(true);
   const [storeSettings, setStoreSettings] = useState<StoreSettings>(DEFAULT_STORE_SETTINGS);
-  const [products, setProducts] = useState<Product[]>(() => {
-    try { const saved = localStorage.getItem('store_products'); if (saved) return JSON.parse(saved); } catch (e) {}
-    return INITIAL_PRODUCTS;
-  });
-  const [orders, setOrders] = useState<Order[]>(() => {
-    try { const saved = localStorage.getItem('store_orders'); if (saved) return JSON.parse(saved); } catch (e) {}
-    return INITIAL_ORDERS;
-  });
-  const [notifications, setNotifications] = useState<StoreNotification[]>(() => {
-    try { const saved = localStorage.getItem('store_notifications'); if (saved) return JSON.parse(saved); } catch (e) {}
-    return INITIAL_NOTIFICATIONS;
-  });
-
-  useEffect(() => { 
-    try { localStorage.setItem('store_products', JSON.stringify(products)); } 
-    catch(e) { console.warn('LocalStorage quota exceeded for products', e); localStorage.removeItem('store_products'); } 
-  }, [products]);
-  
-  useEffect(() => { 
-    try { localStorage.setItem('store_orders', JSON.stringify(orders)); } 
-    catch(e) { console.warn('LocalStorage quota exceeded for orders', e); } 
-  }, [orders]);
-  
-  useEffect(() => { 
-    try { localStorage.setItem('store_notifications', JSON.stringify(notifications)); } 
-    catch(e) { console.warn('LocalStorage quota exceeded for notifications', e); } 
-  }, [notifications]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [notifications, setNotifications] = useState<StoreNotification[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
 
   // Initialize and attach cross-device real-time sync listeners
@@ -175,39 +151,8 @@ function AppContent() {
     };
   }, []);
 
-  const [categories, setCategories] = useState(() => {
-    const saved = localStorage.getItem('store_categories');
-    if (saved) return JSON.parse(saved);
-    const unique = INITIAL_PRODUCTS.reduce((acc, p) => {
-      if (!acc.some((c) => c.id === p.category)) {
-        acc.push({ id: p.category, label: p.categoryLabel });
-      }
-      return acc;
-    }, [] as { id: string; label: string }[]);
-    return unique;
-  });
-
-  useEffect(() => {
-    try { localStorage.setItem('store_categories', JSON.stringify(categories)); }
-    catch(e) { console.warn('LocalStorage quota exceeded for categories', e); }
-  }, [categories]);
-
-  const [brands, setBrands] = useState(() => {
-    const saved = localStorage.getItem('store_brands');
-    if (saved) return JSON.parse(saved);
-    const unique = INITIAL_PRODUCTS.reduce((acc, p) => {
-      if (p.brand && !acc.some((b) => b.name === p.brand)) {
-        acc.push({ name: p.brand, origin: p.brandOrigin || 'Unknown' });
-      }
-      return acc;
-    }, [] as { name: string; origin: string }[]);
-    return unique;
-  });
-
-  useEffect(() => {
-    try { localStorage.setItem('store_brands', JSON.stringify(brands)); }
-    catch(e) { console.warn('LocalStorage quota exceeded for brands', e); }
-  }, [brands]);
+  const [categories, setCategories] = useState<{ id: string; label: string }[]>([]);
+  const [brands, setBrands] = useState<{ name: string; origin: string }[]>([]);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
