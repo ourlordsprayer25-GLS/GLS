@@ -4,7 +4,8 @@ import path from 'path';
 export default async function handler(req, res) {
   const host = req.headers['x-forwarded-host'] || req.headers.host || 'gls-sepia.vercel.app';
   const url = new URL(req.url, `https://${host}`);
-  const id = url.searchParams.get('id') || url.pathname.split('/').filter(Boolean).pop();
+  const rawId = url.searchParams.get('id') || url.pathname.split('/').filter(Boolean).pop();
+  const id = rawId ? rawId.replace(/\.(jpg|jpeg|png|webp)$/i, '') : null;
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;

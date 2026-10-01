@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     ? (product.description || product.subtitle || `Explore ${product.name} on ${siteName}.`).replace(/"/g, '&quot;')
     : 'Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel.';
 
-  // Resolve the product image
+  // Resolve the product image with explicit .jpg extension for WhatsApp Mobile Parser regex matching
   let image = null;
   if (product) {
     const raw = product.primaryImage || 
@@ -73,15 +73,15 @@ export default async function handler(req, res) {
       } else if (raw.startsWith('/')) {
         image = `https://${host}${raw}`;
       } else if (raw.startsWith('data:image/')) {
-        // Base64 image: Serve through binary endpoint so WhatsApp can render real image!
-        image = `https://${host}/api/product-image?id=${encodeURIComponent(product.id || slug)}`;
+        // Base64 image: Serve through binary endpoint ending in .jpg so WhatsApp regex validates it!
+        image = `https://${host}/api/product-image/${encodeURIComponent(product.id || slug)}.jpg`;
       }
     }
   }
 
   // Fallback image if product has no image or product not found
   if (!image) {
-    image = `https://${host}/api/product-image?id=${encodeURIComponent(slug || 'default')}`;
+    image = `https://${host}/api/product-image/${encodeURIComponent(slug || 'default')}.jpg`;
   }
 
   const productUrl = `https://${host}/product/${slug}`;

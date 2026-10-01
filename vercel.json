@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/product-image/:id.jpg",
+      "destination": "/api/product-image.js?id=:id"
+    },
+    {
       "source": "/api/product-image",
       "destination": "/api/product-image.js"
     },
