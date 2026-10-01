@@ -413,6 +413,8 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           ) : (
             <div>
               <HeroSection
+                products={products}
+                onSelectProduct={handleSelectProduct}
                 storeSettings={storeSettings}
                 onShopFeatured={() => {
                   const featured = products.find((p) => p.featured) || products[0];
