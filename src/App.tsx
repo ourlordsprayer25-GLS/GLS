@@ -280,7 +280,7 @@ function AppContent() {
 
       // Keep in sync with users database
       setUsers((prevUsers) => {
-        const existingIdx = prevUsers.findIndex((u) => u.id === authUser.id || u.email.toLowerCase() === authUser.email?.toLowerCase());
+        const existingIdx = prevUsers.findIndex((u) => u.id === authUser.id || (u.email && authUser.email && u.email.toLowerCase() === authUser.email.toLowerCase()));
         if (existingIdx >= 0) {
           const updated = [...prevUsers];
           updated[existingIdx] = {
