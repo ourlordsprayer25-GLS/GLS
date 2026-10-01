@@ -56,8 +56,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     city: defaultAddress?.city || '',
     state: defaultAddress?.state || '',
     postalCode: defaultAddress?.postalCode || '',
-    country: defaultAddress?.country || "CÃ´te d'Ivoire (Ivory Coast)",
+    country: defaultAddress?.country || "Côte d'Ivoire (Ivory Coast)",
   });
+
+  // Keep address in sync when user logs in or modal opens
+  useEffect(() => {
+    if (isOpen && user) {
+      const defAddr = user?.addresses?.[0];
+      const gName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.displayName || '';
+      
+      setAddress(prev => ({
+        ...prev,
+        firstName: prev.firstName || defAddr?.firstName || user?.firstName || gName.split(' ')[0] || '',
+        lastName: prev.lastName || defAddr?.lastName || user?.lastName || gName.split(' ').slice(1).join(' ') || '',
+        email: prev.email || defAddr?.email || user?.email || '',
+        phone: prev.phone || defAddr?.phone || user?.phone || '',
+        street: prev.street || defAddr?.street || '',
+        apartment: prev.apartment || defAddr?.apartment || '',
+        city: prev.city || defAddr?.city || '',
+        state: prev.state || defAddr?.state || '',
+        postalCode: prev.postalCode || defAddr?.postalCode || '',
+        country: prev.country || defAddr?.country || "Côte d'Ivoire (Ivory Coast)",
+      }));
+    }
+  }, [isOpen, user]);
 
   const [phoneDialCode, setPhoneDialCode] = useState('+225');
   const [phoneRaw, setPhoneRaw] = useState('');
@@ -950,3 +972,4 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     </div>
   );
 };
+
