@@ -153,7 +153,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   
   const wrappedOnUpdate = (data: Product[]) => {
     setCache('gls_cache_products', data);
-    wrappedOnUpdateCat(data);
+    onUpdate(data);
   };
   
   localFetch('/api/sync/products')
@@ -744,7 +744,7 @@ export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
   
   const wrappedOnUpdateCat = (data: any[]) => {
     setCache('gls_cache_categories', data);
-    wrappedOnUpdateCat(data);
+    onUpdate(data);
   };
   
   localFetch('/api/sync/categories')
@@ -757,10 +757,10 @@ export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
   if (isSupabaseConfigured) {
     supabase.from('categories').select('*').then(({ data, error }) => {
       if (!error && data) { wrappedOnUpdateCat(data); hasLoaded = true; }
-      else if (error && !hasLoaded) onUpdate(CATEGORIES as any);
+      else if (error && !hasLoaded) wrappedOnUpdateCat(CATEGORIES as any);
     });
   } else {
-    setTimeout(() => { if (!hasLoaded) onUpdate(CATEGORIES as any); }, 1000);
+    setTimeout(() => { if (!hasLoaded) wrappedOnUpdateCat(CATEGORIES as any); }, 1000);
   }
 }
 
@@ -818,7 +818,7 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
 
   if (isSupabaseConfigured) {
     supabase.from('brands').select('*').then(({ data, error }) => {
-      if (!error && data) { wrappedOnUpdateCat(data); hasLoaded = true; }
+      if (!error && data) { onUpdate(data); hasLoaded = true; }
       else if (error && !hasLoaded) wrappedOnUpdate([]);
     });
   } else {
