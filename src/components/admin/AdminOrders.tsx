@@ -46,7 +46,7 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, setOrders, ini
         id: `notif-upd-${Date.now()}`,
         title: `Order Updated: ${order.orderNumber}`,
         message: `Your order is now: ${newStatus}`,
-        timestamp: 'Just now',
+        timestamp: Date.now(),
         read: false,
         type: 'order',
         linkTarget: order.orderNumber,

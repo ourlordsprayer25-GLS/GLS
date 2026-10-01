@@ -540,17 +540,24 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   else onOpenAuth('login');
                 }}
                 title={user ? `${user.firstName} ${user.lastName || ''} - ${language === 'fr' ? 'Mon Compte' : 'Profile'}` : (language === 'fr' ? 'Se Connecter' : 'Sign In')}
-                className="relative w-13 h-13 rounded-full bg-gradient-to-tr from-slate-900 via-blue-950 to-blue-700 text-white font-bold text-base uppercase shadow-lg flex items-center justify-center ring-4 ring-blue-500/20 hover:ring-blue-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+                className="group relative w-14 h-14 rounded-full transition-all duration-300 cursor-pointer shadow-[0_4px_20px_-5px_rgba(0,0,0,0.15)] flex items-center justify-center ring-2 hover:scale-105 active:scale-95 shrink-0 overflow-hidden ring-indigo-500/30 bg-white"
                 aria-label="User Profile"
               >
-                {user ? (
-                  <>
-                    <span>{user.firstName ? user.firstName[0] : 'U'}</span>
-                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full shadow-2xs" />
-                  </>
-                ) : (
-                  <User className="w-6 h-6 stroke-[2.2]" />
-                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className={`relative w-11 h-11 rounded-full flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-300 ${
+                  user 
+                    ? 'bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 text-white font-black text-[17px] uppercase ring-2 ring-white/50' 
+                    : 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white'
+                }`}>
+                  {user ? (
+                    <>
+                      <span>{user.firstName ? user.firstName[0] : 'U'}</span>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full shadow-sm" />
+                    </>
+                  ) : (
+                    <User className="w-5 h-5 stroke-[2.2]" />
+                  )}
+                </div>
               </button>
               <span className="text-xs font-bold text-slate-800 mt-2 truncate max-w-[140px] text-center">
                 {user ? user.firstName : (language === 'fr' ? 'Se Connecter' : 'Sign In')}

@@ -473,10 +473,18 @@ export const Header: React.FC<HeaderProps> = ({
                 <>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-blue-50 text-slate-800 hover:text-blue-600 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-300 shadow-2xs"
+                    className="group relative flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-white/80 hover:bg-white backdrop-blur-md text-slate-800 hover:text-indigo-900 rounded-full font-bold text-xs transition-all duration-300 cursor-pointer shrink-0 border border-slate-200/80 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_25px_-5px_rgba(79,70,229,0.15)] overflow-hidden"
                   >
-                    <User className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span className="truncate max-w-[120px]">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-300 ring-2 ring-white/50">
+                      {user.firstName ? (
+                        <span className="text-white text-[10px] font-black uppercase tracking-wider">{user.firstName[0]}</span>
+                      ) : (
+                        <User className="w-3.5 h-3.5 text-white/90" />
+                      )}
+                      <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full shadow-sm" />
+                    </div>
+                    <span className="relative truncate max-w-[120px] tracking-wide group-hover:tracking-wider transition-all duration-300">
                       {user.firstName || user.email?.split('@')[0] || 'Patron'}
                     </span>
                   </button>
