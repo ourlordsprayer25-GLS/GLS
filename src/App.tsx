@@ -119,9 +119,22 @@ function AppContent() {
   
   const [isInitialBootLoading, setIsInitialBootLoading] = useState(true);
   const [storeSettings, setStoreSettings] = useState<StoreSettings>(DEFAULT_STORE_SETTINGS);
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
-  const [notifications, setNotifications] = useState<StoreNotification[]>(INITIAL_NOTIFICATIONS);
+  const [products, setProducts] = useState<Product[]>(() => {
+    try { const saved = localStorage.getItem('store_products'); if (saved) return JSON.parse(saved); } catch (e) {}
+    return INITIAL_PRODUCTS;
+  });
+  const [orders, setOrders] = useState<Order[]>(() => {
+    try { const saved = localStorage.getItem('store_orders'); if (saved) return JSON.parse(saved); } catch (e) {}
+    return INITIAL_ORDERS;
+  });
+  const [notifications, setNotifications] = useState<StoreNotification[]>(() => {
+    try { const saved = localStorage.getItem('store_notifications'); if (saved) return JSON.parse(saved); } catch (e) {}
+    return INITIAL_NOTIFICATIONS;
+  });
+
+  useEffect(() => { localStorage.setItem('store_products', JSON.stringify(products)); }, [products]);
+  useEffect(() => { localStorage.setItem('store_orders', JSON.stringify(orders)); }, [orders]);
+  useEffect(() => { localStorage.setItem('store_notifications', JSON.stringify(notifications)); }, [notifications]);
   const [users, setUsers] = useState<UserProfile[]>([]);
 
   // Initialize and attach cross-device real-time sync listeners

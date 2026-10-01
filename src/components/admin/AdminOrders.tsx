@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Order } from '../../types/store';
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
-import { updateRealtimeOrderStatus, deleteRealtimeOrder } from '../../services/supabaseService';
+import { updateRealtimeOrderStatus, deleteRealtimeOrder, addRealtimeNotification } from '../../services/supabaseService';
 
 interface AdminOrdersProps {
   orders: Order[];
@@ -40,6 +40,19 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, setOrders, ini
   const handleUpdateStatus = (orderId: string, newStatus: Order['status']) => {
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
     updateRealtimeOrderStatus(orderId, newStatus);
+    const order = orders.find(o => o.id === orderId);
+    if (order && order.customerId) {
+      addRealtimeNotification({
+        id: `notif-upd-${Date.now()}`,
+        title: `Order Updated: ${order.orderNumber}`,
+        message: `Your order is now: ${newStatus}`,
+        timestamp: 'Just now',
+        read: false,
+        type: 'order',
+        linkTarget: order.orderNumber,
+        customerId: order.customerId
+      });
+    }
   };
 
   const handleDeleteOrder = () => {

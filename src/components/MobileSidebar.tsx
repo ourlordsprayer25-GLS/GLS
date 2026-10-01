@@ -142,32 +142,42 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
         <div className="flex-1 overflow-y-auto divide-y divide-slate-100 text-xs font-semibold">
           
           {/* User Profile or Sign In Card */}
-          <div className="p-4 bg-slate-50 border-b border-slate-100">
+          <div className="p-4 bg-white border-b border-slate-100">
             {user && user.id !== 'usr-guest' && !user.id.startsWith('guest-') && (user.firstName || user.email) ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                    {user.firstName ? user.firstName[0] : 'P'}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-800 group transition-all duration-300 hover:shadow-[0_8px_30px_rgba(59,130,246,0.3)] cursor-pointer"
+                onClick={() => {
+                  onClose();
+                  onOpenProfile?.('profile');
+                }}>
+                {/* Decorative background blur */}
+                <div className="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl transition-transform duration-500 group-hover:scale-150"></div>
+                <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-purple-500/20 rounded-full blur-2xl transition-transform duration-500 group-hover:scale-150"></div>
+                
+                <div className="relative flex items-center justify-between z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 text-white flex items-center justify-center font-bold text-lg shadow-lg border border-white/20 ring-2 ring-transparent group-hover:ring-blue-400/50 transition-all duration-300">
+                        {user.firstName ? user.firstName[0] : 'P'}
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-900 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-white tracking-wide">
+                        {user.firstName} {user.lastName}
+                      </h4>
+                      <p className="text-[10px] text-blue-200/80 font-mono truncate max-w-[120px] font-medium">{user.email}</p>
+                      <span className="inline-flex mt-1 text-[9px] font-bold text-white bg-white/10 border border-white/20 px-2 py-0.5 rounded-full backdrop-blur-md shadow-sm">
+                        {user.tier}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900">
-                      {user.firstName} {user.lastName}
-                    </h4>
-                    <p className="text-[11px] text-slate-500 font-mono truncate max-w-[150px]">{user.email}</p>
-                    <span className="inline-block mt-0.5 text-[9px] font-bold text-blue-700 bg-blue-100 px-2 py-0.2 rounded-full">
-                      {user.tier}
-                    </span>
-                  </div>
+                  <button
+                    className="p-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white transition-all duration-300 backdrop-blur-md group-hover:scale-105 active:scale-95"
+                    aria-label="Open Profile"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenProfile?.('profile');
-                  }}
-                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-blue-600 hover:bg-blue-50 cursor-pointer"
-                >
-                  Profile
-                </button>
               </div>
             ) : (
               <button
@@ -175,10 +185,11 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   onClose();
                   onOpenAuth();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md transition-colors cursor-pointer"
+                className="relative w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-bold text-xs shadow-xl shadow-slate-900/20 transition-all duration-300 cursor-pointer overflow-hidden group"
               >
-                <LogIn className="w-4 h-4" />
-                <span>{language === 'fr' ? "Se Connecter / S'inscrire" : 'Sign In / Register'}</span>
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                <LogIn className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">{language === 'fr' ? "Se Connecter / S'inscrire" : 'Sign In / Register'}</span>
               </button>
             )}
           </div>
