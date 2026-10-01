@@ -1,37 +1,76 @@
+import fs from 'fs';
+import path from 'path';
+
 export default async function handler(req, res) {
   const url = new URL(req.url, `https://${req.headers.host}`);
-  // Slug should be extracted from /product/my-slug
-  const slug = url.pathname.split('/').pop();
+  const slug = url.pathname.split('/').filter(Boolean).pop();
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
   let product = null;
 
+  // 1. Try Supabase first
   if (supabaseUrl && supabaseKey) {
     try {
-      const response = await fetch(`${supabaseUrl}/rest/v1/products?slug=eq.${slug}&select=*`, {
+      const response = await fetch(`${supabaseUrl}/rest/v1/products?slug=eq.${encodeURIComponent(slug)}&select=*`, {
         headers: {
           'apikey': supabaseKey,
           'Authorization': `Bearer ${supabaseKey}`
         }
       });
-      const data = await response.json();
-      if (Array.isArray(data) && data.length > 0) {
-        product = data[0];
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          product = data[0];
+        }
       }
     } catch (e) {
-      console.error('Failed to fetch product from Supabase:', e);
+      console.error('Supabase fetch failed:', e.message);
     }
   }
 
-  // Fallback defaults if no product found or Supabase isn't configured
-  const title = product ? `${product.name} | GLADYNS` : 'GLADYNS ALL ACROSS';
-  const description = product ? product.description : 'Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel.';
-  const image = product ? product.primaryImage : 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop';
-  
-  // Clean up relative image paths to absolute if needed
-  const absoluteImage = image.startsWith('http') ? image : `https://${req.headers.host}${image}`;
+  // 2. Fallback: read from data-store.json if Supabase didn't return anything
+  if (!product) {
+    try {
+      const dataStorePath = path.join(process.cwd(), 'data-store.json');
+      if (fs.existsSync(dataStorePath)) {
+        const raw = fs.readFileSync(dataStorePath, 'utf-8');
+        const store = JSON.parse(raw);
+        const allProducts = store.products || [];
+        product = allProducts.find(p => p.slug === slug) || null;
+      }
+    } catch (e) {
+      console.error('data-store.json read failed:', e.message);
+    }
+  }
+
+  // 3. Build OG tag values
+  const siteName = 'GLADYNS';
+  const title = product ? `${product.name} | ${siteName}` : `${siteName} — Curated Department Store`;
+  const description = product
+    ? (product.description || product.subtitle || 'View this product on GLADYNS.')
+    : 'Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel.';
+
+  // Resolve the product image — use primaryImage if it's a full URL
+  let image = null;
+  if (product) {
+    const raw = product.primaryImage || (product.images && product.images[0]?.url);
+    if (raw && raw.startsWith('http')) {
+      image = raw;
+    }
+    // If it's a relative path (e.g. /assets/images/...) make it absolute
+    if (raw && raw.startsWith('/')) {
+      image = `https://${req.headers.host}${raw}`;
+    }
+  }
+
+  // Final fallback image — store banner, not a random stock image
+  if (!image) {
+    image = `https://${req.headers.host}/og-banner.jpg`;
+  }
+
+  const productUrl = `https://${req.headers.host}/product/${slug}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -39,28 +78,31 @@ export default async function handler(req, res) {
     <meta charset="UTF-8">
     <title>${title}</title>
     <meta name="description" content="${description}">
-    <!-- Open Graph for Facebook/WhatsApp -->
+    <!-- Open Graph (WhatsApp, Facebook, Telegram) -->
+    <meta property="og:site_name" content="${siteName}">
+    <meta property="og:type" content="product">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
-    <meta property="og:image" content="${absoluteImage}">
-    <meta property="og:url" content="https://${req.headers.host}/product/${slug}">
-    <meta property="og:type" content="product">
-    <!-- Twitter -->
+    <meta property="og:image" content="${image}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="${productUrl}">
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
-    <meta name="twitter:image" content="${absoluteImage}">
+    <meta name="twitter:image" content="${image}">
 </head>
 <body>
-    <p>Redirecting to the Gladyns store...</p>
+    <p>Redirecting to the GLADYNS store...</p>
     <script>
-        // Redirect to the actual app without causing an infinite loop (we append ?_r=1 to match the Vercel rewrite rule)
         window.location.replace("/product/${slug}?_r=1");
     </script>
 </body>
 </html>`;
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate'); // Cache the HTML for fast WhatsApp scraping
+  // Cache for 60s so WhatsApp scraper gets it fast, but updates propagate within a minute
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
   res.status(200).send(html);
 }
