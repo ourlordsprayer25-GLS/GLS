@@ -151,7 +151,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
       .from('products')
       .select('*')
       .then(({ data, error }) => {
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           onUpdate(data as Product[]);
         }
       });
@@ -198,7 +198,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
       .select('*')
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           onUpdate(data as Order[]);
         }
       });
@@ -207,7 +207,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
       .channel('orders_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
         const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-        if (data) onUpdate(data as Order[]);
+        if (data && data.length > 0) onUpdate(data as Order[]);
       })
       .subscribe();
   }
@@ -242,7 +242,7 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
       .from('users')
       .select('*')
       .then(({ data, error }) => {
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           onUpdate(data as UserProfile[]);
         }
       });
@@ -251,7 +251,7 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
       .channel('users_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, async () => {
         const { data } = await supabase.from('users').select('*');
-        if (data) onUpdate(data as UserProfile[]);
+        if (data && data.length > 0) onUpdate(data as UserProfile[]);
       })
       .subscribe();
   }
@@ -287,7 +287,7 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
       .select('*')
       .order('timestamp', { ascending: false })
       .then(({ data, error }) => {
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           onUpdate(data as StoreNotification[]);
         }
       });
@@ -296,7 +296,7 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
       .channel('notifications_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
         const { data } = await supabase.from('notifications').select('*').order('timestamp', { ascending: false });
-        if (data) onUpdate(data as StoreNotification[]);
+        if (data && data.length > 0) onUpdate(data as StoreNotification[]);
       })
       .subscribe();
   }
@@ -680,7 +680,7 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
   if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         return data as UserProfile;
       }
     } catch (err) {
