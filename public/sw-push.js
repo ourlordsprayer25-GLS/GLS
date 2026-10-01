@@ -1,13 +1,5 @@
-// GLADYNS Push Notification Service Worker
-// Handles background push events and notification clicks
-
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
-});
+// GLADYNS Push Notification Service Worker Logic
+// Handles background push events and notification clicks (Imported into main PWA SW)
 
 // Handle push events from server (Web Push API)
 self.addEventListener('push', (event) => {

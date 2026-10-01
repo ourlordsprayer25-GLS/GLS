@@ -281,15 +281,6 @@ function AppContent() {
   // Ref to track last known status of each order to detect transitions
   const lastKnownStatusesRef = useRef<Record<string, Order['status']>>({});
 
-  // Register push service worker & request notification permissions
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw-push.js').catch((err) => {
-        console.warn('Push service worker registration skipped or failed:', err);
-      });
-    }
-  }, []);
-
   // Initialize the last known statuses ref with existing orders on mount
   useEffect(() => {
     const initialMap: Record<string, Order['status']> = {};
@@ -493,10 +484,54 @@ function AppContent() {
     });
   }, [orders]);
 
+  // Ref to track known products to detect NEW ARRIVALS
+  const knownProductIdsRef = useRef<Set<string> | null>(null);
+
   // Ref to track products already alerted for low stock to avoid duplicate spam
   const lowStockAlertedRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
+    if (!products || products.length === 0) return;
+
+    // Initialize known product IDs on first load
+    if (knownProductIdsRef.current === null) {
+      knownProductIdsRef.current = new Set(products.map((p) => p.id));
+    } else {
+      // Detect newly added products
+      products.forEach((product) => {
+        if (!knownProductIdsRef.current?.has(product.id)) {
+          knownProductIdsRef.current?.add(product.id);
+
+          const title = `✨ New Arrival: ${product.name}`;
+          const message = `Discover our newest addition: "${product.name}" is now available in store for $${product.price.toFixed(2)}.`;
+
+          const arrivalNotif: StoreNotification = {
+            id: `notif-new-product-${product.id}-${Date.now()}`,
+            title,
+            message,
+            timestamp: Date.now(),
+            read: false,
+            type: 'product',
+            linkTarget: product.id,
+          };
+
+          setNotifications((prev) => [arrivalNotif, ...prev]);
+          playPremiumChime();
+          triggerSystemNotification(title, {
+            body: `Now available in store for $${product.price.toFixed(2)}. Tap to view!`,
+            tag: `new-product-${product.id}`,
+            icon: product.primaryImage || '/pwa-192x192.png',
+          });
+          setActiveToast({
+            id: arrivalNotif.id,
+            title: arrivalNotif.title,
+            message: arrivalNotif.message,
+          });
+        }
+      });
+    }
+
+    // Check low stock
     products.forEach((product) => {
       const stock = product.stockLevel !== undefined ? product.stockLevel : 10;
       const isLow = stock < 5;
