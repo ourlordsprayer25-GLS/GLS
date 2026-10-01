@@ -543,12 +543,9 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
                       onChange={(e) => setFormData({...formData, category: e.target.value, categoryLabel: e.target.options[e.target.selectedIndex].text})}
                     >
                       <option value="">Select Category / Department</option>
-                      {CATEGORIES.filter(c => c.id !== 'all').map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.label}</option>
-                      ))}
-                      {categories.filter(c => c.id !== 'all' && !CATEGORIES.some(dc => dc.id === c.id)).map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.label}</option>
-                      ))}
+                      {categories.filter(c => c.id !== 'all').map(cat => (
+                          <option key={cat.id} value={cat.id}>{cat.label}</option>
+                        ))}
                     </select>
                   </div>
                   <div className="space-y-2">
@@ -1013,5 +1010,6 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     </div>
   );
 };
+
 
 
