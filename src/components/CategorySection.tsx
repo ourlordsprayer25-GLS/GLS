@@ -77,7 +77,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               : cat.image;
 
             const displayCount = categoryProducts.length > 0
-              ? \\ \\
+              ? `${categoryProducts.length} ${categoryProducts.length === 1 ? 'Piece' : 'Pieces'}`
               : cat.count;
 
             return (
