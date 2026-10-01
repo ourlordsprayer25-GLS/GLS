@@ -132,28 +132,26 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
   initSSE();
   listeners.products.add(onUpdate);
 
-  // 1. Fetch from Server Central Database
+  let hasLoaded = false;
   localFetch('/api/sync/products')
     .then(r => r.json())
     .then(serverProducts => {
       if (Array.isArray(serverProducts)) {
-        if (!isSupabaseConfigured || serverProducts.length > 0) onUpdate(serverProducts);
+        if (!isSupabaseConfigured || serverProducts.length > 0) { onUpdate(serverProducts); hasLoaded = true; }
       } else {
-        if (!isSupabaseConfigured) onUpdate(INITIAL_PRODUCTS);
+        if (!isSupabaseConfigured) { onUpdate(INITIAL_PRODUCTS); hasLoaded = true; }
       }
     })
-    .catch(() => { if (!isSupabaseConfigured) onUpdate(INITIAL_PRODUCTS); });
+    .catch(() => { if (!isSupabaseConfigured) { onUpdate(INITIAL_PRODUCTS); hasLoaded = true; } });
 
-  // 2. Supabase Integration if configured
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
     supabase
       .from('products')
       .select('*')
       .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
-          onUpdate(data as Product[]);
-        }
+        if (!error && data) { onUpdate(data as Product[]); hasLoaded = true; }
+        else if (error && !hasLoaded) onUpdate(INITIAL_PRODUCTS);
       });
 
     supabaseChannel = supabase
@@ -713,17 +711,21 @@ export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
   if (!(listeners as any).categories) (listeners as any).categories = new Set();
   (listeners as any).categories.add(onUpdate);
 
+  let hasLoaded = false;
   localFetch('/api/sync/categories')
     .then(r => r.json())
     .then(serverCats => {
-      if (Array.isArray(serverCats)) onUpdate(serverCats);
+      if (Array.isArray(serverCats) && serverCats.length > 0) { onUpdate(serverCats); hasLoaded = true; }
     })
     .catch(() => {});
 
   if (isSupabaseConfigured) {
     supabase.from('categories').select('*').then(({ data, error }) => {
-      if (!error && data && data.length > 0) onUpdate(data);
+      if (!error && data) { onUpdate(data); hasLoaded = true; }
+      else if (error && !hasLoaded) onUpdate(CATEGORIES as any);
     });
+  } else {
+    setTimeout(() => { if (!hasLoaded) onUpdate(CATEGORIES as any); }, 1000);
   }
 }
 
@@ -760,17 +762,21 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
   if (!(listeners as any).brands) (listeners as any).brands = new Set();
   (listeners as any).brands.add(onUpdate);
 
+  let hasLoaded = false;
   localFetch('/api/sync/brands')
     .then(r => r.json())
     .then(serverBrands => {
-      if (Array.isArray(serverBrands)) onUpdate(serverBrands);
+      if (Array.isArray(serverBrands) && serverBrands.length > 0) { onUpdate(serverBrands); hasLoaded = true; }
     })
     .catch(() => {});
 
   if (isSupabaseConfigured) {
     supabase.from('brands').select('*').then(({ data, error }) => {
-      if (!error && data && data.length > 0) onUpdate(data);
+      if (!error && data) { onUpdate(data); hasLoaded = true; }
+      else if (error && !hasLoaded) onUpdate([]);
     });
+  } else {
+    setTimeout(() => { if (!hasLoaded) onUpdate([]); }, 1000);
   }
 }
 
@@ -801,3 +807,8 @@ export async function deleteRealtimeBrand(brandName: string) {
     } catch (err) {}
   }
 }
+
+
+
+
+
