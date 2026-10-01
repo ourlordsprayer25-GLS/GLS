@@ -255,6 +255,27 @@ async function startServer() {
     res.json({ success: true });
   });
 
+    // 4c. Brands Sync API
+  app.get('/api/sync/brands', (_req, res) => {
+    res.json(dbState.brands);
+  });
+  app.post('/api/sync/brands', (req, res) => {
+    const brand = req.body;
+    if (!brand || !brand.name) return res.status(400).json({ error: 'Brand with name required' });
+    const idx = dbState.brands.findIndex(b => b.name === brand.name);
+    if (idx >= 0) dbState.brands[idx] = brand;
+    else dbState.brands.push(brand);
+    saveDB();
+    broadcastSyncEvent('brands', dbState.brands);
+    res.json({ success: true, brand });
+  });
+  app.delete('/api/sync/brands/:name', (req, res) => {
+    dbState.brands = dbState.brands.filter(b => b.name !== req.params.name);
+    saveDB();
+    broadcastSyncEvent('brands', dbState.brands);
+    res.json({ success: true });
+  });
+
   // 5. Orders Sync API (Cross-Device Real-Time)
   app.get('/api/sync/orders', (_req, res) => {
     res.json(dbState.orders);
@@ -588,4 +609,5 @@ async function startServer() {
 }
 
 startServer();
+
 

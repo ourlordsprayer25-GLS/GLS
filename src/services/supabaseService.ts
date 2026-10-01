@@ -754,3 +754,50 @@ export async function deleteRealtimeCategory(categoryId: string) {
     } catch (err) {}
   }
 }
+
+export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
+  initSSE();
+  if (!(listeners as any).brands) (listeners as any).brands = new Set();
+  (listeners as any).brands.add(onUpdate);
+
+  localFetch('/api/sync/brands')
+    .then(r => r.json())
+    .then(serverBrands => {
+      if (Array.isArray(serverBrands)) onUpdate(serverBrands);
+    })
+    .catch(() => {});
+
+  if (isSupabaseConfigured) {
+    supabase.from('brands').select('*').then(({ data, error }) => {
+      if (!error && data && data.length > 0) onUpdate(data);
+    });
+  }
+}
+
+export async function saveRealtimeBrand(brand: any) {
+  try {
+    await localFetch('/api/sync/brands', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(brand),
+    });
+  } catch (err) {}
+  
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('brands').upsert(brand);
+    } catch (err) {}
+  }
+}
+
+export async function deleteRealtimeBrand(brandName: string) {
+  try {
+    await localFetch('/api/sync/brands/' + brandName, { method: 'DELETE' });
+  } catch (err) {}
+  
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('brands').delete().eq('name', brandName);
+    } catch (err) {}
+  }
+}

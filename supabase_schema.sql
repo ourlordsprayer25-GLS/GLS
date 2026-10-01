@@ -118,3 +118,21 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.users;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.settings;
+
+-- 7. CATEGORIES TABLE
+CREATE TABLE IF NOT EXISTS public.categories (
+  "id" text PRIMARY KEY,
+  "label" text,
+  "description" text,
+  "image" text,
+  "badge" text
+);
+
+-- 8. BRANDS TABLE
+CREATE TABLE IF NOT EXISTS public.brands (
+  "name" text PRIMARY KEY,
+  "origin" text
+);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.categories;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.brands;

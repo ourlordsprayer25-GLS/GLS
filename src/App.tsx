@@ -12,6 +12,7 @@ import { SectionType } from './components/SectionPage';
 import {
   subscribeToProducts,
   subscribeToCategories,
+  subscribeToBrands,
   subscribeToOrders,
   subscribeToNotifications,
   subscribeToSettings,
@@ -139,6 +140,7 @@ function AppContent() {
 
     const unsubProducts = subscribeToProducts(setProducts);
     const unsubCats = subscribeToCategories(setCategories);
+    const unsubBrands = subscribeToBrands(setBrands);
     const unsubOrders = subscribeToOrders(setOrders);
     const unsubNotifs = subscribeToNotifications(setNotifications);
     const unsubSettings = subscribeToSettings(DEFAULT_STORE_SETTINGS, setStoreSettings);
@@ -146,6 +148,7 @@ function AppContent() {
 
     return () => {
       if (unsubCats) unsubCats();
+      if (unsubBrands) unsubBrands();
       unsubProducts();
       unsubOrders();
       unsubNotifs();
@@ -914,6 +917,7 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 
 
 

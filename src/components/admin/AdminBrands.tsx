@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../../types/store';
+import { saveRealtimeBrand, deleteRealtimeBrand } from '../../services/supabaseService';
 import { 
   Plus, 
   Search, 
@@ -40,12 +41,14 @@ export const AdminBrands: React.FC<AdminBrandsProps> = ({ brands, setBrands }) =
     
     if (editingBrand) {
       setBrands(prev => prev.map(b => b.name === editingBrand.name ? formData : b));
+        saveRealtimeBrand(formData);
     } else {
       if (brands.some(b => b.name === formData.name)) {
         setError('A brand with this name already exists.');
         return;
       }
       setBrands(prev => [...prev, formData]);
+        saveRealtimeBrand(formData);
     }
     setIsModalOpen(false);
     setError(null);
@@ -54,6 +57,7 @@ export const AdminBrands: React.FC<AdminBrandsProps> = ({ brands, setBrands }) =
   const handleDeleteBrand = () => {
     if (deleteConfirmationName) {
       setBrands(prev => prev.filter(b => b.name !== deleteConfirmationName));
+        deleteRealtimeBrand(deleteConfirmationName);
       setDeleteConfirmationName(null);
     }
   };
@@ -225,4 +229,5 @@ export const AdminBrands: React.FC<AdminBrandsProps> = ({ brands, setBrands }) =
     </div>
   );
 };
+
 
