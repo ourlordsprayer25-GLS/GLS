@@ -915,7 +915,7 @@ function AppContent() {
       ) : (
         <StorefrontView
           {...{
-            user, products, orders, notifications: customerNotifications, cartItems, wishlistIds, searchQuery,
+            user, products, orders, categories, notifications: customerNotifications, cartItems, wishlistIds, searchQuery,
             selectedCategory, sortBy, isCategoriesPageOpen, isAboutUsPageOpen, isTermsPageOpen,
             isRefundPolicyPageOpen,
             isStoreLocatorPageOpen, isBrandPageOpen, isCollectionsPageOpen, isOrdersPageOpen,

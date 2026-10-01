@@ -33,6 +33,7 @@ import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   products?: Product[];
+  categories: any[];
   user: UserProfile | null;
   cartItemCount: number;
   unreadNotificationCount: number;
@@ -60,6 +61,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   products = [],
+  categories = [],
   user,
   cartItemCount,
   unreadNotificationCount,

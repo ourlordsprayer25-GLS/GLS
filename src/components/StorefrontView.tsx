@@ -8,7 +8,7 @@ import {
   StoreSettings 
 } from '../types/store';
 import { SectionType } from './SectionPage';
-import { CATEGORIES } from '../data/products';
+
 import { Header } from './Header';
 import { HeroSection } from './HeroSection';
 import { CategorySection } from './CategorySection';
@@ -46,6 +46,7 @@ interface StorefrontViewProps {
   user: UserProfile | null;
   products: Product[];
   orders: Order[];
+  categories: any[];
   notifications: StoreNotification[];
   cartItems: CartItem[];
   wishlistIds: string[];
@@ -134,7 +135,7 @@ interface StorefrontViewProps {
 
 export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
   const {
-    user, products, orders, notifications, cartItems, wishlistIds, searchQuery,
+    user, products, orders, categories, notifications, cartItems, wishlistIds, searchQuery,
     selectedCategory, sortBy, isCategoriesPageOpen, isAboutUsPageOpen, isTermsPageOpen,
     isRefundPolicyPageOpen,
     isStoreLocatorPageOpen, isBrandPageOpen, isCollectionsPageOpen, isOrdersPageOpen,
@@ -402,6 +403,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
               sectionType={activeSectionPage}
               initialCategory={sectionPageCategory}
               allProducts={products}
+              categories={categories}
               wishlistIds={wishlistIds}
               onToggleWishlist={handleToggleWishlist}
               onSelectProduct={handleSelectProduct}
@@ -426,6 +428,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
               <div id="categories-section">
                 <CategorySection
                   products={products}
+                  categories={categories}
                   onSelectCategory={(cat) => handleOpenSectionPage('categories', cat)}
                   onViewAllCategories={() => handleOpenSectionPage('categories')}
                 />
@@ -470,7 +473,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
 
                   <div className="flex flex-wrap items-center gap-2.5">
                     <div className="flex items-center p-1 bg-zinc-200/60 rounded-xl overflow-x-auto max-w-full">
-                      {CATEGORIES.map((cat) => (
+                      {categories.map((cat) => (
                         <button
                           key={cat.id}
                           onClick={() => setSelectedCategory(cat.id)}

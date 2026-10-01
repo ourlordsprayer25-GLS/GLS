@@ -5,12 +5,14 @@ import { Product } from '../types/store';
 
 interface CategorySectionProps {
   products?: Product[];
+  categories: any[];
   onSelectCategory: (category: string) => void;
   onViewAllCategories?: () => void;
 }
 
 export const CategorySection: React.FC<CategorySectionProps> = ({
   products = [],
+  categories,
   onSelectCategory,
   onViewAllCategories,
 }) => {
@@ -18,7 +20,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     onSelectCategory(category);
   };
 
-  const activeCategories = VISUAL_CATEGORIES.map(cat => ({
+  const activeCategories = VISUAL_CATEGORIES.filter(cat => 
+    categories.some(c => c.id === cat.id)
+  ).map(cat => ({
     cat,
     categoryProducts: products.filter(p => 
       p.category === cat.id || 

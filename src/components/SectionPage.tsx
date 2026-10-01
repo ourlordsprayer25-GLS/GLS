@@ -16,7 +16,7 @@ import {
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
 import { HotDealCard } from './HotDealCard';
-import { CATEGORIES } from '../data/products';
+
 
 // Image imports
 import dealsBannerImg from '../assets/images/deals_editorial_banner_1790121007285.jpg';
@@ -47,6 +47,7 @@ interface SectionPageProps {
   sectionType: SectionType;
   initialCategory?: string;
   allProducts: Product[];
+  categories: any[];
   wishlistIds: string[];
   onToggleWishlist: (productId: string) => void;
   onSelectProduct: (product: Product) => void;
@@ -58,6 +59,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
   sectionType,
   initialCategory = 'all',
   allProducts,
+  categories,
   wishlistIds,
   onToggleWishlist,
   onSelectProduct,
@@ -506,7 +508,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Category Filter Tabs */}
             <div className="flex items-center p-1 bg-slate-200/70 rounded-xl overflow-x-auto max-w-full">
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
