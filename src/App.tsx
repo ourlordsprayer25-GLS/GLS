@@ -132,9 +132,20 @@ function AppContent() {
     return INITIAL_NOTIFICATIONS;
   });
 
-  useEffect(() => { localStorage.setItem('store_products', JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem('store_orders', JSON.stringify(orders)); }, [orders]);
-  useEffect(() => { localStorage.setItem('store_notifications', JSON.stringify(notifications)); }, [notifications]);
+  useEffect(() => { 
+    try { localStorage.setItem('store_products', JSON.stringify(products)); } 
+    catch(e) { console.warn('LocalStorage quota exceeded for products', e); localStorage.removeItem('store_products'); } 
+  }, [products]);
+  
+  useEffect(() => { 
+    try { localStorage.setItem('store_orders', JSON.stringify(orders)); } 
+    catch(e) { console.warn('LocalStorage quota exceeded for orders', e); } 
+  }, [orders]);
+  
+  useEffect(() => { 
+    try { localStorage.setItem('store_notifications', JSON.stringify(notifications)); } 
+    catch(e) { console.warn('LocalStorage quota exceeded for notifications', e); } 
+  }, [notifications]);
   const [users, setUsers] = useState<UserProfile[]>([]);
 
   // Initialize and attach cross-device real-time sync listeners
@@ -177,7 +188,8 @@ function AppContent() {
   });
 
   useEffect(() => {
-    localStorage.setItem('store_categories', JSON.stringify(categories));
+    try { localStorage.setItem('store_categories', JSON.stringify(categories)); }
+    catch(e) { console.warn('LocalStorage quota exceeded for categories', e); }
   }, [categories]);
 
   const [brands, setBrands] = useState(() => {
@@ -193,7 +205,8 @@ function AppContent() {
   });
 
   useEffect(() => {
-    localStorage.setItem('store_brands', JSON.stringify(brands));
+    try { localStorage.setItem('store_brands', JSON.stringify(brands)); }
+    catch(e) { console.warn('LocalStorage quota exceeded for brands', e); }
   }, [brands]);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
