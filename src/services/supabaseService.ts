@@ -7,7 +7,7 @@ const localFetch = (url: string | URL | Request, init?: RequestInit) => {
 };
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Product, Order, UserProfile, StoreNotification, StoreSettings } from '../types/store';
-import { INITIAL_PRODUCTS } from '../data/products';
+import { INITIAL_PRODUCTS, CATEGORIES } from '../data/products';
 import { INITIAL_ORDERS, INITIAL_CUSTOMERS } from '../data/user';
 import { INITIAL_NOTIFICATIONS } from '../data/notifications';
 
@@ -807,6 +807,7 @@ export async function deleteRealtimeBrand(brandName: string) {
     } catch (err) {}
   }
 }
+
 
 
 
