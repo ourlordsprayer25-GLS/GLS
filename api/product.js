@@ -87,24 +87,26 @@ export default async function handler(req, res) {
   const productUrl = `https://${host}/product/${slug}`;
 
   const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <title>${title}</title>
     <meta name="description" content="${description}">
 
-    <!-- Open Graph (WhatsApp, Facebook, Telegram, iMessage) -->
-    <meta property="fb:app_id" content="${process.env.FB_APP_ID || '966242223397117'}">
-    <meta property="og:site_name" content="${siteName}">
-    <meta property="og:type" content="product">
-    <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${description}">
+    <!-- Open Graph Image First for Mobile Parsers (WhatsApp, iMessage, Facebook) -->
     <meta property="og:image" content="${image}">
     <meta property="og:image:secure_url" content="${image}">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+
+    <!-- Open Graph General Metadata -->
+    <meta property="og:site_name" content="${siteName}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
     <meta property="og:url" content="${productUrl}">
+    <meta property="fb:app_id" content="${process.env.FB_APP_ID || '966242223397117'}">
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
