@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/product-image",
+      "destination": "/api/product-image.js"
+    },
+    {
       "source": "/product/:slug",
       "has": [
         {
@@ -13,7 +17,7 @@
     },
     {
       "source": "/product/:slug",
-      "destination": "/api/product"
+      "destination": "/api/product.js"
     },
     {
       "source": "/(.*)",

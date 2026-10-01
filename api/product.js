@@ -72,13 +72,16 @@ export default async function handler(req, res) {
         image = raw;
       } else if (raw.startsWith('/')) {
         image = `https://${host}${raw}`;
+      } else if (raw.startsWith('data:image/')) {
+        // Base64 image: Serve through binary endpoint so WhatsApp can render real image!
+        image = `https://${host}/api/product-image?id=${encodeURIComponent(product.id || slug)}`;
       }
     }
   }
 
   // Fallback image if product has no image or product not found
   if (!image) {
-    image = `https://${host}/og-banner.jpg`;
+    image = `https://${host}/api/product-image?id=${encodeURIComponent(slug || 'default')}`;
   }
 
   const productUrl = `https://${host}/product/${slug}`;
