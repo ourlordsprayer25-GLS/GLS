@@ -137,12 +137,12 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
     .then(r => r.json())
     .then(serverProducts => {
       if (Array.isArray(serverProducts)) {
-        onUpdate(serverProducts);
+        if (!isSupabaseConfigured || serverProducts.length > 0) onUpdate(serverProducts);
       } else {
-        onUpdate(INITIAL_PRODUCTS);
+        if (!isSupabaseConfigured) onUpdate(INITIAL_PRODUCTS);
       }
     })
-    .catch(() => onUpdate(INITIAL_PRODUCTS));
+    .catch(() => { if (!isSupabaseConfigured) onUpdate(INITIAL_PRODUCTS); });
 
   // 2. Supabase Integration if configured
   let supabaseChannel: any = null;

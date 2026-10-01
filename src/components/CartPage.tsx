@@ -10,7 +10,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { CartItem, Product, ProductVariant, ProductSize } from '../types/store';
-import { INITIAL_PRODUCTS } from '../data/products';
+
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { ProductCard } from './ProductCard';
 
@@ -56,7 +56,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
   // Curated recommendations (pieces not yet in the bag, fallback to full catalog)
   const cartProductIds = new Set(validItems.map((i) => i.product.id));
-  const allCatalog = products.length > 0 ? products : INITIAL_PRODUCTS;
+  const allCatalog = products;
   const unselected = allCatalog.filter((p) => !cartProductIds.has(p.id));
   const recommendations = (unselected.length > 0 ? unselected : allCatalog).slice(0, 8);
 
@@ -69,8 +69,8 @@ export const CartPage: React.FC<CartPageProps> = ({
   };
 
   const handleFillSampleItems = () => {
-    if (onAddToCart) {
-      INITIAL_PRODUCTS.slice(0, 2).forEach((prod) => {
+    if (onAddToCart && products.length > 0) {
+      products.slice(0, 2).forEach((prod) => {
         const defaultVariant = prod.colors[0];
         const defaultSize = prod.sizes.find((s) => s.inStock) || prod.sizes[0];
         onAddToCart(prod, defaultVariant, defaultSize, 1);

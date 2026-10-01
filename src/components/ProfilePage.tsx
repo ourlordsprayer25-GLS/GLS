@@ -670,7 +670,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {(products.length > 0 ? products : INITIAL_PRODUCTS).slice(3, 7).map((prod) => (
+            {products.slice(0, 4).map((prod) => (
               <ProductCard
                 key={prod.id}
                 product={prod}

@@ -42,7 +42,7 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
 
   // Get generic curated recommendations for empty state
   const wishlistProductIds = new Set(wishlistProducts.map((p) => p.id));
-  const recommendations = (products.length > 0 ? products : INITIAL_PRODUCTS).filter((p) => !wishlistProductIds.has(p.id)).slice(0, 4);
+  const recommendations = products.filter((p) => !wishlistProductIds.has(p.id)).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] py-10 lg:py-16 animate-in fade-in duration-300">
