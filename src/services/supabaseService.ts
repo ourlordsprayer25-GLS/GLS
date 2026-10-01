@@ -1,4 +1,15 @@
 
+
+const getCache = (key: string) => {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  } catch (e) { return null; }
+};
+const setCache = (key: string, data: any) => {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+};
+
 const localFetch = (url: string | URL | Request, init?: RequestInit) => {
   if (import.meta.env.PROD) {
     return Promise.resolve(new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } }));
@@ -133,16 +144,28 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   listeners.products.add(onUpdate);
 
   let hasLoaded = false;
+  const cached = getCache('gls_cache_products');
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    onUpdate(cached);
+    hasLoaded = true;
+    if (onReady) onReady();
+  }
+  
+  const wrappedOnUpdate = (data: Product[]) => {
+    setCache('gls_cache_products', data);
+    wrappedOnUpdateCat(data);
+  };
+  
   localFetch('/api/sync/products')
     .then(r => r.json())
     .then(serverProducts => {
       if (Array.isArray(serverProducts)) {
-        if (!isSupabaseConfigured || serverProducts.length > 0) { onUpdate(serverProducts); hasLoaded = true; }
+        if (!isSupabaseConfigured || serverProducts.length > 0) { wrappedOnUpdate(serverProducts); hasLoaded = true; }
       } else {
-          if (!isSupabaseConfigured) { onUpdate([]); hasLoaded = true; }
+          if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; }
         }
     })
-    .catch(() => { if (!isSupabaseConfigured) { onUpdate([]); hasLoaded = true; } });
+    .catch(() => { if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; } });
 
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
@@ -150,8 +173,8 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       .from('products')
       .select('*')
       .then(({ data, error }) => {
-        if (!error && data) { onUpdate(data as Product[]); hasLoaded = true; }
-        else if (error && !hasLoaded) onUpdate([]);
+        if (!error && data) { wrappedOnUpdate(data as Product[]); hasLoaded = true; }
+        else if (error && !hasLoaded) wrappedOnUpdate([]);
           if (onReady) onReady();
       });
 
@@ -160,7 +183,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
         const { data } = await supabase.from('products').select('*');
         if (data) {
-          onUpdate(data as Product[]);
+          wrappedOnUpdate(data as Product[]);
         }
       })
       .subscribe();
@@ -713,16 +736,27 @@ export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
   (listeners as any).categories.add(onUpdate);
 
   let hasLoaded = false;
+  const cachedCat = getCache('gls_cache_categories');
+  if (cachedCat && Array.isArray(cachedCat) && cachedCat.length > 0) {
+    onUpdate(cachedCat);
+    hasLoaded = true;
+  }
+  
+  const wrappedOnUpdateCat = (data: any[]) => {
+    setCache('gls_cache_categories', data);
+    wrappedOnUpdateCat(data);
+  };
+  
   localFetch('/api/sync/categories')
     .then(r => r.json())
     .then(serverCats => {
-      if (Array.isArray(serverCats) && serverCats.length > 0) { onUpdate(serverCats); hasLoaded = true; }
+      if (Array.isArray(serverCats) && serverCats.length > 0) { wrappedOnUpdateCat(serverCats); hasLoaded = true; }
     })
     .catch(() => {});
 
   if (isSupabaseConfigured) {
     supabase.from('categories').select('*').then(({ data, error }) => {
-      if (!error && data) { onUpdate(data); hasLoaded = true; }
+      if (!error && data) { wrappedOnUpdateCat(data); hasLoaded = true; }
       else if (error && !hasLoaded) onUpdate(CATEGORIES as any);
     });
   } else {
@@ -764,6 +798,17 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
   (listeners as any).brands.add(onUpdate);
 
   let hasLoaded = false;
+  const cachedBrand = getCache('gls_cache_brands');
+  if (cachedBrand && Array.isArray(cachedBrand) && cachedBrand.length > 0) {
+    onUpdate(cachedBrand);
+    hasLoaded = true;
+  }
+  
+  const wrappedOnUpdateBrand = (data: any[]) => {
+    setCache('gls_cache_brands', data);
+    onUpdate(data);
+  };
+  
   localFetch('/api/sync/brands')
     .then(r => r.json())
     .then(serverBrands => {
@@ -773,11 +818,11 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
 
   if (isSupabaseConfigured) {
     supabase.from('brands').select('*').then(({ data, error }) => {
-      if (!error && data) { onUpdate(data); hasLoaded = true; }
-      else if (error && !hasLoaded) onUpdate([]);
+      if (!error && data) { wrappedOnUpdateCat(data); hasLoaded = true; }
+      else if (error && !hasLoaded) wrappedOnUpdate([]);
     });
   } else {
-    setTimeout(() => { if (!hasLoaded) onUpdate([]); }, 1000);
+    setTimeout(() => { if (!hasLoaded) wrappedOnUpdate([]); }, 1000);
   }
 }
 

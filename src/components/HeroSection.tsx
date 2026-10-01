@@ -48,7 +48,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const slides: HeroSlide[] = language === 'fr' ? [
     {
       id: 'slide-multi-department',
-      image: heroBannerImg,
+      image: storeSettings?.heroContent?.image || heroBannerImg,
       badge: 'Boutique Multi-Rayons · Électronique, Musique, Maison & Mode',
       badgeIcon: 'sparkles',
       title: storeSettings?.storeName ? `${storeSettings.storeName} — Grands Magasins & Curation` : 'Électronique, Musique, Électroménager & Mode',
@@ -109,7 +109,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   ] : [
     {
       id: 'slide-multi-department',
-      image: heroBannerImg,
+      image: storeSettings?.heroContent?.image || heroBannerImg,
       badge: 'Multi-Department Store · Electronics, Music, Home & Style',
       badgeIcon: 'sparkles',
       title: storeSettings?.storeName ? `${storeSettings.storeName} — Curated Storefront` : 'Electronics, Musical Gear, Home Appliances & Apparel',
