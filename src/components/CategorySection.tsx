@@ -16,20 +16,33 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   onSelectCategory,
   onViewAllCategories,
 }) => {
-  const handleClick = (category: CategoryCardData['id']) => {
+  const handleClick = (category: string) => {
     onSelectCategory(category);
   };
 
-  const activeCategories = VISUAL_CATEGORIES.filter(cat => 
-    categories.some(c => c.id === cat.id)
-  ).map(cat => ({
-    cat,
-    categoryProducts: products.filter(p => 
-      p.category === cat.id || 
-      p.category.toLowerCase() === cat.id.toLowerCase() || 
-      p.categoryLabel.toLowerCase().includes(cat.id.toLowerCase())
-    )
-  })).filter(c => c.categoryProducts.length > 0);
+  const activeCategories = categories
+    .filter(cat => cat.id !== 'all')
+    .map(cat => {
+      const categoryProducts = products.filter(p => 
+        p.category === cat.id || 
+        p.category.toLowerCase() === cat.id.toLowerCase() || 
+        (p.categoryLabel && p.categoryLabel.toLowerCase().includes(cat.id.toLowerCase()))
+      );
+      
+      const visualCat = VISUAL_CATEGORIES.find(v => v.id === cat.id);
+      
+      return {
+        cat: {
+          id: cat.id,
+          title: cat.label,
+          subtitle: cat.description || visualCat?.subtitle || 'Explore our curated collection',
+          count: cat.badge || visualCat?.count || 'Curated Items',
+          image: cat.image || visualCat?.image || 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&q=80&w=1000',
+          tag: cat.badge || visualCat?.tag || 'Discover'
+        },
+        categoryProducts
+      };
+    });
 
   if (activeCategories.length === 0) return null;
 
@@ -59,12 +72,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             const firstProduct = categoryProducts[0];
 
             // Display image: prioritize the first product's primary image, falling back to static visual category image
-            const displayImage = firstProduct
-              ? firstProduct.primaryImage || firstProduct.images?.[0]?.url || cat.image
+            const displayImage = firstProduct && firstProduct.primaryImage
+              ? firstProduct.primaryImage
               : cat.image;
 
             const displayCount = categoryProducts.length > 0
-              ? `${categoryProducts.length} ${categoryProducts.length === 1 ? 'Piece' : 'Pieces'}`
+              ? \\ \\
               : cat.count;
 
             return (
@@ -111,4 +124,3 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     </section>
   );
 };
-
