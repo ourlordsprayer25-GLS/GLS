@@ -128,7 +128,7 @@ export async function initServerSync(defaults: {
 /**
  * Real-time Subscription to Products across all devices & Supabase
  */
-export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
+export function subscribeToProducts(onUpdate: (products: Product[]) => void, onReady?: () => void) {
   initSSE();
   listeners.products.add(onUpdate);
 
@@ -139,10 +139,10 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
       if (Array.isArray(serverProducts)) {
         if (!isSupabaseConfigured || serverProducts.length > 0) { onUpdate(serverProducts); hasLoaded = true; }
       } else {
-        if (!isSupabaseConfigured) { onUpdate(INITIAL_PRODUCTS); hasLoaded = true; }
-      }
+          if (!isSupabaseConfigured) { onUpdate([]); hasLoaded = true; }
+        }
     })
-    .catch(() => { if (!isSupabaseConfigured) { onUpdate(INITIAL_PRODUCTS); hasLoaded = true; } });
+    .catch(() => { if (!isSupabaseConfigured) { onUpdate([]); hasLoaded = true; } });
 
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
@@ -151,7 +151,8 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void) {
       .select('*')
       .then(({ data, error }) => {
         if (!error && data) { onUpdate(data as Product[]); hasLoaded = true; }
-        else if (error && !hasLoaded) onUpdate(INITIAL_PRODUCTS);
+        else if (error && !hasLoaded) onUpdate([]);
+          if (onReady) onReady();
       });
 
     supabaseChannel = supabase

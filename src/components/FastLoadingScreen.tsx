@@ -5,6 +5,7 @@ interface FastLoadingScreenProps {
   message?: string;
   subMessage?: string;
   isInitialBoot?: boolean;
+  isReady?: boolean;
   onFinish?: () => void;
 }
 
@@ -12,6 +13,7 @@ export const FastLoadingScreen: React.FC<FastLoadingScreenProps> = ({
   message = 'GLADYNS DEPARTMENT STORE',
   subMessage = 'Loading Curated Catalog & Atelier...',
   isInitialBoot = true,
+  isReady = true,
   onFinish,
 }) => {
   const [progress, setProgress] = useState(15);
@@ -23,22 +25,27 @@ export const FastLoadingScreen: React.FC<FastLoadingScreenProps> = ({
     const t2 = setTimeout(() => setProgress(90), 220);
     const t3 = setTimeout(() => setProgress(100), 380);
 
-    const t4 = setTimeout(() => {
-      setIsFadingOut(true);
-    }, 450);
-
-    const t5 = setTimeout(() => {
-      if (onFinish) onFinish();
-    }, 650);
+    
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
-      clearTimeout(t4);
-      clearTimeout(t5);
+      
     };
-  }, [onFinish]);
+  }, []);
+
+
+  useEffect(() => {
+    if (isReady && progress === 100) {
+      setIsFadingOut(true);
+      const timer = setTimeout(() => {
+        if (onFinish) onFinish();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isReady, progress, onFinish]);
+
 
   return (
     <div

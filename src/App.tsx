@@ -120,6 +120,7 @@ function AppContent() {
   const { user: authUser, login: authLogin, logout: authLogout } = useAuth();
   
   const [isInitialBootLoading, setIsInitialBootLoading] = useState(true);
+    const [isReady, setIsReady] = useState(false);
   const [storeSettings, setStoreSettings] = useState<StoreSettings>(DEFAULT_STORE_SETTINGS);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -138,7 +139,7 @@ function AppContent() {
       brands: [],
     });
 
-    const unsubProducts = subscribeToProducts(setProducts);
+    const unsubProducts = subscribeToProducts(setProducts, () => setIsReady(true));
     const unsubCats = subscribeToCategories(setCategories);
     const unsubBrands = subscribeToBrands(setBrands);
     const unsubOrders = subscribeToOrders(setOrders);
@@ -851,6 +852,7 @@ function AppContent() {
     <>
       {isInitialBootLoading && (
         <FastLoadingScreen
+          isReady={isReady}
           onFinish={() => setIsInitialBootLoading(false)}
         />
       )}
