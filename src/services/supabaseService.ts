@@ -143,12 +143,24 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   initSSE();
   listeners.products.add(onUpdate);
 
+  let readyCalled = false;
+  const callReady = () => {
+    if (!readyCalled && onReady) {
+      readyCalled = true;
+      onReady();
+    }
+  };
+
+  // Hard timeout: no matter what, dismiss loading screen after 1.5s max
+  const hardTimeout = setTimeout(() => callReady(), 1500);
+
   let hasLoaded = false;
   const cached = getCache('gls_cache_products');
   if (cached && Array.isArray(cached) && cached.length > 0) {
     onUpdate(cached);
     hasLoaded = true;
-    if (onReady) onReady();
+    clearTimeout(hardTimeout);
+    callReady(); // Instant dismiss if cache exists
   }
   
   const wrappedOnUpdate = (data: Product[]) => {
@@ -162,10 +174,16 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       if (Array.isArray(serverProducts)) {
         if (!isSupabaseConfigured || serverProducts.length > 0) { wrappedOnUpdate(serverProducts); hasLoaded = true; }
       } else {
-          if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; }
-        }
+        if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; }
+      }
+      clearTimeout(hardTimeout);
+      callReady();
     })
-    .catch(() => { if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; } });
+    .catch(() => {
+      if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; }
+      clearTimeout(hardTimeout);
+      callReady();
+    });
 
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
@@ -175,7 +193,8 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       .then(({ data, error }) => {
         if (!error && data) { wrappedOnUpdate(data as Product[]); hasLoaded = true; }
         else if (error && !hasLoaded) wrappedOnUpdate([]);
-          if (onReady) onReady();
+        clearTimeout(hardTimeout);
+        callReady();
       });
 
     supabaseChannel = supabase
@@ -190,6 +209,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   }
 
   return () => {
+    clearTimeout(hardTimeout);
     listeners.products.delete(onUpdate);
     if (supabaseChannel) supabase.removeChannel(supabaseChannel);
   };
