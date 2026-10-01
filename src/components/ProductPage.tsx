@@ -167,45 +167,11 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
     if (navigator.share) {
       try {
-        const imageUrl = product.images[selectedImageIndex]?.url || product.primaryImage;
-        let fileShared = false;
-
-        if (imageUrl) {
-          try {
-            // Fetch the image as a blob
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            
-            // Generate a proper filename and mime type
-            const fileType = blob.type || 'image/jpeg';
-            const fileExt = fileType.split('/')[1] || 'jpg';
-            const file = new File([blob], `gladyns_product_${product.id}.${fileExt}`, { type: fileType });
-
-            const shareData = {
-              title: shareTitle,
-              text: shareText,
-              url: shareUrl,
-              files: [file],
-            };
-
-            // Double check system compatibility with file sharing
-            if (navigator.canShare && navigator.canShare(shareData)) {
-              await navigator.share(shareData);
-              fileShared = true;
-            }
-          } catch (fileError) {
-            console.warn('Could not bundle image for native sharing, falling back to text sharing', fileError);
-          }
-        }
-
-        if (!fileShared) {
-          // Fallback to native text-only share
-          await navigator.share({
-            title: shareTitle,
-            text: shareText,
-            url: shareUrl,
-          });
-        }
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
         
         // Show success checkmark in UI temporarily
         setCopiedShare(true);
