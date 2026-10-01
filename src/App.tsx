@@ -281,6 +281,15 @@ function AppContent() {
   // Ref to track last known status of each order to detect transitions
   const lastKnownStatusesRef = useRef<Record<string, Order['status']>>({});
 
+  // Register push service worker & request notification permissions
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw-push.js').catch((err) => {
+        console.warn('Push service worker registration skipped or failed:', err);
+      });
+    }
+  }, []);
+
   // Initialize the last known statuses ref with existing orders on mount
   useEffect(() => {
     const initialMap: Record<string, Order['status']> = {};
@@ -776,6 +785,13 @@ function AppContent() {
     setInitialInvoiceNumber(newOrder.orderNumber);
     if (user?.email) dispatchOrderStatusEmail(user.email, newOrder.orderNumber, 'PLACED', `Order for $${newOrder.total.toFixed(2)} received.`);
     setIsOrdersPageOpen(true);
+    // Fire real device push notification + chime sound for customer when order placed
+    playPremiumChime();
+    triggerSystemNotification('\u2705 Order ' + newOrder.orderNumber + ' Confirmed!', {
+      body: 'Your order for $' + newOrder.total.toFixed(2) + ' has been placed. We are on it!',
+      tag: 'order-placed-' + newOrder.id,
+      icon: '/pwa-192x192.png',
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
