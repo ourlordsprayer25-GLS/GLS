@@ -33,6 +33,15 @@ interface HeroSlide {
   onSecondaryClick?: () => void;
 }
 
+
+// Only use the saved hero image if it's a real hosted URL (not a local src/ path)
+const getHeroImage = (saved?: string, fallback?: string): string => {
+  if (saved && (saved.startsWith('http://') || saved.startsWith('https://'))) {
+    return saved;
+  }
+  return fallback || '';
+};
+
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onShopFeatured,
   onExploreCollection,
@@ -48,7 +57,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const slides: HeroSlide[] = language === 'fr' ? [
     {
       id: 'slide-multi-department',
-      image: storeSettings?.heroContent?.image || heroBannerImg,
+      image: getHeroImage(storeSettings?.heroContent?.image, heroBannerImg),
       badge: 'Boutique Multi-Rayons · Électronique, Musique, Maison & Mode',
       badgeIcon: 'sparkles',
       title: storeSettings?.storeName ? `${storeSettings.storeName} — Grands Magasins & Curation` : 'Électronique, Musique, Électroménager & Mode',
@@ -109,7 +118,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   ] : [
     {
       id: 'slide-multi-department',
-      image: storeSettings?.heroContent?.image || heroBannerImg,
+      image: getHeroImage(storeSettings?.heroContent?.image, heroBannerImg),
       badge: 'Multi-Department Store · Electronics, Music, Home & Style',
       badgeIcon: 'sparkles',
       title: storeSettings?.storeName ? `${storeSettings.storeName} — Curated Storefront` : 'Electronics, Musical Gear, Home Appliances & Apparel',

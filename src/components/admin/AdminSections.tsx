@@ -293,6 +293,7 @@ export const AdminSections: React.FC<AdminSectionsProps> = ({ storeSettings, set
                 <ImageIcon className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
                 <input 
                   type="text"
+                  placeholder="https://your-image-host.com/image.jpg"
                   value={localSettings.heroContent.image}
                   onChange={(e) => handleHeroChange('image', e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:ring-2 focus:ring-zinc-950/10 transition-all"
