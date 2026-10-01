@@ -102,6 +102,34 @@ function broadcastSyncEvent(eventType: string, payload: any) {
   }
 }
 
+function injectOGMetaTags(html: string, url: string, products: any[]): string {
+  if (url.startsWith('/product/')) {
+    const prodId = url.replace('/product/', '').split('?')[0];
+    const product = products.find(p => p.id === prodId || p.slug === prodId);
+    if (product) {
+      const title = product.name + ' - GLADYNS Studio';
+      const desc = product.subtitle || product.tagline || 'Discover premium goods at GLADYNS Studio.';
+      const img = product.primaryImage;
+      
+      let newHtml = html;
+      newHtml = newHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'][^"']*["']\s*\/?>/g, '');
+      newHtml = newHtml.replace(/<meta\s+property=["']og:description["']\s+content=["'][^"']*["']\s*\/?>/g, '');
+      newHtml = newHtml.replace(/<meta\s+property=["']og:image["']\s+content=["'][^"']*["']\s*\/?>/g, '');
+      newHtml = newHtml.replace(/<title>.*?<\/title>/g, '');
+      
+      const metaTags = 
+        <title> + title + </title>
+        <meta property="og:title" content=" + title + " />
+        <meta property="og:description" content=" + desc + " />
+        <meta property="og:image" content=" + img + " />
+      ;
+      
+      return newHtml.replace('</head>', metaTags + '</head>');
+    }
+  }
+  return html;
+}
+
 async function startServer() {
   const app = express();
   const server = http.createServer(app);
@@ -590,6 +618,7 @@ async function startServer() {
       try {
         const rawHtml = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
         let template = await vite.transformIndexHtml(url, rawHtml);
+          template = injectOGMetaTags(template, url, dbState.products);
         res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
       } catch (e) {
         vite.ssrFixStacktrace(e as Error);
@@ -599,7 +628,9 @@ async function startServer() {
   } else {
     app.use(express.static(path.resolve(__dirname, 'dist')));
     app.get('*', (req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist/index.html'));
+      const rawHtml = fs.readFileSync(path.resolve(__dirname, 'dist/index.html'), 'utf-8');
+        const finalHtml = injectOGMetaTags(rawHtml, req.originalUrl, dbState.products);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(finalHtml);
     });
   }
 
@@ -609,5 +640,6 @@ async function startServer() {
 }
 
 startServer();
+
 
 

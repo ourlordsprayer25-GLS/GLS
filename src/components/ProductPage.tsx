@@ -163,7 +163,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   const handleShare = async () => {
     const shareUrl = window.location.href;
     const shareTitle = product.name;
-    const shareText = `${product.name} - ${product.subtitle}\n\n${product.description.slice(0, 150)}...`;
+    const shareText = `Check out ${product.name} on GLADYNS Studio.`;
 
     if (navigator.share) {
       try {
@@ -1020,3 +1020,5 @@ export const ProductPage: React.FC<ProductPageProps> = ({
     </>
   );
 };
+
+
