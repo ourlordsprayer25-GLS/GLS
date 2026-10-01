@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../../types/store';
+import { saveRealtimeCategory, deleteRealtimeCategory } from '../../services/supabaseService';
 import { 
   Plus, 
   Search, 
@@ -57,6 +58,7 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({ categories, se
     
     if (editingCategory) {
       setCategories(prev => prev.map(c => c.id === editingCategory.id ? formData : c));
+      saveRealtimeCategory(formData);
       setSuccessMessage('Category successfully updated.');
     } else {
       if (categories.some(c => c.id === formData.id)) {
@@ -64,6 +66,7 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({ categories, se
         return;
       }
       setCategories(prev => [...prev, formData]);
+      saveRealtimeCategory(formData);
       setSuccessMessage('New category successfully created.');
     }
     setIsModalOpen(false);
@@ -72,6 +75,7 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({ categories, se
   };
 
   const handleDeleteCategory = (id: string) => {
+    deleteRealtimeCategory(id);
     setCategories(prev => prev.filter(c => c.id !== id));
     setDeleteConfirmationId(null);
     setSuccessMessage('Category successfully deleted.');
@@ -370,4 +374,5 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({ categories, se
     </div>
   );
 };
+
 

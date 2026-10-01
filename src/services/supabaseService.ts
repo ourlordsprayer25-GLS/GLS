@@ -706,3 +706,51 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
 
 
 
+
+
+export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
+  initSSE();
+  if (!(listeners as any).categories) (listeners as any).categories = new Set();
+  (listeners as any).categories.add(onUpdate);
+
+  localFetch('/api/sync/categories')
+    .then(r => r.json())
+    .then(serverCats => {
+      if (Array.isArray(serverCats)) onUpdate(serverCats);
+    })
+    .catch(() => {});
+
+  if (isSupabaseConfigured) {
+    supabase.from('categories').select('*').then(({ data, error }) => {
+      if (!error && data && data.length > 0) onUpdate(data);
+    });
+  }
+}
+
+export async function saveRealtimeCategory(category: any) {
+  try {
+    await localFetch('/api/sync/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(category),
+    });
+  } catch (err) {}
+  
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('categories').upsert(category);
+    } catch (err) {}
+  }
+}
+
+export async function deleteRealtimeCategory(categoryId: string) {
+  try {
+    await localFetch('/api/sync/categories/' + categoryId, { method: 'DELETE' });
+  } catch (err) {}
+  
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('categories').delete().eq('id', categoryId);
+    } catch (err) {}
+  }
+}

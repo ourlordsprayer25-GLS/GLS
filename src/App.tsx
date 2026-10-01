@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SectionType } from './components/SectionPage';
 import {
   subscribeToProducts,
+  subscribeToCategories,
   subscribeToOrders,
   subscribeToNotifications,
   subscribeToSettings,
@@ -137,12 +138,14 @@ function AppContent() {
     });
 
     const unsubProducts = subscribeToProducts(setProducts);
+    const unsubCats = subscribeToCategories(setCategories);
     const unsubOrders = subscribeToOrders(setOrders);
     const unsubNotifs = subscribeToNotifications(setNotifications);
     const unsubSettings = subscribeToSettings(DEFAULT_STORE_SETTINGS, setStoreSettings);
     const unsubUsers = subscribeToUsers(setUsers);
 
     return () => {
+      if (unsubCats) unsubCats();
       unsubProducts();
       unsubOrders();
       unsubNotifs();
@@ -911,6 +914,7 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 
 
 

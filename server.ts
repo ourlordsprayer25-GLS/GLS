@@ -234,6 +234,27 @@ async function startServer() {
     res.json({ success: true, id });
   });
 
+    // 4b. Categories Sync API
+  app.get('/api/sync/categories', (_req, res) => {
+    res.json(dbState.categories);
+  });
+  app.post('/api/sync/categories', (req, res) => {
+    const category = req.body;
+    if (!category || !category.id) return res.status(400).json({ error: 'Category with ID required' });
+    const idx = dbState.categories.findIndex(c => c.id === category.id);
+    if (idx >= 0) dbState.categories[idx] = category;
+    else dbState.categories.push(category);
+    saveDB();
+    broadcastSyncEvent('categories', dbState.categories);
+    res.json({ success: true, category });
+  });
+  app.delete('/api/sync/categories/:id', (req, res) => {
+    dbState.categories = dbState.categories.filter(c => c.id !== req.params.id);
+    saveDB();
+    broadcastSyncEvent('categories', dbState.categories);
+    res.json({ success: true });
+  });
+
   // 5. Orders Sync API (Cross-Device Real-Time)
   app.get('/api/sync/orders', (_req, res) => {
     res.json(dbState.orders);
@@ -567,3 +588,4 @@ async function startServer() {
 }
 
 startServer();
+
