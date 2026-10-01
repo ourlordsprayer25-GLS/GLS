@@ -94,6 +94,7 @@ export default async function handler(req, res) {
     <meta name="description" content="${description}">
 
     <!-- Open Graph (WhatsApp, Facebook, Telegram, iMessage) -->
+    <meta property="fb:app_id" content="${process.env.FB_APP_ID || '966242223397117'}">
     <meta property="og:site_name" content="${siteName}">
     <meta property="og:type" content="product">
     <meta property="og:title" content="${title}">
