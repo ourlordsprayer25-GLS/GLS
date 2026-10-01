@@ -114,10 +114,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const orderNumber = `GL-${Math.floor(1000 + Math.random() * 9000)}`;
       const trackingNumber = `DHL-${Math.floor(100000000 + Math.random() * 900000000)}`;
 
+      const getGuestId = () => {
+        let gid = localStorage.getItem('guest_id');
+        if (!gid) {
+          gid = `guest-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`;
+          localStorage.setItem('guest_id', gid);
+        }
+        return gid;
+      };
+
       const newOrder: Order = {
         id: `ord-${Date.now()}`,
         orderNumber,
-        customerId: user?.id,
+        customerId: user?.id || getGuestId(),
         date: new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         items: [...items],
         shippingAddress: address,

@@ -467,7 +467,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* 5. Connexion / S'inscrire or User Profile */}
             <div className="hidden sm:block relative" ref={userMenuRef}>
-              {user && user.id !== 'usr-guest' && (user.firstName || user.email) ? (
+              {user && user.id !== 'usr-guest' && !user.id.startsWith('guest-') && (user.firstName || user.email) ? (
                 <>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}

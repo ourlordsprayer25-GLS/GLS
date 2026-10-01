@@ -143,7 +143,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
           
           {/* User Profile or Sign In Card */}
           <div className="p-4 bg-slate-50 border-b border-slate-100">
-            {user && user.id !== 'usr-guest' && (user.firstName || user.email) ? (
+            {user && user.id !== 'usr-guest' && !user.id.startsWith('guest-') && (user.firstName || user.email) ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
@@ -414,7 +414,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
               <span className="font-medium text-xs sm:text-sm">{language === 'fr' ? 'Nous trouver' : 'Store Locator'}</span>
             </button>
 
-            {user && user.id !== 'usr-guest' && (user.firstName || user.email) && (
+            {user && user.id !== 'usr-guest' && !user.id.startsWith('guest-') && (user.firstName || user.email) && (
               <button
                 onClick={() => {
                   onClose();

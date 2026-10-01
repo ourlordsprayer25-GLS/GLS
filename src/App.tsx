@@ -33,6 +33,15 @@ import {
 } from './services/supabaseService';
 import defaultShopImg from './assets/images/workshop_textile_banner_1790121031293.jpg';
 
+const getGuestId = () => {
+  let gid = localStorage.getItem('guest_id');
+  if (!gid) {
+    gid = `guest-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`;
+    localStorage.setItem('guest_id', gid);
+  }
+  return gid;
+};
+
 const DEFAULT_STORE_SETTINGS: StoreSettings = {
   storeName: 'GLADYNS DEPARTMENT STORE',
   storeDescription: 'Curated Department House redefining modern living through audio precision, musical instruments, smart home appliances, and artisanal fashion.',
@@ -261,7 +270,7 @@ function AppContent() {
       });
     } else {
       // Mark as logged out if user was previously authenticated
-      if (user && user.id !== 'usr-guest') {
+      if (user && user.id !== 'usr-guest' && !user.id.startsWith('guest-')) {
         const loggedOutId = user.id;
         setUsers((prevUsers) =>
           prevUsers.map((u) => {
@@ -563,7 +572,7 @@ function AppContent() {
   const isWishlistInitRef = useRef(false);
 
   useEffect(() => {
-    const currentUid = user?.id || 'usr-guest';
+    const currentUid = user?.id || getGuestId();
     fetchRealtimeWishlist(currentUid).then((loadedIds) => {
       if (Array.isArray(loadedIds)) {
         setWishlistIds(loadedIds);
@@ -574,7 +583,7 @@ function AppContent() {
 
   useEffect(() => {
     if (!isWishlistInitRef.current) return;
-    const currentUid = user?.id || 'usr-guest';
+    const currentUid = user?.id || getGuestId();
     saveRealtimeWishlist(currentUid, wishlistIds);
   }, [wishlistIds, user?.id]);
 
@@ -583,7 +592,7 @@ function AppContent() {
   const isCartInitRef = useRef(false);
 
   useEffect(() => {
-    const currentUid = user?.id || 'usr-guest';
+    const currentUid = user?.id || getGuestId();
     fetchRealtimeCart(currentUid).then((loadedCart) => {
       if (Array.isArray(loadedCart)) {
         setCartItems(loadedCart);
@@ -594,7 +603,7 @@ function AppContent() {
 
   useEffect(() => {
     if (!isCartInitRef.current) return;
-    const currentUid = user?.id || 'usr-guest';
+    const currentUid = user?.id || getGuestId();
     saveRealtimeCart(currentUid, cartItems);
   }, [cartItems, user?.id]);
 
@@ -770,7 +779,7 @@ function AppContent() {
       read: false,
       type: 'order',
       linkTarget: newOrder.orderNumber,
-      customerId: user?.id,
+      customerId: user?.id || getGuestId(),
     };
     const adminNotification: StoreNotification = {
       id: `notif-${Date.now()}-a`,
@@ -851,7 +860,7 @@ function AppContent() {
 
   const customerNotifications = notifications.filter(n => {
     if (n.isAdminOnly) return false;
-    if (n.type === 'order' && n.customerId !== user?.id) return false;
+    if (n.type === 'order' && n.customerId !== (user?.id || getGuestId())) return false;
     return ['drop', 'promo', 'wishlist', 'order'].includes(n.type);
   });
   const adminNotifications = notifications.filter(n => n.isAdminOnly || n.type !== 'order' || !n.customerId);
