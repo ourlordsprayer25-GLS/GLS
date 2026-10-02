@@ -119,6 +119,11 @@ function AppContent() {
   const { user: authUser, login: authLogin, logout: authLogout } = useAuth();
   const { formatPrice } = useLanguageCurrency();
   
+  const navigate = useCallback((path: string) => {
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new Event('popstate'));
+  }, []);
+
   const [isInitialBootLoading, setIsInitialBootLoading] = useState(true);
     const [isReady, setIsReady] = useState(false);
   const [storeSettings, setStoreSettings] = useState<StoreSettings>(DEFAULT_STORE_SETTINGS);
@@ -671,11 +676,6 @@ function AppContent() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-
-  const navigate = (path: string) => {
-    window.history.pushState({}, '', path);
-    window.dispatchEvent(new Event('popstate'));
-  };
 
   const syncStateFromPath = useCallback(() => {
     const rawHash = window.location.pathname.replace(/^\/+/, '');
