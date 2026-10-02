@@ -37,12 +37,13 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
           title: cat.label,
           subtitle: cat.description || visualCat?.subtitle || 'Explore our curated collection',
           count: cat.badge || visualCat?.count || 'Curated Items',
-          image: cat.image || visualCat?.image || 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&q=80&w=1000',
+          image: cat.image || visualCat?.image || '',
           tag: cat.badge || visualCat?.tag || 'Discover'
         },
         categoryProducts
       };
-    });
+    })
+    .filter(c => c.categoryProducts.length > 0);
 
   if (activeCategories.length === 0) return null;
 

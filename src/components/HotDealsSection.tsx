@@ -50,6 +50,8 @@ export const HotDealsSection: React.FC<HotDealsSectionProps> = ({
     (p) => p.isHotDeal || (p.originalPrice && p.originalPrice > p.price)
   );
 
+  if (dealProducts.length === 0) return null;
+
   // Responsive items count detector
   useEffect(() => {
     const updateVisibleCount = () => {
