@@ -338,6 +338,7 @@ function AppContent() {
       badge: '/pwa-192x192.png',
       vibrate: [100, 50, 100],
       tag: 'gladyns-notif',
+      data: { url: '/#orders' },
       ...options,
     };
 
@@ -345,10 +346,18 @@ function AppContent() {
       navigator.serviceWorker.ready.then((registration) => {
         registration.showNotification(title, defaultOptions);
       }).catch(() => {
-        new Notification(title, defaultOptions);
+        const notif = new Notification(title, defaultOptions);
+        notif.onclick = () => {
+          window.focus();
+          setIsOrdersPageOpen(true);
+        };
       });
     } else {
-      new Notification(title, defaultOptions);
+      const notif = new Notification(title, defaultOptions);
+      notif.onclick = () => {
+        window.focus();
+        setIsOrdersPageOpen(true);
+      };
     }
   }, []);
 
