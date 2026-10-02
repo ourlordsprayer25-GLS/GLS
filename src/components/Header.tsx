@@ -302,8 +302,8 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer text-left"
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
-                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform shrink-0 border border-blue-900/20 bg-slate-950">
+                <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col leading-tight">
                 <span className="text-base sm:text-xl font-display font-extrabold tracking-tight text-blue-950 group-hover:text-blue-600 transition-colors">

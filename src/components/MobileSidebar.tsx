@@ -114,8 +114,8 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
         {/* Drawer Header */}
         <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
-              <Compass className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl overflow-hidden shadow-xs shrink-0 border border-blue-900/20 bg-slate-950">
+              <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <span className="text-sm font-display font-bold text-slate-950 block leading-tight">

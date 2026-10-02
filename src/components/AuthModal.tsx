@@ -100,9 +100,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="p-8 sm:p-10 space-y-5 text-center">
           
           {/* Branded Logo */}
-          <div className="space-y-1.5 pt-2">
-            <h1 className="text-3xl font-display font-medium tracking-widest text-zinc-950">GLADYNS</h1>
-            <p className="text-[10px] uppercase font-black tracking-widest text-zinc-400">Haute Joaillerie & Luxe</p>
+          <div className="space-y-2 pt-2 flex flex-col items-center">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border border-blue-900/30 bg-slate-950">
+              <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-display font-medium tracking-widest text-zinc-950">GLADYNS</h1>
+              <p className="text-[10px] uppercase font-black tracking-widest text-zinc-400 mt-0.5">Haute Joaillerie & Luxe</p>
+            </div>
           </div>
 
           {/* Segmented Auth Mode Switcher */}
