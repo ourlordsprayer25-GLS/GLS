@@ -9,13 +9,6 @@ import {
 } from 'lucide-react';
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
-import workshopImg from '../assets/images/general_department_hero_banner_1790694250421.jpg';
-import synthImg from '../assets/images/musical_analog_synthesizer_1790694264160.jpg';
-import robotVacuumImg from '../assets/images/smart_robot_vacuum_station_1790694287531.jpg';
-import woolTrenchImg from '../assets/images/wool_trench_coat_1790117159378.jpg';
-import leatherBagImg from '../assets/images/leather_weekend_bag_1790117170382.jpg';
-import audiophileHeadphonesImg from '../assets/images/audiophile_headphones_1790153788692.jpg';
-import smartEspressoImg from '../assets/images/smart_espresso_machine_1790153803517.jpg';
 
 interface CategoriesPageProps {
   products: Product[];
@@ -57,7 +50,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
   const heroSlides: Slide[] = [
     {
       id: 'cat-slide-1',
-      image: workshopImg,
+      image: '',
       badge: 'Multi-Department Catalog',
       title: 'Shop All Store Departments',
       subtitle: 'Browse all curated disciplines across Musical Instruments, Precision Electronics, Home Appliances, Apparel, and Tuscan Leather Carry.',
@@ -65,7 +58,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-musical',
-      image: synthImg,
+      image: '',
       badge: 'Musical Instruments & Studio',
       title: 'Polyphonic Synthesizers & Vinyl Hi-Fi',
       subtitle: 'Discrete 8-voice analog synthesizers, direct-drive turntables with carbon tonearms, and ribbon studio monitors.',
@@ -73,7 +66,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-appliances',
-      image: robotVacuumImg,
+      image: '',
       badge: 'Home Appliances & Living',
       title: 'Autonomous Living & Barista Craft',
       subtitle: 'LiDAR auto-empty robot vacuums, Italian dual-boiler espresso systems, and medical-grade HEPA 13 air purifiers.',
@@ -81,7 +74,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-electronics',
-      image: audiophileHeadphonesImg,
+      image: '',
       badge: 'Electronics & Audio',
       title: 'Planar Magnetic & Studio Tech',
       subtitle: 'High-res planar acoustic headphones, audiophile hi-fi components, and tactile machined studio gear.',
@@ -89,7 +82,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-2',
-      image: woolTrenchImg,
+      image: '',
       badge: 'Fashion & Tailoring',
       title: 'Architectural Cuts & Twill',
       subtitle: 'Double-faced Biella virgin wool overcoats and Japanese selvedge twill workwear jackets.',
@@ -97,7 +90,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-4',
-      image: leatherBagImg,
+      image: '',
       badge: 'Tuscan Leather Carry',
       title: 'Vegetable-Tanned Travel Bags',
       subtitle: 'Consortium-certified full-grain cowhide burnished with organic beeswax to develop rich patina.',

@@ -18,19 +18,6 @@ import { ProductCard } from './ProductCard';
 import { HotDealCard } from './HotDealCard';
 
 
-// Image imports
-import dealsBannerImg from '../assets/images/deals_editorial_banner_1790121007285.jpg';
-import newArrivalsBannerImg from '../assets/images/new_arrivals_banner_1790121019270.jpg';
-import heroBannerImg from '../assets/images/general_department_hero_banner_1790694250421.jpg';
-import synthImg from '../assets/images/musical_analog_synthesizer_1790694264160.jpg';
-import turntableImg from '../assets/images/musical_vinyl_turntable_1790694276533.jpg';
-import robotVacuumImg from '../assets/images/smart_robot_vacuum_station_1790694287531.jpg';
-import audiophileHeadphonesImg from '../assets/images/audiophile_headphones_1790153788692.jpg';
-import woolTrenchImg from '../assets/images/wool_trench_coat_1790117159378.jpg';
-import leatherBagImg from '../assets/images/leather_weekend_bag_1790117170382.jpg';
-import merinoKnitImg from '../assets/images/product_merino_knit_1790116576108.jpg';
-import choreCoatImg from '../assets/images/product_chore_coat_1790116559808.jpg';
-
 export type SectionType = 'hot-deals' | 'new-arrivals' | 'bestsellers' | 'categories' | 'collection';
 
 interface Slide {
@@ -84,7 +71,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'deal-slide-1',
-              image: dealsBannerImg,
+              image: '',
               badge: 'Archive Reductions',
               title: 'Seasonal Archive Vault',
               subtitle: 'Limited micro-batch pricing on tailored overcoats, raw selvedge twill, and knitwear.',
@@ -92,7 +79,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'deal-slide-2',
-              image: woolTrenchImg,
+              image: '',
               badge: 'Italian Double-Faced Wool',
               title: 'Architectural Trench & Overcoats',
               subtitle: 'Precision unlined split seams crafted with heritage wool mills in Biella, Italy.',
@@ -100,7 +87,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'deal-slide-3',
-              image: leatherBagImg,
+              image: '',
               badge: 'Tuscan Leather Carry',
               title: 'Hand-Burnished Cabin Weekenders',
               subtitle: 'Full-grain certified vegetable-tanned leather designed to patinate with age.',
@@ -117,7 +104,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'new-slide-1',
-              image: newArrivalsBannerImg,
+              image: '',
               badge: 'Autumn / Winter Release',
               title: 'New Season Additions',
               subtitle: 'Architectural discipline in virgin wool trousers, heavy twill coats, and cashmere.',
@@ -125,7 +112,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'new-slide-2',
-              image: heroBannerImg,
+              image: '',
               badge: 'Featured Collection',
               title: 'Structured Everyday Foundations',
               subtitle: 'Japanese selvedge twill with clean-finished bound seams and corozo hardware.',
@@ -133,7 +120,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'new-slide-3',
-              image: merinoKnitImg,
+              image: '',
               badge: 'Fine Gauge Knitwear',
               title: 'Tasmanian Merino Ribbed Knits',
               subtitle: '7-gauge fisherman rib engineered for thermoregulation and enduring shape.',
@@ -150,7 +137,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'best-slide-1',
-              image: heroBannerImg,
+              image: '',
               badge: 'Highest Rated',
               title: 'Community Favorites',
               subtitle: 'The definitive selection of pieces that have defined the GLADYNS aesthetic.',
@@ -158,7 +145,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'best-slide-2',
-              image: woolTrenchImg,
+              image: '',
               badge: 'Perennial Classic',
               title: 'The Wool Trench Coat',
               subtitle: 'Our most sought-after outerwear piece, crafted for longevity and silhouette.',
@@ -166,7 +153,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'best-slide-3',
-              image: choreCoatImg,
+              image: '',
               badge: 'Boutique Favorite',
               title: 'Structured Twill Chore Jacket',
               subtitle: 'A versatile foundation piece that continues to lead our seasonal requests.',
@@ -183,7 +170,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'cat-slide-1',
-              image: heroBannerImg,
+              image: '',
               badge: 'Multi-Department Showcase',
               title: 'All Store Departments',
               subtitle: 'Independent collections across Musical Instruments, Electronics & Audio, Home Appliances, and Apparel.',
@@ -191,7 +178,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'cat-slide-2',
-              image: synthImg,
+              image: '',
               badge: 'Musical Instruments & Studio',
               title: 'Polyphonic Synthesizers & Vinyl Hi-Fi',
               subtitle: 'Discrete analog oscillators, direct-drive turntables, and ribbon nearfield monitors.',
@@ -199,7 +186,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'cat-slide-3',
-              image: robotVacuumImg,
+              image: '',
               badge: 'Home Appliances & Living',
               title: 'Smart Home Automation & Appliances',
               subtitle: 'LiDAR auto-empty robot vacuum stations and dual-boiler commercial-grade espresso machines.',
@@ -207,7 +194,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'cat-slide-4',
-              image: audiophileHeadphonesImg,
+              image: '',
               badge: 'Electronics & Audio',
               title: 'Planar Magnetic & Studio Tech',
               subtitle: 'Studio headphones, high-resolution audio processing, and acoustic monitors.',
@@ -225,7 +212,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'col-slide-1',
-              image: heroBannerImg,
+              image: '',
               badge: 'The Complete Archive',
               title: 'Enduring Wardrobe Architecture',
               subtitle: 'Every object is designed with permanent materials, zero trends, and lifetime repairs.',
@@ -233,7 +220,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'col-slide-2',
-              image: dealsBannerImg,
+              image: '',
               badge: 'Exclusive Network',
               title: 'Artisanal Portuguese & Italian Craft',
               subtitle: 'Transparent supply chains and carbon-neutral direct distribution.',
@@ -241,7 +228,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'col-slide-3',
-              image: choreCoatImg,
+              image: '',
               badge: 'Iconic Pieces',
               title: 'Japanese Twill Chore Jacket',
               subtitle: 'Custom-milled 14.5oz selvedge twill with functional internal pockets.',

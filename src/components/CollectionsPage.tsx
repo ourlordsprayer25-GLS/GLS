@@ -10,12 +10,6 @@ import {
 } from 'lucide-react';
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
-import workshopImg from '../assets/images/workshop_textile_banner_1790121031293.jpg';
-import woolTrenchImg from '../assets/images/wool_trench_coat_1790117159378.jpg';
-import leatherBagImg from '../assets/images/leather_weekend_bag_1790117170382.jpg';
-import heroImg from '../assets/images/hero_editorial_banner_1790116547626.jpg';
-import audiophileHeadphonesImg from '../assets/images/audiophile_headphones_1790153788692.jpg';
-import smartEspressoImg from '../assets/images/smart_espresso_machine_1790153803517.jpg';
 
 interface CollectionsPageProps {
   products: Product[];
@@ -48,7 +42,7 @@ const CAPSULES: CollectionCapsule[] = [
     season: 'Precision Sound & Gear',
     description:
       'CNC-machined aerospace aluminum, American walnut acoustic chambers, and ultra-thin planar diaphragms engineered in Stockholm.',
-    image: audiophileHeadphonesImg,
+    image: '',
     categoryKeys: ['electronics', 'Electronics & Audio'],
   },
   {
@@ -59,7 +53,7 @@ const CAPSULES: CollectionCapsule[] = [
     season: 'Smart Modern Living',
     description:
       'Micro-metered PID espresso machines from Milan, medical-grade H14 Scandinavian air purifiers, and Japanese induction gooseneck kettles.',
-    image: smartEspressoImg,
+    image: '',
     categoryKeys: ['appliances', 'Home Appliances'],
   },
   {
@@ -70,7 +64,7 @@ const CAPSULES: CollectionCapsule[] = [
     season: 'Autumn / Winter Archive',
     description:
       'Unlined Japanese selvedge twill and double-faced Biella virgin wool engineered for seamless shoulder movement without synthetic stiffeners.',
-    image: woolTrenchImg,
+    image: '',
     categoryKeys: ['outerwear', 'Coats', 'Apparel'],
   },
   {
@@ -81,7 +75,7 @@ const CAPSULES: CollectionCapsule[] = [
     season: 'Permanent Heritage',
     description:
       'Spun from 19.5-micron fine merino fleece in Northern Italy, then knitted on 7-gauge Shima Seiki machines in our Porto workshop.',
-    image: workshopImg,
+    image: '',
     categoryKeys: ['knitwear'],
   },
   {
@@ -92,7 +86,7 @@ const CAPSULES: CollectionCapsule[] = [
     season: 'Artisanal Carry Goods',
     description:
       'Consortium-certified full-grain leather burnished by hand with organic beeswax and solid brass hardware in Florence.',
-    image: leatherBagImg,
+    image: '',
     categoryKeys: ['leather-goods', 'Bags'],
   },
   {
@@ -103,7 +97,7 @@ const CAPSULES: CollectionCapsule[] = [
     season: 'Limited Consortium',
     description:
       'Technical court trainers in buttery nappa calfskin, heavy double-knit studio track jackets, and Millerain staywax caps.',
-    image: heroImg,
+    image: '',
     categoryKeys: ['Activewear', 'Accessories', 'essentials'],
   },
 ];
@@ -187,7 +181,7 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
         <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 text-white p-8 sm:p-12 md:p-16 shadow-lg">
           <div className="absolute inset-0 z-0 opacity-35">
             <img
-              src={workshopImg}
+              src=""
               alt="GLADYNS Workshop"
               className="w-full h-full object-cover object-center"
             />

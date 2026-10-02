@@ -65,13 +65,15 @@ CREATE TABLE IF NOT EXISTS public.products (
   "madeIn" text,
   "sku" text,
   "barcode" text,
-  "stockLevel" integer DEFAULT 0
+  "stockLevel" integer DEFAULT 0,
+  "created_at" timestamp with time zone DEFAULT now()
 );
 
 -- 3. ORDERS TABLE
 CREATE TABLE IF NOT EXISTS public.orders (
   "id" text PRIMARY KEY,
   "orderNumber" text,
+  "customerId" text,
   "date" text,
   "items" jsonb DEFAULT '[]'::jsonb,
   "shippingAddress" jsonb DEFAULT '{}'::jsonb,
@@ -101,7 +103,10 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   "timestamp" numeric,
   "read" boolean DEFAULT false,
   "type" text,
-  "linkTarget" text
+  "linkTarget" text,
+  "customerId" text,
+  "isAdminOnly" boolean DEFAULT false,
+  "created_at" timestamp with time zone DEFAULT now()
 );
 
 -- 5. SETTINGS TABLE
@@ -111,15 +116,7 @@ CREATE TABLE IF NOT EXISTS public.settings (
   "updated_at" timestamp with time zone DEFAULT now()
 );
 
--- 6. REALTIME REPLICATION FIX (Optional but recommended for React Realtime)
--- This ensures Supabase emits changes over websockets to your clients
-ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.users;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.settings;
-
--- 7. CATEGORIES TABLE
+-- 6. CATEGORIES TABLE
 CREATE TABLE IF NOT EXISTS public.categories (
   "id" text PRIMARY KEY,
   "label" text,
@@ -128,11 +125,34 @@ CREATE TABLE IF NOT EXISTS public.categories (
   "badge" text
 );
 
--- 8. BRANDS TABLE
+-- 7. BRANDS TABLE
 CREATE TABLE IF NOT EXISTS public.brands (
   "name" text PRIMARY KEY,
   "origin" text
 );
 
-ALTER PUBLICATION supabase_realtime ADD TABLE public.categories;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.brands;
+-- 8. SCHEMA MIGRATION / ALTER COLUMNS FOR EXISTING TABLES
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS "customerId" text;
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS "customerId" text;
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS "isAdminOnly" boolean DEFAULT false;
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now();
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now();
+
+-- 9. DISABLE ROW LEVEL SECURITY (RLS) FOR UNRESTRICTED ANONYMOUS ACCESS
+ALTER TABLE IF EXISTS public.products DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.orders DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.notifications DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.brands DISABLE ROW LEVEL SECURITY;
+
+-- 10. REALTIME REPLICATION SETUP (Safely ignored if already member)
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.products; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.orders; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.users; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.settings; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.categories; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.brands; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+

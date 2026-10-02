@@ -3,9 +3,6 @@ import { ChevronLeft, ChevronRight, ArrowUpRight, Sparkles, Flame, ShoppingBag, 
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { Product, StoreSettings } from '../types/store';
 
-// Fallback hero banner image (bundled asset)
-import heroBannerImg from '../assets/images/general_department_hero_banner_1790694250421.jpg';
-
 interface HeroSectionProps {
   onShopFeatured: () => void;
   onExploreCollection: () => void;
@@ -30,7 +27,7 @@ const buildProductSlides = (
 
   return pool.map(product => ({
     id: product.id,
-    image: product.primaryImage || (product.images?.[0]?.url) || heroBannerImg,
+    image: product.primaryImage || (product.images?.[0]?.url) || '',
     badge: product.tag || product.categoryLabel || 'New Arrival',
     title: product.name,
     subtitle: product.subtitle || product.tagline || product.description?.slice(0, 120) || '',
@@ -49,9 +46,7 @@ const buildFallbackSlides = (
   onExploreCollection: () => void,
   onOpenSection?: (s: any, cat?: string) => void
 ) => {
-  const heroImg = storeSettings?.heroContent?.image?.startsWith('http')
-    ? storeSettings.heroContent.image
-    : heroBannerImg;
+  const heroImg = storeSettings?.heroContent?.image || '';
 
   return [{
     id: 'fallback-hero',
@@ -139,7 +134,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               src={slide.image}
               alt={slide.title}
               className="w-full h-full object-cover object-center"
-              onError={(e) => { (e.target as HTMLImageElement).src = heroBannerImg; }}
             />
             {/* Gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/95 via-zinc-950/50 to-zinc-950/20" />

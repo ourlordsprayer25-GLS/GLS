@@ -33,8 +33,6 @@ import {
   saveRealtimeWishlist,
   fetchRealtimeUserProfile,
 } from './services/supabaseService';
-import defaultShopImg from './assets/images/workshop_textile_banner_1790121031293.jpg';
-
 const getGuestId = () => {
   let gid = localStorage.getItem('guest_id');
   if (!gid) {
@@ -61,8 +59,8 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
     title: 'About GLADYNS Department Store',
     subtitle: 'Curated Multi-Department House & Living Standards',
     content: 'GLADYNS is a modern multi-department store curating premium electronics, studio musical instruments, autonomous smart home appliances, and timeless wardrobe foundations. Every department represents uncompromising engineering, sustainable materials, and rigorous functional design.',
-    image: defaultShopImg,
-    secondaryImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
+    image: '',
+    secondaryImage: '',
     foundedYear: '2018',
     atelierLocation: 'Porto, Portugal & Florence, Italy',
     missionStatement: 'Pure Engineering, Acoustic Precision, and Enduring Quality Across Every Department.',
@@ -95,7 +93,7 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
     title: 'ELECTRONICS, MUSIC, APPLIANCES & ATELIER',
     subtitle: 'Curated studio analog synthesizers, planar acoustics, smart living tech, and timeless apparel.',
     buttonText: 'EXPLORE CATALOG',
-    image: defaultShopImg,
+    image: '',
   },
   moreToLoveSection: {
     enabled: true,

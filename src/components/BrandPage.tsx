@@ -10,10 +10,6 @@ import {
 } from 'lucide-react';
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
-import workshopImg from '../assets/images/workshop_textile_banner_1790121031293.jpg';
-import woolTrenchImg from '../assets/images/wool_trench_coat_1790117159378.jpg';
-import leatherBagImg from '../assets/images/leather_weekend_bag_1790117170382.jpg';
-import heroImg from '../assets/images/hero_editorial_banner_1790116547626.jpg';
 
 interface BrandPageProps {
   products: Product[];
@@ -57,7 +53,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
   const heroSlides: Slide[] = [
     {
       id: 'brand-slide-1',
-      image: heroImg,
+      image: '',
       badge: 'Brand Directory',
       title: 'The Maison & Brand Archive',
       subtitle: 'Complete alphabetical directory of monitored partner studios and heritage brands, from Adidas Originals to Tuscan leather houses.',
@@ -65,7 +61,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
     },
     {
       id: 'brand-slide-2',
-      image: workshopImg,
+      image: '',
       badge: 'European Studio Guild',
       title: 'Direct Monitored Craft',
       subtitle: 'Permanent contracts with independent workshops across Porto, Biella, Kojima, and Tuscany with 100% material traceability.',
@@ -73,7 +69,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
     },
     {
       id: 'brand-slide-3',
-      image: woolTrenchImg,
+      image: '',
       badge: 'Material Sovereignty',
       title: 'Zero Synthetic Fillers',
       subtitle: 'Unlined split-face garments without synthetic fusible linings or microplastics that return harmoniously to the earth.',
@@ -81,7 +77,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
     },
     {
       id: 'brand-slide-4',
-      image: leatherBagImg,
+      image: '',
       badge: 'Lifetime Covenant',
       title: 'Complimentary Product Support',
       subtitle: 'Every GLADYNS object is backed by dynamic technical support and lifetime product restoration.',

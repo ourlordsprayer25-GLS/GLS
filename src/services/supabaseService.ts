@@ -190,9 +190,22 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
     supabase
       .from('products')
       .select('*')
-      .then(({ data, error }) => {
-        if (!error && data) { wrappedOnUpdate(data as Product[]); hasLoaded = true; }
-        else if (error && !hasLoaded) wrappedOnUpdate([]);
+      .then(async ({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          wrappedOnUpdate(data as Product[]);
+          hasLoaded = true;
+        } else if (!error && data && data.length === 0) {
+          // Supabase products table is empty — seed default catalog
+          wrappedOnUpdate(INITIAL_PRODUCTS);
+          hasLoaded = true;
+          try {
+            await supabase.from('products').upsert(INITIAL_PRODUCTS);
+          } catch (e) {
+            console.warn('Auto-seed products to Supabase failed:', e);
+          }
+        } else if (error && !hasLoaded) {
+          wrappedOnUpdate(INITIAL_PRODUCTS);
+        }
         clearTimeout(hardTimeout);
         callReady();
       });
@@ -201,7 +214,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       .channel('products_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
         const { data } = await supabase.from('products').select('*');
-        if (data) {
+        if (data && data.length > 0) {
           wrappedOnUpdate(data as Product[]);
         }
       })
@@ -225,7 +238,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
   localFetch('/api/sync/orders')
     .then(r => r.json())
     .then(serverOrders => {
-      if (Array.isArray(serverOrders)) {
+      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
         onUpdate(serverOrders);
       } else {
         onUpdate(INITIAL_ORDERS);
@@ -242,6 +255,11 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
       .then(({ data, error }) => {
         if (!error && data && data.length > 0) {
           onUpdate(data as Order[]);
+        } else if (!error && data && data.length === 0) {
+          onUpdate(INITIAL_ORDERS);
+        } else if (error) {
+          console.warn('Supabase fetch orders error:', error.message);
+          onUpdate(INITIAL_ORDERS);
         }
       });
 
@@ -414,7 +432,10 @@ export async function addRealtimeOrder(order: Order) {
   // Sync to Supabase
   if (isSupabaseConfigured) {
     try {
-      await supabase.from('orders').upsert(order);
+      const { error } = await supabase.from('orders').upsert(order);
+      if (error) {
+        console.error('Supabase add order error:', error.message);
+      }
     } catch (err) {
       console.error('Supabase add order error:', err);
     }
@@ -472,7 +493,10 @@ export async function saveRealtimeProduct(product: Product) {
 
   if (isSupabaseConfigured) {
     try {
-      await supabase.from('products').upsert(product);
+      const { error } = await supabase.from('products').upsert(product);
+      if (error) {
+        console.error('Supabase save product error:', error.message);
+      }
     } catch (err) {
       console.error('Supabase save product error:', err);
     }
@@ -593,7 +617,10 @@ export async function addRealtimeNotification(notification: StoreNotification) {
 
   if (isSupabaseConfigured) {
     try {
-      await supabase.from('notifications').upsert(notification);
+      const { error } = await supabase.from('notifications').upsert(notification);
+      if (error) {
+        console.error('Supabase add notification error:', error.message);
+      }
     } catch (err) {
       console.error('Supabase add notification error:', err);
     }

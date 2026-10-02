@@ -16,7 +16,6 @@ import {
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { WHATSAPP_FORMATTED, getWhatsAppLink, WhatsAppIcon } from './WhatsAppWidget';
 import { StoreSettings } from '../types/store';
-import defaultShopImg from '../assets/images/workshop_textile_banner_1790121031293.jpg';
 
 interface AboutUsPageProps {
   onBackToShop: () => void;
@@ -167,7 +166,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
             {/* Shop Image */}
             <div className="lg:col-span-7 relative min-h-[340px] lg:min-h-full overflow-hidden bg-slate-950">
               <img
-                src={storeSettings?.aboutUs?.image || defaultShopImg}
+                src={storeSettings?.aboutUs?.image || ''}
                 alt={`${storeName} Official Boutique & Flagship`}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />

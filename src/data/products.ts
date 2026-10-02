@@ -1,25 +1,5 @@
 import { Product } from '../types/store';
 
-// Image references
-import choreCoatImg from '../assets/images/product_chore_coat_1790116559808.jpg';
-import merinoKnitImg from '../assets/images/product_merino_knit_1790116576108.jpg';
-import leatherToteImg from '../assets/images/product_leather_tote_1790116587937.jpg';
-import woolTrenchImg from '../assets/images/wool_trench_coat_1790117159378.jpg';
-import leatherWeekenderImg from '../assets/images/leather_weekend_bag_1790117170382.jpg';
-import audiophileHeadphonesImg from '../assets/images/audiophile_headphones_1790153788692.jpg';
-import smartEspressoImg from '../assets/images/smart_espresso_machine_1790153803517.jpg';
-import smartAirPurifierImg from '../assets/images/smart_air_purifier_1790153815905.jpg';
-import inductionKettleImg from '../assets/images/induction_kettle_1790153828614.jpg';
-
-// Newly generated multi-department high-fidelity assets
-import heroBannerImg from '../assets/images/general_department_hero_banner_1790694250421.jpg';
-import synthImg from '../assets/images/musical_analog_synthesizer_1790694264160.jpg';
-import turntableImg from '../assets/images/musical_vinyl_turntable_1790694276533.jpg';
-import robotVacuumImg from '../assets/images/smart_robot_vacuum_station_1790694287531.jpg';
-import studioMonitorsImg from '../assets/images/studio_monitor_speakers_1790694302203.jpg';
-
-export const HERO_BANNER_IMAGE = heroBannerImg;
-
 export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'prod-analog-synth',
@@ -43,8 +23,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: 'Brushed Aluminum Chassis, Solid Walnut',
     care: 'Keep in dry studio environment; clean with lint-free microfiber',
-    primaryImage: synthImg,
-    images: [{ url: synthImg, alt: 'Polyphonic Analog Synthesizer' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'walnut-silver', name: 'Walnut & Silver', colorHex: '#451a03', inStock: true }],
     sizes: [{ name: '61-Key', inStock: true }],
     rating: 5.0,
@@ -75,8 +55,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: 'Solid Walnut Plinth, Carbon Fiber, Anodized Aluminum',
     care: 'Dust gently with antistatic brush',
-    primaryImage: turntableImg,
-    images: [{ url: turntableImg, alt: 'Direct-Drive Audiophile Turntable' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'walnut-gold', name: 'Walnut Gold', colorHex: '#78350f', inStock: true }],
     sizes: [{ name: 'Standard', inStock: true }],
     rating: 4.9,
@@ -107,8 +87,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: 'Aerospace Magnesium, Fine Italian Leather',
     care: 'Wipe with microfiber cloth',
-    primaryImage: audiophileHeadphonesImg,
-    images: [{ url: audiophileHeadphonesImg, alt: 'Planar Magnetic Studio Headphones' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'onyx', name: 'Onyx Black', colorHex: '#18181b', inStock: true }],
     sizes: [{ name: 'One Size', inStock: true }],
     rating: 5.0,
@@ -139,8 +119,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: 'Birch Plywood Enclosure, Matte Black Acoustic Baffle',
     care: 'Keep away from direct heat sources',
-    primaryImage: studioMonitorsImg,
-    images: [{ url: studioMonitorsImg, alt: 'Active Ribbon Studio Monitors' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'birch-black', name: 'Birch & Matte Black', colorHex: '#27272a', inStock: true }],
     sizes: [{ name: 'Pair', inStock: true }],
     rating: 4.9,
@@ -171,8 +151,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: '304 Mirror Polished Stainless Steel, Walnut Wood',
     care: 'Regular backflushing and descaling recommended',
-    primaryImage: smartEspressoImg,
-    images: [{ url: smartEspressoImg, alt: 'Dual-Boiler Espresso Machine' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'silver', name: 'Mirror Stainless', colorHex: '#d4d4d8', inStock: true }],
     sizes: [{ name: 'Standard', inStock: true }],
     rating: 4.9,
@@ -203,8 +183,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: 'Anodized Aluminum Cylindrical Housing, Recycled ABS',
     care: 'Replace filter every 6-12 months',
-    primaryImage: smartAirPurifierImg,
-    images: [{ url: smartAirPurifierImg, alt: 'HEPA 13 Smart Air Purifier' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'graphite', name: 'Space Gray', colorHex: '#3f3f46', inStock: true }],
     sizes: [{ name: 'Standard (Up to 1200 sq ft)', inStock: true }],
     rating: 4.8,
@@ -235,8 +215,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: 'Matte Graphite Composite, Brushed Bronze Accents',
     care: 'Empty dirty water tank weekly',
-    primaryImage: robotVacuumImg,
-    images: [{ url: robotVacuumImg, alt: 'LiDAR Smart Robot Vacuum & Mop Station' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'graphite-bronze', name: 'Matte Graphite', colorHex: '#27272a', inStock: true }],
     sizes: [{ name: 'Full Station Kit', inStock: true }],
     rating: 4.9,
@@ -267,8 +247,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     materials: '304 Stainless Steel, Matte Powdercoat, Walnut Accents',
     care: 'Hand wash exterior; descale with vinegar periodically',
-    primaryImage: inductionKettleImg,
-    images: [{ url: inductionKettleImg, alt: 'Precision Gooseneck Smart Kettle' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'matte-black', name: 'Matte Black', colorHex: '#18181b', inStock: true }],
     sizes: [{ name: '0.9 Liter', inStock: true }],
     rating: 4.9,
@@ -293,8 +273,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     details: ['14.5oz Japanese Selvedge Twill', 'Reinforced internal pockets', 'Corozo nut hardware', 'Triple-needle stitched seams'],
     materials: '100% Organic Cotton',
     care: 'Dry clean or cold gentle wash, hang dry',
-    primaryImage: choreCoatImg,
-    images: [{ url: choreCoatImg, alt: 'Japanese Selvedge Twill Chore Coat' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'navy', name: 'Navy', colorHex: '#1e1b4b', inStock: true }],
     sizes: [{ name: 'S', inStock: true }, { name: 'M', inStock: true }, { name: 'L', inStock: true }, { name: 'XL', inStock: true }],
     rating: 4.9,
@@ -319,8 +299,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     details: ['Double-faced Italian virgin wool', 'Split-seam construction', 'Adjustable storm flaps', 'Concealed button placket'],
     materials: '100% Virgin Wool',
     care: 'Professional dry clean only',
-    primaryImage: woolTrenchImg,
-    images: [{ url: woolTrenchImg, alt: 'Architectural Wool Overcoat' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'camel', name: 'Camel', colorHex: '#c19a6b', inStock: true }],
     sizes: [{ name: 'S', inStock: true }, { name: 'M', inStock: true }, { name: 'L', inStock: true }],
     rating: 4.8,
@@ -345,8 +325,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     details: ['7-gauge Fisherman Rib', 'Tasmanian Merino Wool', 'RWS Certified', 'Hand-linked seams'],
     materials: '100% Merino Wool',
     care: 'Hand wash cold, dry flat',
-    primaryImage: merinoKnitImg,
-    images: [{ url: merinoKnitImg, alt: 'Fisherman Merino Wool Knit' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'olive', name: 'Deep Olive', colorHex: '#3f6212', inStock: true }],
     sizes: [{ name: 'S', inStock: true }, { name: 'M', inStock: true }, { name: 'L', inStock: true }],
     rating: 4.7,
@@ -371,8 +351,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     details: ['Full-grain Tuscan Leather', 'Solid brass hardware', 'Reinforced base with studs', 'Internal laptop sleeve and passport slot'],
     materials: 'Vegetable-Tanned Full Grain Leather',
     care: 'Condition once a season with beeswax balm',
-    primaryImage: leatherWeekenderImg,
-    images: [{ url: leatherWeekenderImg, alt: 'Tuscan Leather Weekender Bag' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'mahogany', name: 'Mahogany', colorHex: '#451a03', inStock: true }],
     sizes: [{ name: 'One Size (45L)', inStock: true }],
     rating: 4.9,
@@ -397,8 +377,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     details: ['Bridle Full-Grain Leather', 'Magnetic German Fidlock closure', 'Padded 15-inch laptop sleeve', 'Reinforced dual shoulder straps'],
     materials: 'Full-Grain Bridle Leather',
     care: 'Wipe with damp cloth',
-    primaryImage: leatherToteImg,
-    images: [{ url: leatherToteImg, alt: 'Architectural Daily Leather Tote' }],
+    primaryImage: '',
+    images: [],
     colors: [{ id: 'black', name: 'Matte Black', colorHex: '#18181b', inStock: true }],
     sizes: [{ name: 'One Size', inStock: true }],
     rating: 4.8,
@@ -433,7 +413,7 @@ export const VISUAL_CATEGORIES: CategoryCardData[] = [
     title: 'Electronics & Audio',
     subtitle: 'Planar magnetic headphones, ribbon studio monitors & audiophile gear',
     count: 'Curated Audio',
-    image: audiophileHeadphonesImg,
+    image: '',
     tag: 'Acoustic Precision'
   },
   {
@@ -441,7 +421,7 @@ export const VISUAL_CATEGORIES: CategoryCardData[] = [
     title: 'Musical Instruments & Studio',
     subtitle: 'Polyphonic analog synthesizers, direct-drive turntables & vinyl decks',
     count: 'Studio Instruments',
-    image: synthImg,
+    image: '',
     tag: 'Sound Design'
   },
   {
@@ -449,7 +429,7 @@ export const VISUAL_CATEGORIES: CategoryCardData[] = [
     title: 'Home Appliances & Living',
     subtitle: 'Dual-boiler espresso machines, smart HEPA purifiers & robot vacuums',
     count: 'Smart Living',
-    image: smartEspressoImg,
+    image: '',
     tag: 'Craft Living'
   },
   {
@@ -457,7 +437,7 @@ export const VISUAL_CATEGORIES: CategoryCardData[] = [
     title: 'Fashion & Apparel',
     subtitle: 'Japanese selvedge twill chore coats & tailored virgin wool overcoats',
     count: 'Wardrobe Editions',
-    image: choreCoatImg,
+    image: '',
     tag: 'Artisanal Tailoring'
   },
   {
@@ -465,7 +445,7 @@ export const VISUAL_CATEGORIES: CategoryCardData[] = [
     title: 'Leather Goods & Accessories',
     subtitle: 'Tuscan vegetable-tanned leather travel weekenders & daily totes',
     count: 'Heritage Carry',
-    image: leatherWeekenderImg,
+    image: '',
     tag: 'Hand-Burnished'
   }
 ];

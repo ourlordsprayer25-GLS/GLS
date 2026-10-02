@@ -14,7 +14,6 @@ import {
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { getWhatsAppLink, WhatsAppIcon } from './WhatsAppWidget';
 import { StoreSettings } from '../types/store';
-import defaultShopImg from '../assets/images/workshop_textile_banner_1790121031293.jpg';
 
 interface StoreLocatorPageProps {
   onBackToShop: () => void;
@@ -125,7 +124,7 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
             {/* Shop Image */}
             <div className="lg:col-span-6 relative min-h-[280px] lg:min-h-full overflow-hidden bg-slate-950">
               <img
-                src={storeSettings?.aboutUs?.image || defaultShopImg}
+                src={storeSettings?.aboutUs?.image || ''}
                 alt={`${storeName} Flagship Boutique`}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />

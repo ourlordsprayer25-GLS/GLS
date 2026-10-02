@@ -28,7 +28,7 @@ import {
   Store,
   MessageSquare
 } from 'lucide-react';
-import defaultShopImg from '../../assets/images/workshop_textile_banner_1790121031293.jpg';
+const defaultShopImg = '';
 import { saveRealtimeSettings } from '../../services/supabaseService';
 
 interface AdminSettingsProps {
