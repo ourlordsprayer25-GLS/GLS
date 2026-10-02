@@ -461,6 +461,7 @@ function AppContent() {
           read: false,
           type: 'order',
           linkTarget: order.orderNumber,
+          customerId: order.customerId,
         };
 
         // Prepend the transition notification
@@ -843,16 +844,36 @@ function AppContent() {
   };
 
   const handleCancelOrder = (orderId: string, reason: string) => {
+    const targetOrder = orders.find((ord) => ord.id === orderId);
     setOrders((prev) => prev.map((ord) => ord.id === orderId ? { ...ord, status: 'cancelled', cancelledAt: new Date().toLocaleDateString(), cancelReason: reason } : ord));
     updateRealtimeOrderStatus(orderId, 'cancelled');
-    const cancelNotif: StoreNotification = { id: `notif-cancel-${Date.now()}`, title: `Order Cancelled`, message: `Order successfully cancelled. Refund processed.`, timestamp: Date.now(), read: false, type: 'order' };
+    const cancelNotif: StoreNotification = {
+      id: `notif-cancel-${Date.now()}`,
+      title: `Order Cancelled`,
+      message: `Order successfully cancelled. Refund processed.`,
+      timestamp: Date.now(),
+      read: false,
+      type: 'order',
+      linkTarget: targetOrder?.orderNumber,
+      customerId: targetOrder?.customerId,
+    };
     setNotifications((prev) => [cancelNotif, ...prev]);
     addRealtimeNotification(cancelNotif);
   };
 
   const handleRequestReturn = (orderId: string) => {
+    const targetOrder = orders.find((ord) => ord.id === orderId);
     setOrders((prev) => prev.map((ord) => ord.id === orderId ? { ...ord, returnRequested: true } : ord));
-    const returnNotif: StoreNotification = { id: `notif-return-${Date.now()}`, title: 'Return Label Dispatched', message: `Prepaid return authorization sent to your email.`, timestamp: Date.now(), read: false, type: 'order' };
+    const returnNotif: StoreNotification = {
+      id: `notif-return-${Date.now()}`,
+      title: 'Return Label Dispatched',
+      message: `Prepaid return authorization sent to your email.`,
+      timestamp: Date.now(),
+      read: false,
+      type: 'order',
+      linkTarget: targetOrder?.orderNumber,
+      customerId: targetOrder?.customerId,
+    };
     setNotifications((prev) => [returnNotif, ...prev]);
     addRealtimeNotification(returnNotif);
   };
