@@ -32,7 +32,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   if (!isOpen) return null;
 
   const filteredNotifications = notifications.filter(
-    (n) => filter === 'all' || n.type === filter
+    (n) => filter === 'all' || n.type === filter || (filter === 'drop' && (n.type === 'product' || n.type === 'drop'))
   );
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -42,6 +42,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       case 'order':
         return <Package className="w-4 h-4 text-blue-600" />;
       case 'drop':
+      case 'product':
         return <Sparkles className="w-4 h-4 text-amber-600" />;
       case 'restock':
         return <RefreshCw className="w-4 h-4 text-emerald-600" />;
@@ -146,7 +147,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
               (() => {
                 // Pre-filter the notifications into their respective scannable groups
                 const ordersGroup = filteredNotifications.filter(n => n.type === 'order');
-                const promosGroup = filteredNotifications.filter(n => ['drop', 'promo', 'restock'].includes(n.type));
+                const promosGroup = filteredNotifications.filter(n => ['drop', 'promo', 'restock', 'product'].includes(n.type));
                 const accountGroup = filteredNotifications.filter(n => n.type === 'wishlist');
 
                 const groups = [

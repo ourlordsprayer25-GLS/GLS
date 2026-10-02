@@ -494,8 +494,8 @@ function AppContent() {
     });
   }, [orders]);
 
-  // Ref to track known products to detect NEW ARRIVALS
-  const knownProductIdsRef = useRef<Set<string> | null>(null);
+  // Ref & localStorage tracking for already alerted product IDs so page refresh NEVER re-triggers arrival alerts
+  const alertedProductIdsRef = useRef<Set<string> | null>(null);
 
   // Ref to track products already alerted for low stock to avoid duplicate spam
   const lowStockAlertedRef = useRef<Record<string, boolean>>({});
@@ -503,20 +503,35 @@ function AppContent() {
   useEffect(() => {
     if (!products || products.length === 0) return;
 
-    // Initialize known product IDs on first load
-    if (knownProductIdsRef.current === null) {
-      knownProductIdsRef.current = new Set(products.map((p) => p.id));
+    if (alertedProductIdsRef.current === null) {
+      alertedProductIdsRef.current = new Set();
+      try {
+        const saved = localStorage.getItem('gls_alerted_product_ids');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) parsed.forEach((id: string) => alertedProductIdsRef.current?.add(id));
+        }
+      } catch (e) {}
+
+      // On first boot, mark all existing catalog products as alerted so refreshing NEVER re-fires toasts
+      products.forEach((p) => alertedProductIdsRef.current?.add(p.id));
+      try {
+        localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alertedProductIdsRef.current)));
+      } catch (e) {}
     } else {
-      // Detect newly added products
+      // Detect newly added products during live session
       products.forEach((product) => {
-        if (!knownProductIdsRef.current?.has(product.id)) {
-          knownProductIdsRef.current?.add(product.id);
+        if (!alertedProductIdsRef.current?.has(product.id)) {
+          alertedProductIdsRef.current?.add(product.id);
+          try {
+            localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alertedProductIdsRef.current)));
+          } catch (e) {}
 
           const title = `✨ New Arrival: ${product.name}`;
           const message = `Discover our newest addition: "${product.name}" is now available in store for ${formatPrice(product.price)}.`;
 
           const arrivalNotif: StoreNotification = {
-            id: `notif-new-product-${product.id}-${Date.now()}`,
+            id: `notif-new-product-${product.id}`,
             title,
             message,
             timestamp: Date.now(),
@@ -917,11 +932,32 @@ function AppContent() {
     closeAllMainViews();
   };
 
-  const customerNotifications = notifications.filter(n => {
-    if (n.isAdminOnly) return false;
-    if (n.type === 'order' && n.customerId !== (user?.id || getGuestId())) return false;
-    return ['drop', 'promo', 'wishlist', 'order'].includes(n.type);
-  });
+  const customerNotifications = useMemo(() => {
+    const map = new Map<string, StoreNotification>();
+    notifications.forEach((n) => {
+      if (n.isAdminOnly) return;
+      if (n.type === 'order' && n.customerId && n.customerId !== (user?.id || getGuestId())) return;
+      if (!['drop', 'promo', 'wishlist', 'order', 'product', 'restock'].includes(n.type)) return;
+
+      // Extract status keyword to merge DB trigger & client transition notifications for the same status change
+      const titleLower = (n.title || '').toLowerCase();
+      const statusKey = titleLower.includes('processing') ? 'processing'
+        : titleLower.includes('confirmed') ? 'confirmed'
+        : titleLower.includes('dispatched') || titleLower.includes('shipping') ? 'shipping'
+        : titleLower.includes('delivered') ? 'delivered'
+        : titleLower.includes('cancelled') ? 'cancelled'
+        : n.title || n.id;
+
+      const dedupeKey = n.type === 'order' && n.linkTarget
+        ? `order-${n.linkTarget}-${statusKey}`
+        : n.id;
+
+      if (!map.has(dedupeKey)) {
+        map.set(dedupeKey, n);
+      }
+    });
+    return Array.from(map.values());
+  }, [notifications, user]);
   const adminNotifications = notifications.filter(n => n.isAdminOnly || n.type !== 'order' || !n.customerId);
   const unreadNotificationCount = customerNotifications.filter((n) => !n.read).length;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
