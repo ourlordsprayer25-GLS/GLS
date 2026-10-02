@@ -898,11 +898,11 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
 
   if (isSupabaseConfigured) {
     supabase.from('brands').select('*').then(({ data, error }) => {
-      if (!error && data) { onUpdate(data); hasLoaded = true; }
-      else if (error && !hasLoaded) wrappedOnUpdate([]);
+      if (!error && data) { wrappedOnUpdateBrand(data); hasLoaded = true; }
+      else if (error && !hasLoaded) wrappedOnUpdateBrand([]);
     });
   } else {
-    setTimeout(() => { if (!hasLoaded) wrappedOnUpdate([]); }, 1000);
+    setTimeout(() => { if (!hasLoaded) wrappedOnUpdateBrand([]); }, 1000);
   }
 }
 
