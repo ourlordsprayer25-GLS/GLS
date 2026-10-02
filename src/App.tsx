@@ -830,7 +830,7 @@ function AppContent() {
       read: false,
       type: 'order',
       linkTarget: newOrder.orderNumber,
-      customerId: user?.id || getGuestId(),
+      customerId: user?.id || newOrder.customerId || getGuestId(),
     };
     const adminNotification: StoreNotification = {
       id: `notif-${Date.now()}-a`,
@@ -938,9 +938,18 @@ function AppContent() {
 
   const customerNotifications = useMemo(() => {
     const map = new Map<string, StoreNotification>();
+    const currentUserId = user?.id || getGuestId();
+
     notifications.forEach((n) => {
       if (n.isAdminOnly) return;
-      if (n.type === 'order' && n.customerId && n.customerId !== (user?.id || getGuestId())) return;
+
+      // Order notifications are strictly private to the customer who placed the order
+      if (n.type === 'order') {
+        if (!n.customerId || n.customerId !== currentUserId) {
+          return;
+        }
+      }
+
       if (!['drop', 'promo', 'wishlist', 'order', 'product', 'restock'].includes(n.type)) return;
 
       // Extract status keyword to merge DB trigger & client transition notifications for the same status change
