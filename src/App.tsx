@@ -340,8 +340,15 @@ function AppContent() {
       badge: '/pwa-192x192.png',
       vibrate: [100, 50, 100],
       tag: 'gladyns-notif',
-      data: { url: '/#orders' },
+      data: { url: '/orders' },
       ...options,
+    };
+
+    const targetUrl = defaultOptions.data?.url || '/orders';
+
+    const handleNotifClick = () => {
+      window.focus();
+      navigate(targetUrl);
     };
 
     if ('serviceWorker' in navigator) {
@@ -349,19 +356,13 @@ function AppContent() {
         registration.showNotification(title, defaultOptions);
       }).catch(() => {
         const notif = new Notification(title, defaultOptions);
-        notif.onclick = () => {
-          window.focus();
-          setIsOrdersPageOpen(true);
-        };
+        notif.onclick = handleNotifClick;
       });
     } else {
       const notif = new Notification(title, defaultOptions);
-      notif.onclick = () => {
-        window.focus();
-        setIsOrdersPageOpen(true);
-      };
+      notif.onclick = handleNotifClick;
     }
-  }, []);
+  }, [navigate]);
 
   // Request notification permissions
   const requestNotificationPermission = useCallback(async () => {
@@ -478,6 +479,7 @@ function AppContent() {
         triggerSystemNotification(title, {
           body: message,
           tag: `order-${order.id}`,
+          data: { url: '/orders' },
         });
 
         // Pop up the real-time top notification toast
@@ -546,6 +548,7 @@ function AppContent() {
             body: `Now available in store for ${formatPrice(product.price)}. Tap to view!`,
             tag: `new-product-${product.id}`,
             icon: product.primaryImage || '/pwa-192x192.png',
+            data: { url: `/product/${product.id}` },
           });
           setActiveToast({
             id: arrivalNotif.id,
@@ -583,6 +586,7 @@ function AppContent() {
         triggerSystemNotification(title, {
           body: message,
           tag: `stock-${product.id}`,
+          data: { url: '/admin' },
         });
       } else if (!isLow && alreadyAlerted) {
         lowStockAlertedRef.current[product.id] = false;
@@ -851,6 +855,7 @@ function AppContent() {
       body: 'Your order for ' + formatPrice(newOrder.total) + ' has been placed. We are on it!',
       tag: 'order-placed-' + newOrder.id,
       icon: '/pwa-192x192.png',
+      data: { url: '/orders' },
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
