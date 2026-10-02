@@ -105,6 +105,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <p className="text-[10px] uppercase font-black tracking-widest text-zinc-400">Haute Joaillerie & Luxe</p>
           </div>
 
+          {/* Segmented Auth Mode Switcher */}
+          <div className="flex items-center p-1 bg-zinc-100 rounded-2xl border border-zinc-200/80">
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setErrorMsg(null); }}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                mode === 'login'
+                  ? 'bg-zinc-950 text-white shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-950'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode('register'); setErrorMsg(null); }}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                mode === 'register'
+                  ? 'bg-zinc-950 text-white shadow-sm'
+                  : 'text-zinc-600 hover:text-zinc-950'
+              }`}
+            >
+              Create Account
+            </button>
+          </div>
+
           <div className="space-y-1">
             <h2 className="text-xl font-display font-medium text-zinc-900">
               {mode === 'login' ? 'Sign In to Your Account' : 'Create Prestige Account'}
