@@ -219,12 +219,45 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
         }
       })
       .subscribe();
+
+    // Auto re-sync when tab becomes visible or focused (e.g. phone screen unlock / tab switch)
+    const fetchLatestProducts = async () => {
+      try {
+        const { data, error } = await supabase.from('products').select('*');
+        if (!error && data && data.length > 0) {
+          wrappedOnUpdate(data as Product[]);
+        }
+      } catch (e) {}
+    };
+
+    const handleFocusOrVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchLatestProducts();
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', handleFocusOrVisibility);
+      document.addEventListener('visibilitychange', handleFocusOrVisibility);
+    }
+
+    const pollInterval = setInterval(fetchLatestProducts, 10000);
+
+    return () => {
+      clearTimeout(hardTimeout);
+      clearInterval(pollInterval);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('focus', handleFocusOrVisibility);
+        document.removeEventListener('visibilitychange', handleFocusOrVisibility);
+      }
+      listeners.products.delete(onUpdate);
+      if (supabaseChannel) supabase.removeChannel(supabaseChannel);
+    };
   }
 
   return () => {
     clearTimeout(hardTimeout);
     listeners.products.delete(onUpdate);
-    if (supabaseChannel) supabase.removeChannel(supabaseChannel);
   };
 }
 

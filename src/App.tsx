@@ -8,6 +8,7 @@ import { AdminView } from './components/admin/AdminView';
 import { FastLoadingScreen } from './components/FastLoadingScreen';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useLanguageCurrency } from './context/LanguageCurrencyContext';
 import { SectionType } from './components/SectionPage';
 import {
   subscribeToProducts,
@@ -116,6 +117,7 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
 
 function AppContent() {
   const { user: authUser, login: authLogin, logout: authLogout } = useAuth();
+  const { formatPrice } = useLanguageCurrency();
   
   const [isInitialBootLoading, setIsInitialBootLoading] = useState(true);
     const [isReady, setIsReady] = useState(false);
@@ -445,7 +447,7 @@ function AppContent() {
             break;
           case 'cancelled':
             title = `Order ${order.orderNumber} Cancelled`;
-            message = `Your order has been cancelled. A full refund of $${order.total.toFixed(2)} has been credited back to your original payment method.`;
+            message = `Your order has been cancelled. A full refund of ${formatPrice(order.total)} has been credited back to your original payment method.`;
             break;
           default:
             title = `Order ${order.orderNumber} Status Updated`;
@@ -511,7 +513,7 @@ function AppContent() {
           knownProductIdsRef.current?.add(product.id);
 
           const title = `✨ New Arrival: ${product.name}`;
-          const message = `Discover our newest addition: "${product.name}" is now available in store for $${product.price.toFixed(2)}.`;
+          const message = `Discover our newest addition: "${product.name}" is now available in store for ${formatPrice(product.price)}.`;
 
           const arrivalNotif: StoreNotification = {
             id: `notif-new-product-${product.id}-${Date.now()}`,
@@ -526,7 +528,7 @@ function AppContent() {
           setNotifications((prev) => [arrivalNotif, ...prev]);
           playPremiumChime();
           triggerSystemNotification(title, {
-            body: `Now available in store for $${product.price.toFixed(2)}. Tap to view!`,
+            body: `Now available in store for ${formatPrice(product.price)}. Tap to view!`,
             tag: `new-product-${product.id}`,
             icon: product.primaryImage || '/pwa-192x192.png',
           });
@@ -814,7 +816,7 @@ function AppContent() {
     const adminNotification: StoreNotification = {
       id: `notif-${Date.now()}-a`,
       title: `New Order Received: ${newOrder.orderNumber}`,
-      message: `A new order has been placed for ${newOrder.items.length} item(s) totaling $${newOrder.total.toFixed(2)}.`,
+      message: `A new order has been placed for ${newOrder.items.length} item(s) totaling ${formatPrice(newOrder.total)}.`,
       timestamp: Date.now(),
       read: false,
       type: 'order',
@@ -826,12 +828,12 @@ function AppContent() {
     addRealtimeNotification(adminNotification);
     setActiveToast({ id: customerNotification.id, title: customerNotification.title, message: customerNotification.message, orderNumber: newOrder.orderNumber });
     setInitialInvoiceNumber(newOrder.orderNumber);
-    if (user?.email) dispatchOrderStatusEmail(user.email, newOrder.orderNumber, 'PLACED', `Order for $${newOrder.total.toFixed(2)} received.`);
+    if (user?.email) dispatchOrderStatusEmail(user.email, newOrder.orderNumber, 'PLACED', `Order for ${formatPrice(newOrder.total)} received.`);
     setIsOrdersPageOpen(true);
     // Fire real device push notification + chime sound for customer when order placed
     playPremiumChime();
     triggerSystemNotification('\u2705 Order ' + newOrder.orderNumber + ' Confirmed!', {
-      body: 'Your order for $' + newOrder.total.toFixed(2) + ' has been placed. We are on it!',
+      body: 'Your order for ' + formatPrice(newOrder.total) + ' has been placed. We are on it!',
       tag: 'order-placed-' + newOrder.id,
       icon: '/pwa-192x192.png',
     });
