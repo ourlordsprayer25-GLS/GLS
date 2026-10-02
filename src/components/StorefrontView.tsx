@@ -109,7 +109,6 @@ interface StorefrontViewProps {
   handleSelectCategory: (cat: string) => void;
   handleOpenWishlistPage: () => void;
   handleOpenAuth: (mode?: 'login' | 'register') => void;
-  handleOpenAdmin: () => void;
   handleLogout: () => void;
   handleSelectProduct: (p: Product | null) => void;
   handleToggleWishlist: (id: string) => void;
@@ -150,7 +149,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
     handleBackToShop, handleOpenSectionPage, handleOpenCategoriesPage, handleOpenBrandPage,
     handleOpenAboutUsPage, handleOpenTermsPage, handleOpenRefundPolicyPage, handleOpenStoreLocatorPage,
     handleOpenCollectionsPage, handleOpenOrders, handleOpenProfile, handleSelectCategory,
-    handleOpenWishlistPage, handleOpenAuth, handleOpenAdmin, handleLogout, handleSelectProduct,
+    handleOpenWishlistPage, handleOpenAuth, handleLogout, handleSelectProduct,
     handleToggleWishlist, handleQuickAdd, handleCancelOrder, handleRequestReturn,
     handleReorder, handleAddToCart, handleUpdateOrderStatus, handleUpdateQuantity,
     handleRemoveItem, handleProceedToCheckout,
@@ -225,7 +224,6 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
         isProfileActive={isProfilePageOpen}
         onOpenWishlist={handleOpenWishlistPage}
         onOpenAuth={(mode) => handleOpenAuth(mode || 'login')}
-        onOpenAdmin={handleOpenAdmin}
       />
 
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
@@ -621,7 +619,6 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onOpenRefundPolicyPage={handleOpenRefundPolicyPage}
           onOpenStoreLocatorPage={handleOpenStoreLocatorPage}
           onOpenCollectionsPage={handleOpenCollectionsPage}
-          onOpenAdmin={handleOpenAdmin}
           onSelectCategory={handleSelectCategory}
           onSelectProduct={handleSelectProduct}
           onSearch={setSearchQuery}

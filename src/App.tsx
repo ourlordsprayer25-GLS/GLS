@@ -924,7 +924,6 @@ function AppContent() {
   const handleOpenCartPage = () => navigate('/cart');
   const handleOpenWishlistPage = () => navigate('/wishlist');
   const handleOpenAuth = (mode: 'login' | 'register' = 'login') => { setAuthModalMode(mode); setIsAuthModalOpen(true); };
-  const handleOpenAdmin = () => window.open(window.location.origin + '/admin', '_blank');
 
   const handleLoginSuccess = (newUser: UserProfile) => {
     setUser(newUser);
@@ -1019,7 +1018,7 @@ function AppContent() {
             handleBackToShop, handleOpenSectionPage, handleOpenCategoriesPage, handleOpenBrandPage,
             handleOpenAboutUsPage, handleOpenTermsPage, handleOpenRefundPolicyPage, handleOpenStoreLocatorPage,
             handleOpenCollectionsPage, handleOpenOrders, handleOpenProfile, handleSelectCategory,
-            handleOpenWishlistPage, handleOpenAuth, handleOpenAdmin, handleLogout, handleSelectProduct,
+            handleOpenWishlistPage, handleOpenAuth, handleLogout, handleSelectProduct,
             handleToggleWishlist, handleQuickAdd, handleCancelOrder, handleRequestReturn,
             handleReorder, handleAddToCart, handleUpdateOrderStatus, handleUpdateQuantity,
             handleRemoveItem, handleProceedToCheckout,

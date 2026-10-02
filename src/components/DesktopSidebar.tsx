@@ -46,7 +46,6 @@ interface DesktopSidebarProps {
   isProfileActive: boolean;
   onOpenWishlist?: () => void;
   onOpenAuth?: (mode?: 'login' | 'register') => void;
-  onOpenAdmin?: () => void;
 }
 
 export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
@@ -71,7 +70,6 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
   isProfileActive,
   onOpenWishlist,
   onOpenAuth,
-  onOpenAdmin,
 }) => {
   const { language, currency, country, setIsSelectorModalOpen } = useLanguageCurrency();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -324,18 +322,6 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
           >
             <MapPin className="w-4.5 h-4.5 text-blue-600 shrink-0" />
             {!isCollapsed && <span className="font-medium text-xs sm:text-sm">{language === 'fr' ? 'Nous trouver' : 'Store Locator'}</span>}
-          </button>
-
-          {/* Admin Panel */}
-          <button
-            onClick={() => onOpenAdmin?.()}
-            title={language === 'fr' ? 'Panneau Admin' : 'Admin Panel'}
-            className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all cursor-pointer ${
-              isCollapsed ? 'justify-center px-2' : ''
-            }`}
-          >
-            <Shield className="w-4 h-4 text-blue-600 shrink-0" />
-            {!isCollapsed && <span>{language === 'fr' ? 'Panneau Admin' : 'Admin Panel'}</span>}
           </button>
         </div>
 
