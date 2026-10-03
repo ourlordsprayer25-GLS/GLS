@@ -595,6 +595,9 @@ async function startServer() {
       server: {
         middlewareMode: true,
         hmr: isHmrDisabled ? false : { server },
+        watch: {
+          ignored: ['**/data-store.json', '**/dist/**', '**/.git/**'],
+        },
       },
       appType: 'custom',
     });
