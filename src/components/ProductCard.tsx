@@ -21,6 +21,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { formatPrice, t, language } = useLanguageCurrency();
   const [selectedColor, setSelectedColor] = useState<ProductVariant>(product.colors[0]);
   const [isAdded, setIsAdded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const isOutOfStock = !product.sizes.some((s) => s.inStock);
 
@@ -40,6 +41,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const discountSavings = product.originalPrice ? product.originalPrice - product.price : 0;
+  const imageSrc = !imageError && (selectedColor?.image || product.primaryImage);
 
   return (
     <article
@@ -47,13 +49,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       className="group flex flex-col bg-white rounded-2xl border border-slate-200/90 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 relative"
     >
       {/* Product Image Area */}
-      <div className="relative aspect-[4/5] bg-slate-50 overflow-hidden">
-        <img
-          src={selectedColor.image || product.primaryImage}
-          alt={product.name}
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
-        />
+      <div className="relative aspect-[4/5] bg-slate-100 overflow-hidden">
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt=""
+            onError={() => setImageError(true)}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 text-slate-400 p-4 text-center select-none">
+            <ShoppingBag className="w-8 h-8 mb-2 opacity-35 stroke-[1.5]" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 truncate max-w-[85%]">{product.name}</span>
+          </div>
+        )}
 
         {/* Top Badges Area */}
         <div className="absolute top-2.5 left-2.5 right-2.5 sm:top-3 sm:left-3 sm:right-3 flex items-start justify-between pointer-events-none z-10">
