@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { 
   Product, 
   UserProfile, 
@@ -158,10 +158,31 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
     handleNavigateToProductFromNotification, handleOrderSuccess, handleLoginSuccess
   } = props;
 
+  const lastViewKeyRef = useRef<string>('');
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    const currentViewKey = [
+      selectedProduct?.id || '',
+      activeSectionPage || '',
+      isCartPageOpen ? 'cart' : '',
+      isProfilePageOpen ? 'profile' : '',
+      isOrdersPageOpen ? 'orders' : '',
+      isCategoriesPageOpen ? 'categories' : '',
+      isAboutUsPageOpen ? 'about' : '',
+      isTermsPageOpen ? 'terms' : '',
+      isRefundPolicyPageOpen ? 'refund' : '',
+      isStoreLocatorPageOpen ? 'store' : '',
+      isBrandPageOpen ? 'brand' : '',
+      isCollectionsPageOpen ? 'collections' : '',
+      isWishlistPageOpen ? 'wishlist' : '',
+    ].join('|');
+
+    if (currentViewKey !== lastViewKeyRef.current) {
+      lastViewKeyRef.current = currentViewKey;
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   }, [
-    selectedProduct,
+    selectedProduct?.id,
     activeSectionPage,
     isCartPageOpen,
     isProfilePageOpen,

@@ -755,10 +755,13 @@ function AppContent() {
       setIsProfilePageOpen(true);
     } else if (rawHash.startsWith('product/')) {
       const prodId = rawHash.replace('product/', '');
-      const p = products.find((prod) => prod.id === prodId);
+      const p = products.find((prod) => prod.id === prodId || prod.slug === prodId);
       if (p) {
-        closeAllMainViews();
-        setSelectedProduct(p);
+        setSelectedProduct((prev) => {
+          if (prev?.id === p.id) return prev;
+          closeAllMainViews();
+          return p;
+        });
       }
     } else if (rawHash.startsWith('section/')) {
       const secName = rawHash.replace('section/', '') as SectionType;
@@ -1014,8 +1017,13 @@ function AppContent() {
         if (!isNaN(timeMs) && timeMs < sevenDaysAgo) return;
       }
 
-      // Extract status keyword to merge DB trigger & client transition notifications for the same status change
+      // Filter out redundant raw Postgres DB trigger logs (e.g. "Order GL-4741 Status Updated to SHIPPING")
+      // because rich, styled customer transition notifications ("Order GL-4741 Dispatched") are already sent.
       const titleLower = (n.title || '').toLowerCase();
+      const isRawDbTrigger = titleLower.includes('status updated to');
+      if (isRawDbTrigger) return;
+
+      // Extract status keyword to merge DB trigger & client transition notifications for the same status change
       const statusKey = titleLower.includes('processing') ? 'processing'
         : titleLower.includes('confirmed') ? 'confirmed'
         : titleLower.includes('dispatched') || titleLower.includes('shipping') ? 'shipping'
