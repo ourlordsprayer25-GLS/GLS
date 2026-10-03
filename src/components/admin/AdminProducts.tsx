@@ -23,7 +23,8 @@ import {
   MapPin,
   Image as ImageIcon,
   Barcode,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 import JsBarcode from 'jsbarcode';
 import { Product } from '../../types/store';
@@ -147,44 +148,111 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
       });
     } else {
       setEditingProduct(null);
-      setSalePriceInput('');
-      setOrigPriceInput('');
-      setFormData({
-        name: '',
-        subtitle: 'Premium Acquisition',
-        tagline: 'Excellence in Craftsmanship',
-        price: 0,
-        originalPrice: 0,
-        category: 'essentials',
-        categoryLabel: 'Essentials',
-        brand: 'GLADYNS',
-        brandOrigin: 'Europe',
-        tag: 'New Arrival',
-        description: '',
-        materials: 'Premium Materials',
-        care: 'Professional dry clean only',
-        madeIn: 'Portugal',
-        primaryImage: '',
-        featured: false,
-        isNewArrival: true,
-        isHotDeal: false,
-        images: [],
-        colors: [{ id: 'col-1', name: 'Standard', colorHex: '#000000', inStock: true }],
-        sizes: [
-          { name: 'S', inStock: true },
-          { name: 'M', inStock: true },
-          { name: 'L', inStock: true }
-        ],
-        details: [],
-        reviewCount: 0,
-        rating: 5,
-        reviews: [],
-        sku: `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        barcode: Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0'),
-        stockLevel: 0,
-      });
+      let draft: any = null;
+      try {
+        const raw = localStorage.getItem('gls_admin_product_draft');
+        if (raw) draft = JSON.parse(raw);
+      } catch (e) {}
+
+      if (draft && draft.formData && (draft.formData.name || (draft.formData.images && draft.formData.images.length > 0))) {
+        setFormData(draft.formData);
+        setSalePriceInput(draft.salePriceInput || '');
+        setOrigPriceInput(draft.origPriceInput || '');
+        if (draft.priceCurrency) setPriceCurrency(draft.priceCurrency);
+      } else {
+        setSalePriceInput('');
+        setOrigPriceInput('');
+        setFormData({
+          name: '',
+          subtitle: 'Premium Acquisition',
+          tagline: 'Excellence in Craftsmanship',
+          price: 0,
+          originalPrice: 0,
+          category: 'essentials',
+          categoryLabel: 'Essentials',
+          brand: 'GLADYNS',
+          brandOrigin: 'Europe',
+          tag: 'New Arrival',
+          description: '',
+          materials: 'Premium Materials',
+          care: 'Professional dry clean only',
+          madeIn: 'Portugal',
+          primaryImage: '',
+          featured: false,
+          isNewArrival: true,
+          isHotDeal: false,
+          images: [],
+          colors: [{ id: 'col-1', name: 'Standard', colorHex: '#000000', inStock: true }],
+          sizes: [
+            { name: 'S', inStock: true },
+            { name: 'M', inStock: true },
+            { name: 'L', inStock: true }
+          ],
+          details: [],
+          reviewCount: 0,
+          rating: 5,
+          reviews: [],
+          sku: `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          barcode: Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0'),
+          stockLevel: 0,
+        });
+      }
     }
     setIsModalOpen(true);
+  };
+
+  // Auto-save uncommitted product draft to protect against mobile camera/app switches
+  React.useEffect(() => {
+    if (isModalOpen && !editingProduct && (formData.name || (formData.images && formData.images.length > 0))) {
+      try {
+        localStorage.setItem('gls_admin_product_draft', JSON.stringify({
+          formData,
+          salePriceInput,
+          origPriceInput,
+          priceCurrency,
+        }));
+      } catch (e) {}
+    }
+  }, [isModalOpen, editingProduct, formData, salePriceInput, origPriceInput, priceCurrency]);
+
+  const handleDiscardDraft = () => {
+    try { localStorage.removeItem('gls_admin_product_draft'); } catch (e) {}
+    setSalePriceInput('');
+    setOrigPriceInput('');
+    setFormData({
+      name: '',
+      subtitle: 'Premium Acquisition',
+      tagline: 'Excellence in Craftsmanship',
+      price: 0,
+      originalPrice: 0,
+      category: 'essentials',
+      categoryLabel: 'Essentials',
+      brand: 'GLADYNS',
+      brandOrigin: 'Europe',
+      tag: 'New Arrival',
+      description: '',
+      materials: 'Premium Materials',
+      care: 'Professional dry clean only',
+      madeIn: 'Portugal',
+      primaryImage: '',
+      featured: false,
+      isNewArrival: true,
+      isHotDeal: false,
+      images: [],
+      colors: [{ id: 'col-1', name: 'Standard', colorHex: '#000000', inStock: true }],
+      sizes: [
+        { name: 'S', inStock: true },
+        { name: 'M', inStock: true },
+        { name: 'L', inStock: true }
+      ],
+      details: [],
+      reviewCount: 0,
+      rating: 5,
+      reviews: [],
+      sku: `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      barcode: Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0'),
+      stockLevel: 0,
+    });
   };
 
   const compressImageFile = (file: File, maxDim = 1000, quality = 0.8): Promise<string> => {
@@ -279,40 +347,51 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     setFormData(prev => ({ ...prev, primaryImage: url }));
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     const rawSale = parseFloat(salePriceInput);
     if (!formData.name || isNaN(rawSale) || rawSale <= 0) {
       setError('Please provide at least a product name and a valid sale price.');
       return;
     }
 
+    setError(null);
     setIsSaving(true);
 
-    // Convert from the chosen currency to base USD storage value
-    const curRate = SUPPORTED_CURRENCIES[priceCurrency]?.rate || 1;
-    const basePrice = rawSale / curRate;
-    const rawOrig = parseFloat(origPriceInput);
-    const baseOrigPrice = !isNaN(rawOrig) && rawOrig > 0 ? rawOrig / curRate : undefined;
-    
-    const finalFormData: Product = {
-      ...(formData as Product),
-      price: basePrice,
-      originalPrice: baseOrigPrice,
-    };
-    
-    setTimeout(() => {
+    try {
+      // Convert from the chosen currency to base USD storage value
+      const curRate = SUPPORTED_CURRENCIES[priceCurrency]?.rate || 1;
+      const basePrice = rawSale / curRate;
+      const rawOrig = parseFloat(origPriceInput);
+      const baseOrigPrice = !isNaN(rawOrig) && rawOrig > 0 ? rawOrig / curRate : undefined;
+      
+      const finalFormData: Product = {
+        ...(formData as Product),
+        price: basePrice,
+        originalPrice: baseOrigPrice,
+      };
+
       if (editingProduct) {
         const updated = { ...editingProduct, ...finalFormData };
+        const res = await saveRealtimeProduct(updated);
+        if (!res.success) {
+          setError(res.error || 'Failed to update product in database.');
+          setIsSaving(false);
+          return;
+        }
         setProducts(prev => prev.map(p => p.id === editingProduct.id ? updated : p));
-        saveRealtimeProduct(updated);
       } else {
         const product: Product = {
           ...finalFormData,
           id: `prod-${Date.now()}`,
           slug: (formData.name || '')?.toLowerCase().replace(/\s+/g, '-'),
         };
+        const res = await saveRealtimeProduct(product);
+        if (!res.success) {
+          setError(res.error || 'Failed to save product in database.');
+          setIsSaving(false);
+          return;
+        }
         setProducts(prev => [product, ...prev]);
-        saveRealtimeProduct(product);
         addRealtimeNotification({
           id: `notif-new-product-${product.id}-${Date.now()}`,
           title: `✨ New Arrival: ${product.name}`,
@@ -326,9 +405,14 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
           onNewProductAdded(product);
         }
       }
+
+      try { localStorage.removeItem('gls_admin_product_draft'); } catch (e) {}
       setIsSaving(false);
       setIsModalOpen(false);
-    }, 300);
+    } catch (err: any) {
+      setError(err?.message || 'An unexpected error occurred while saving.');
+      setIsSaving(false);
+    }
   };
 
   const handleDeleteProduct = () => {
@@ -387,9 +471,20 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
                 <h3 className="text-xl font-bold text-zinc-900">{editingProduct ? 'Edit Catalogue Piece' : 'Catalogue New Arrival'}</h3>
                 <p className="text-xs text-zinc-500 mt-1">Configure advanced product parameters and assets.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
-                <Plus className="w-6 h-6 rotate-45 text-zinc-400" />
-              </button>
+              <div className="flex items-center gap-2">
+                {!editingProduct && (formData.name || (formData.images && formData.images.length > 0)) && (
+                  <button
+                    type="button"
+                    onClick={handleDiscardDraft}
+                    className="px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-xl font-semibold transition-colors cursor-pointer"
+                  >
+                    Clear Draft
+                  </button>
+                )}
+                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer">
+                  <Plus className="w-6 h-6 rotate-45 text-zinc-400" />
+                </button>
+              </div>
             </div>
             
             <div className="p-6 sm:p-8 space-y-8">
@@ -847,11 +942,22 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
 
               <div className="pt-8 border-t border-zinc-100">
                 <button 
+                  type="button"
                   onClick={handleSaveProduct}
-                  className="w-full py-4 bg-zinc-900 text-white rounded-2xl font-bold hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-200 flex items-center justify-center gap-2"
+                  disabled={isSaving}
+                  className="w-full py-4 bg-zinc-900 text-white rounded-2xl font-bold hover:bg-zinc-800 disabled:opacity-60 transition-all shadow-xl shadow-zinc-200 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Save className="w-5 h-5" />
-                  <span>{editingProduct ? 'Update Catalogue Piece' : 'Catalogue Piece'}</span>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Saving & Syncing to Cloud...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      <span>{editingProduct ? 'Update Catalogue Piece' : 'Catalogue Piece'}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

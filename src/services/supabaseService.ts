@@ -518,7 +518,7 @@ export async function deleteRealtimeOrder(orderId: string) {
   }
 }
 
-export async function saveRealtimeProduct(product: Product) {
+export async function saveRealtimeProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   try {
     await localFetch('/api/sync/products', {
       method: 'POST',
@@ -534,11 +534,15 @@ export async function saveRealtimeProduct(product: Product) {
       const { error } = await supabase.from('products').upsert(product);
       if (error) {
         console.error('Supabase save product error:', error.message);
+        return { success: false, error: error.message };
       }
-    } catch (err) {
+      return { success: true };
+    } catch (err: any) {
       console.error('Supabase save product error:', err);
+      return { success: false, error: err?.message || 'Failed to save product to database' };
     }
   }
+  return { success: true };
 }
 
 export async function deleteRealtimeProduct(productId: string) {
