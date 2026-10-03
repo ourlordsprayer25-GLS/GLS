@@ -156,3 +156,95 @@ DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.settings; EXCEP
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.categories; EXCEPTION WHEN OTHERS THEN NULL; END $$;
 DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.brands; EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
+-- 11. AUTOMATIC CUSTOMER ACCOUNT SYNC & INSTANT ACTIVATION TRIGGER
+CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_full_name text;
+  v_first_name text;
+  v_last_name text;
+BEGIN
+  v_full_name := COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', '');
+  IF v_full_name <> '' THEN
+    v_first_name := SPLIT_PART(v_full_name, ' ', 1);
+    v_last_name := TRIM(SUBSTRING(v_full_name FROM LENGTH(v_first_name) + 1));
+  ELSE
+    v_first_name := SPLIT_PART(NEW.email, '@', 1);
+    v_last_name := '';
+  END IF;
+
+  INSERT INTO public.users (
+    "id",
+    "firstName",
+    "lastName",
+    "email",
+    "memberSince",
+    "tier",
+    "loyaltyPoints",
+    "lifetimePoints",
+    "registeredDateExact",
+    "sessionStatus",
+    "lastSeen",
+    "cart_items",
+    "wishlist_ids",
+    "updated_at"
+  )
+  VALUES (
+    NEW.id::text,
+    v_first_name,
+    v_last_name,
+    NEW.email,
+    TO_CHAR(NOW(), 'Mon YYYY'),
+    'Bronze VIP',
+    100,
+    100,
+    TO_CHAR(NOW(), 'YYYY-MM-DD HH24:MI:SS'),
+    'online',
+    'Active Now',
+    '[]'::jsonb,
+    '[]'::jsonb,
+    NOW()
+  )
+  ON CONFLICT ("id") DO UPDATE SET
+    "email" = EXCLUDED."email",
+    "firstName" = CASE WHEN public.users."firstName" IS NULL OR public.users."firstName" = '' THEN EXCLUDED."firstName" ELSE public.users."firstName" END,
+    "lastName" = CASE WHEN public.users."lastName" IS NULL OR public.users."lastName" = '' THEN EXCLUDED."lastName" ELSE public.users."lastName" END,
+    "sessionStatus" = 'online',
+    "lastSeen" = 'Active Now',
+    "updated_at" = NOW();
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trigger_sync_new_auth_user ON auth.users;
+CREATE TRIGGER trigger_sync_new_auth_user
+AFTER INSERT OR UPDATE ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_new_auth_user();
+
+-- Auto-confirm trigger
+CREATE OR REPLACE FUNCTION public.auto_confirm_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.email_confirmed_at IS NULL THEN
+    NEW.email_confirmed_at := NOW();
+  END IF;
+  IF NEW.confirmed_at IS NULL THEN
+    NEW.confirmed_at := NOW();
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trigger_auto_confirm_auth_user ON auth.users;
+CREATE TRIGGER trigger_auto_confirm_auth_user
+BEFORE INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.auto_confirm_new_user();
+
+-- Retroactively auto-confirm existing unconfirmed customer accounts
+UPDATE auth.users
+SET email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
+    confirmed_at = COALESCE(confirmed_at, NOW())
+WHERE email_confirmed_at IS NULL;
+
+
