@@ -76,7 +76,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
       onClose();
     } catch (e: any) {
-      setErrorMsg(e?.message || `${mode === 'login' ? 'Sign in' : 'Account creation'} failed.`);
+      const rawMsg = e?.message || '';
+      if (rawMsg.toLowerCase().includes('invalid login credentials') || rawMsg.toLowerCase().includes('invalid_grant')) {
+        setErrorMsg('Invalid email or password. If you are new, click "Create Account" above to register.');
+      } else {
+        setErrorMsg(rawMsg || `${mode === 'login' ? 'Sign in' : 'Account creation'} failed.`);
+      }
     } finally {
       setIsProcessing(false);
     }

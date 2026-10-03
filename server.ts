@@ -58,6 +58,74 @@ const isMockProduct = (p: any) => {
   );
 };
 
+const isMockOrder = (o: any) => {
+  if (!o) return false;
+  return (
+    o.id === 'ord-1001' ||
+    o.id === 'ord-1002' ||
+    o.id === 'ord-1003' ||
+    o.id === 'ord-1004' ||
+    o.id?.startsWith('ord-c00') ||
+    o.id?.startsWith('ord-100') ||
+    o.orderNumber?.startsWith('GLS-9') ||
+    o.id === 'ord-vintage-amp' ||
+    o.id === 'ord-acoustic-guitar' ||
+    o.id === 'ord-turntable' ||
+    o.id === 'ord-synth'
+  );
+};
+
+const isMockUser = (u: any) => {
+  if (!u) return false;
+  return (
+    u.id === 'usr-c001' ||
+    u.id === 'usr-c002' ||
+    u.id === 'usr-c003' ||
+    u.id === 'usr-c004' ||
+    u.id === 'usr-guest' ||
+    u.id?.startsWith('usr-c00') ||
+    u.email?.includes('@gladyns-patron.ci') ||
+    u.email?.includes('@luxeparis.fr') ||
+    u.email === 'sarah.j@example.com' ||
+    u.email === 'm.vance@example.com' ||
+    u.email === 'elena.r@example.com' ||
+    u.email === 'david.k@example.com' ||
+    u.email === 'jp.moreau@luxeparis.fr'
+  );
+};
+
+const isMockCategory = (c: any) => {
+  if (!c) return false;
+  return [
+    'audio',
+    'electronics',
+    'wearables',
+    'accessories',
+    'lighting',
+    'home',
+    'leather-goods',
+    'timepieces',
+    'stationery',
+    'all',
+    'musical',
+    'appliances',
+    'apparel'
+  ].includes(c.id);
+};
+
+const isMockBrand = (b: any) => {
+  if (!b) return false;
+  return (
+    b.origin === 'United States' ||
+    b.origin === 'Hong Kong' ||
+    b.origin === 'Taiwan' ||
+    b.origin === "Côte d'Ivoire" ||
+    b.name === 'Bang & Olufsen' ||
+    b.name === 'Teenage Engineering' ||
+    b.name === 'Leica'
+  );
+};
+
 function loadDB(): StoreDB {
   try {
     if (fs.existsSync(DB_FILE)) {
@@ -66,12 +134,12 @@ function loadDB(): StoreDB {
       return {
         products: Array.isArray(parsed.products) ? parsed.products.filter((p: any) => !isMockProduct(p)) : [],
         deletedProductIds: Array.isArray(parsed.deletedProductIds) ? parsed.deletedProductIds : [],
-        orders: Array.isArray(parsed.orders) ? parsed.orders : [],
-        users: Array.isArray(parsed.users) ? parsed.users : [],
+        orders: Array.isArray(parsed.orders) ? parsed.orders.filter((o: any) => !isMockOrder(o)) : [],
+        users: Array.isArray(parsed.users) ? parsed.users.filter((u: any) => !isMockUser(u)) : [],
         notifications: Array.isArray(parsed.notifications) ? parsed.notifications : [],
         settings: parsed.settings || null,
-        categories: Array.isArray(parsed.categories) ? parsed.categories : [],
-        brands: Array.isArray(parsed.brands) ? parsed.brands : [],
+        categories: Array.isArray(parsed.categories) ? parsed.categories.filter((c: any) => !isMockCategory(c)) : [],
+        brands: Array.isArray(parsed.brands) ? parsed.brands.filter((b: any) => !isMockBrand(b)) : [],
         carts: parsed.carts && typeof parsed.carts === 'object' ? parsed.carts : {},
         wishlists: parsed.wishlists && typeof parsed.wishlists === 'object' ? parsed.wishlists : {},
         lastUpdated: parsed.lastUpdated || Date.now(),
@@ -204,13 +272,19 @@ async function startServer() {
     }
 
     if (Array.isArray(orders) && dbState.orders.length === 0 && orders.length > 0) {
-      dbState.orders = orders;
-      changed = true;
+      const cleanOrders = orders.filter(o => !isMockOrder(o));
+      if (cleanOrders.length > 0) {
+        dbState.orders = cleanOrders;
+        changed = true;
+      }
     }
 
     if (Array.isArray(users) && dbState.users.length === 0 && users.length > 0) {
-      dbState.users = users;
-      changed = true;
+      const cleanUsers = users.filter(u => !isMockUser(u));
+      if (cleanUsers.length > 0) {
+        dbState.users = cleanUsers;
+        changed = true;
+      }
     }
 
     if (Array.isArray(notifications) && dbState.notifications.length === 0 && notifications.length > 0) {
@@ -224,13 +298,19 @@ async function startServer() {
     }
 
     if (Array.isArray(categories) && dbState.categories.length === 0) {
-      dbState.categories = categories;
-      changed = true;
+      const cleanCategories = categories.filter(c => !isMockCategory(c));
+      if (cleanCategories.length > 0) {
+        dbState.categories = cleanCategories;
+        changed = true;
+      }
     }
 
     if (Array.isArray(brands) && dbState.brands.length === 0) {
-      dbState.brands = brands;
-      changed = true;
+      const cleanBrands = brands.filter(b => !isMockBrand(b));
+      if (cleanBrands.length > 0) {
+        dbState.brands = cleanBrands;
+        changed = true;
+      }
     }
 
     if (changed) {
@@ -239,6 +319,43 @@ async function startServer() {
     }
 
     res.json({ success: true, db: dbState });
+  });
+
+  // Bulk Sync Endpoints to keep Central Server store aligned with Supabase
+  app.post('/api/sync/orders/bulk-sync', (req, res) => {
+    if (Array.isArray(req.body)) {
+      dbState.orders = req.body.filter(o => !isMockOrder(o));
+      saveDB();
+      broadcastSyncEvent('orders', dbState.orders);
+    }
+    res.json({ success: true, count: dbState.orders.length });
+  });
+
+  app.post('/api/sync/categories/bulk-sync', (req, res) => {
+    if (Array.isArray(req.body)) {
+      dbState.categories = req.body.filter(c => !isMockCategory(c));
+      saveDB();
+      broadcastSyncEvent('categories', dbState.categories);
+    }
+    res.json({ success: true, count: dbState.categories.length });
+  });
+
+  app.post('/api/sync/brands/bulk-sync', (req, res) => {
+    if (Array.isArray(req.body)) {
+      dbState.brands = req.body.filter(b => !isMockBrand(b));
+      saveDB();
+      broadcastSyncEvent('brands', dbState.brands);
+    }
+    res.json({ success: true, count: dbState.brands.length });
+  });
+
+  app.post('/api/sync/users/bulk-sync', (req, res) => {
+    if (Array.isArray(req.body)) {
+      dbState.users = req.body.filter(u => !isMockUser(u));
+      saveDB();
+      broadcastSyncEvent('users', dbState.users);
+    }
+    res.json({ success: true, count: dbState.users.length });
   });
 
   // 4. Products Sync API

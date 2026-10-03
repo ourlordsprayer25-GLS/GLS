@@ -140,12 +140,35 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
     document.body.removeChild(link);
   };
 
+  const [accountTypeFilter, setAccountTypeFilter] = useState<'registered' | 'all' | 'guests'>('all');
+
+  // Helper functions for safe user rendering
+  const getInitials = (u: UserProfile) => {
+    const f = u.firstName ? u.firstName.trim().charAt(0).toUpperCase() : '';
+    const l = u.lastName ? u.lastName.trim().charAt(0).toUpperCase() : '';
+    if (f || l) return (f + l).slice(0, 2);
+    if (u.email) return u.email.trim().charAt(0).toUpperCase();
+    return 'G';
+  };
+
+  const getDisplayName = (u: UserProfile) => {
+    if (u.firstName || u.lastName) {
+      return `${u.firstName || ''} ${u.lastName || ''}`.trim();
+    }
+    if (u.email) return u.email.split('@')[0];
+    return `Storefront Guest (${u.id.slice(0, 8)})`;
+  };
+
   // Filter customers
   const filteredUsers = users.filter(u => {
+    const isRegistered = Boolean(u.email);
+    if (accountTypeFilter === 'registered' && !isRegistered) return false;
+    if (accountTypeFilter === 'guests' && isRegistered) return false;
+
     const q = searchTerm?.toLowerCase().trim();
     if (!q) return tierFilter === 'all' || u.tier === tierFilter;
 
-    const nameMatch = `${u.firstName} ${u.lastName}`?.toLowerCase().includes(q);
+    const nameMatch = `${u.firstName || ''} ${u.lastName || ''}`?.toLowerCase().includes(q);
     const emailMatch = u.email?.toLowerCase().includes(q);
     const phoneMatch = u.phone?.toLowerCase().includes(q);
     const idMatch = u.id?.toLowerCase().includes(q);
@@ -155,6 +178,9 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
 
     return matchesSearch && matchesTier;
   });
+
+  const registeredCount = users.filter(u => u.email).length;
+  const guestCount = users.length - registeredCount;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -171,7 +197,35 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Account Category Filter Toggle */}
+          <div className="flex items-center bg-zinc-100 p-1 rounded-xl">
+            <button
+              onClick={() => setAccountTypeFilter('registered')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                accountTypeFilter === 'registered' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'
+              }`}
+            >
+              Registered Patrons ({registeredCount})
+            </button>
+            <button
+              onClick={() => setAccountTypeFilter('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                accountTypeFilter === 'all' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'
+              }`}
+            >
+              All Users ({users.length})
+            </button>
+            <button
+              onClick={() => setAccountTypeFilter('guests')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                accountTypeFilter === 'guests' ? 'bg-white text-zinc-950 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'
+              }`}
+            >
+              Guest Sessions ({guestCount})
+            </button>
+          </div>
+
           <div className="flex items-center gap-2 bg-white border border-zinc-200 rounded-xl px-3 py-2.5">
             <Filter className="w-3.5 h-3.5 text-zinc-500" />
             <select
@@ -234,7 +288,7 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-2">
                             <div className="font-bold text-zinc-950 text-sm">
-                              {u.firstName} {u.lastName}
+                              {getDisplayName(u)}
                             </div>
                             {u.deviceInfo?.isPwa ? (
                               <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-1">
@@ -248,7 +302,7 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-zinc-400 block mt-0.5 font-mono">{u.email}</span>
+                          <span className="text-[10px] text-zinc-400 block mt-0.5 font-mono">{u.email || 'Guest visitor session'}</span>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-1.5 font-semibold text-xs text-zinc-800">
@@ -264,17 +318,17 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
                             }`}
                           >
-                            {u.tier}
+                            {u.tier || 'Bronze'}
                           </span>
                         </td>
                         <td className="py-4 px-6 font-mono font-bold text-zinc-900">
-                          {u.loyaltyPoints} points
+                          {u.loyaltyPoints || 0} points
                         </td>
                         <td className="py-4 px-6 text-right">
                           <div className="font-bold text-zinc-900 text-xs flex items-center justify-end gap-1.5">
                             <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                             <span>
-                              {reg ? `${reg.day} ${reg.month} ${reg.year}` : u.memberSince}
+                              {reg ? `${reg.day} ${reg.month} ${reg.year}` : (u.memberSince || '2026')}
                             </span>
                           </div>
                           <div className="text-[10px] text-zinc-400 font-mono flex items-center justify-end gap-1 mt-0.5">
@@ -298,17 +352,17 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ users, setUsers,
               {/* Profile Card Header */}
               <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
                 <div className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200/80 flex items-center justify-center font-bold text-zinc-800 text-sm">
-                  {selectedCustomer.firstName.charAt(0)}{selectedCustomer.lastName.charAt(0)}
+                  {getInitials(selectedCustomer)}
                 </div>
                 <div>
                   <h4 className="font-display font-bold text-zinc-950 text-sm">
-                    {selectedCustomer.firstName} {selectedCustomer.lastName}
+                    {getDisplayName(selectedCustomer)}
                   </h4>
                   <span className="text-[10px] text-zinc-500 font-medium block mt-0.5">
                     {selectedCustomer.registrationDetails ? (
                       `Registered: ${selectedCustomer.registrationDetails.day} ${selectedCustomer.registrationDetails.month} ${selectedCustomer.registrationDetails.year} at ${selectedCustomer.registrationDetails.time}`
                     ) : (
-                      `Member since ${selectedCustomer.memberSince}`
+                      `Member since ${selectedCustomer.memberSince || '2026'}`
                     )}
                   </span>
                 </div>

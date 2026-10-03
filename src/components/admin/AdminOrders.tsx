@@ -69,10 +69,10 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, setOrders, ini
       order.orderNumber?.toLowerCase().includes(q) ||
       order.id?.toLowerCase().includes(q) ||
       (order.trackingNumber && order.trackingNumber?.toLowerCase().includes(q)) ||
-      order.shippingAddress.firstName?.toLowerCase().includes(q) ||
-      order.shippingAddress.lastName?.toLowerCase().includes(q) ||
-      `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`?.toLowerCase().includes(q) ||
-      order.shippingAddress.email?.toLowerCase().includes(q);
+      order.shippingAddress?.firstName?.toLowerCase().includes(q) ||
+      order.shippingAddress?.lastName?.toLowerCase().includes(q) ||
+      `${order.shippingAddress?.firstName || ''} ${order.shippingAddress?.lastName || ''}`?.toLowerCase().includes(q) ||
+      order.shippingAddress?.email?.toLowerCase().includes(q);
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     
@@ -179,9 +179,9 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, setOrders, ini
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-sm font-semibold text-zinc-900">
-                          {order.shippingAddress.firstName} {order.shippingAddress.lastName}
+                          {order.shippingAddress?.firstName || 'Customer'} {order.shippingAddress?.lastName || ''}
                         </p>
-                        <p className="text-[10px] text-zinc-500">{order.shippingAddress.email}</p>
+                        <p className="text-[10px] text-zinc-500">{order.shippingAddress?.email || ''}</p>
                       </td>
                       <td className="px-6 py-4 text-sm text-zinc-600">{order.date}</td>
                       <td className="px-6 py-4 text-sm font-bold text-zinc-900">{formatPrice(order.total)}</td>

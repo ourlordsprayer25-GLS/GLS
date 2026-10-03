@@ -248,14 +248,25 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       })
       .subscribe();
 
-    // Auto re-sync when tab becomes visible or focused (e.g. phone screen unlock / tab switch)
+    // Auto re-sync when tab becomes visible or focused (throttled to at most once per 60s)
+    let lastProductFetchTime = Date.now();
     const fetchLatestProducts = async () => {
+      if (Date.now() - lastProductFetchTime < 60000) return;
+      lastProductFetchTime = Date.now();
       try {
         const { data, error } = await supabase.from('products').select('*');
         if (!error && data && data.length > 0) {
           wrappedOnUpdate(data as Product[]);
         }
-      } catch (e) {}
+      } catch (e) {
+        try {
+          const res = await localFetch('/api/sync/products');
+          const serverProducts = await res.json();
+          if (Array.isArray(serverProducts) && serverProducts.length > 0) {
+            wrappedOnUpdate(serverProducts);
+          }
+        } catch (_) {}
+      }
     };
 
     const handleFocusOrVisibility = () => {
@@ -269,11 +280,8 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       document.addEventListener('visibilitychange', handleFocusOrVisibility);
     }
 
-    const pollInterval = setInterval(fetchLatestProducts, 10000);
-
     return () => {
       clearTimeout(hardTimeout);
-      clearInterval(pollInterval);
       if (typeof window !== 'undefined') {
         window.removeEventListener('focus', handleFocusOrVisibility);
         document.removeEventListener('visibilitychange', handleFocusOrVisibility);
@@ -292,43 +300,89 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
 /**
  * Real-time Subscription to Orders across all devices & Supabase
  */
+const isMockOrder = (o: any) => {
+  if (!o) return false;
+  return (
+    o.id === 'ord-1001' ||
+    o.id === 'ord-1002' ||
+    o.id === 'ord-1003' ||
+    o.id === 'ord-1004' ||
+    o.id?.startsWith('ord-c00') ||
+    o.id?.startsWith('ord-100') ||
+    o.orderNumber?.startsWith('GLS-9') ||
+    o.id === 'ord-vintage-amp' ||
+    o.id === 'ord-acoustic-guitar' ||
+    o.id === 'ord-turntable' ||
+    o.id === 'ord-synth'
+  );
+};
+
 export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
   initSSE();
   listeners.orders.add(onUpdate);
+
+  const rawCached = getCache('gls_cache_orders');
+  const cached = Array.isArray(rawCached) ? rawCached.filter(o => !isMockOrder(o)) : null;
+  if (cached && cached.length > 0) {
+    onUpdate(cached);
+  }
+
+  const wrappedOnUpdate = (data: Order[]) => {
+    const clean = (Array.isArray(data) ? data : []).filter(o => !isMockOrder(o));
+    setCache('gls_cache_orders', clean);
+    onUpdate(clean);
+  };
 
   localFetch('/api/sync/orders')
     .then(r => r.json())
     .then(serverOrders => {
       if (Array.isArray(serverOrders) && serverOrders.length > 0) {
-        onUpdate(serverOrders);
-      } else {
-        onUpdate(INITIAL_ORDERS);
+        wrappedOnUpdate(serverOrders);
+      } else if (!isSupabaseConfigured) {
+        wrappedOnUpdate(INITIAL_ORDERS);
       }
     })
-    .catch(() => onUpdate(INITIAL_ORDERS));
+    .catch(() => {
+      if (!isSupabaseConfigured) wrappedOnUpdate(INITIAL_ORDERS);
+    });
 
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
-    supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
-          onUpdate(data as Order[]);
-        } else if (!error && data && data.length === 0) {
-          onUpdate(INITIAL_ORDERS);
-        } else if (error) {
-          console.warn('Supabase fetch orders error:', error.message);
-          onUpdate(INITIAL_ORDERS);
+    let ordersDebounceTimer: any = null;
+    const fetchSupabaseOrders = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && Array.isArray(data)) {
+          wrappedOnUpdate(data as Order[]);
+          try {
+            await localFetch('/api/sync/orders/bulk-sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+          } catch (e) {}
         }
-      });
+      } catch (err) {
+        try {
+          const res = await localFetch('/api/sync/orders');
+          const serverOrders = await res.json();
+          if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+            wrappedOnUpdate(serverOrders);
+          }
+        } catch (_) {}
+      }
+    };
+
+    fetchSupabaseOrders();
 
     supabaseChannel = supabase
       .channel('orders_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
-        const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-        if (data && data.length > 0) onUpdate(data as Order[]);
+        if (ordersDebounceTimer) clearTimeout(ordersDebounceTimer);
+        ordersDebounceTimer = setTimeout(fetchSupabaseOrders, 2000);
       })
       .subscribe();
   }
@@ -342,37 +396,96 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
 /**
  * Real-time Subscription to Users across all devices & Supabase
  */
+const isMockUser = (u: any) => {
+  if (!u) return false;
+  return (
+    u.id === 'usr-c001' ||
+    u.id === 'usr-c002' ||
+    u.id === 'usr-c003' ||
+    u.id === 'usr-c004' ||
+    u.id === 'usr-guest' ||
+    u.id?.startsWith('usr-c00') ||
+    u.email?.includes('@gladyns-patron.ci') ||
+    u.email?.includes('@luxeparis.fr') ||
+    u.email === 'sarah.j@example.com' ||
+    u.email === 'm.vance@example.com' ||
+    u.email === 'elena.r@example.com' ||
+    u.email === 'david.k@example.com' ||
+    u.email === 'jp.moreau@luxeparis.fr'
+  );
+};
+
 export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
   initSSE();
   listeners.users.add(onUpdate);
 
+  const rawCached = getCache('gls_cache_users');
+  const cached = Array.isArray(rawCached) ? rawCached.filter(u => !isMockUser(u)) : null;
+  if (cached && cached.length > 0) {
+    onUpdate(cached);
+  }
+
+  const wrappedOnUpdate = (data: UserProfile[]) => {
+    const clean = (Array.isArray(data) ? data : []).filter(u => !isMockUser(u));
+    // Sort registered users (with email) to the top!
+    clean.sort((a, b) => {
+      const aReg = Boolean(a.email);
+      const bReg = Boolean(b.email);
+      if (aReg && !bReg) return -1;
+      if (!aReg && bReg) return 1;
+      return 0;
+    });
+    setCache('gls_cache_users', clean);
+    onUpdate(clean);
+  };
+
   localFetch('/api/sync/users')
     .then(r => r.json())
     .then(serverUsers => {
-      if (Array.isArray(serverUsers)) {
-        onUpdate(serverUsers);
-      } else {
-        onUpdate(INITIAL_CUSTOMERS);
+      if (Array.isArray(serverUsers) && serverUsers.length > 0) {
+        wrappedOnUpdate(serverUsers);
+      } else if (!isSupabaseConfigured) {
+        wrappedOnUpdate(INITIAL_CUSTOMERS);
       }
     })
-    .catch(() => onUpdate(INITIAL_CUSTOMERS));
+    .catch(() => {
+      if (!isSupabaseConfigured) wrappedOnUpdate(INITIAL_CUSTOMERS);
+    });
 
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
-    supabase
-      .from('users')
-      .select('*')
-      .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
-          onUpdate(data as UserProfile[]);
+    let usersDebounceTimer: any = null;
+    const fetchSupabaseUsers = async () => {
+      try {
+        const { data, error } = await supabase.from('users').select('*');
+        if (!error && Array.isArray(data)) {
+          wrappedOnUpdate(data as UserProfile[]);
+          try {
+            await localFetch('/api/sync/users/bulk-sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+          } catch (e) {}
         }
-      });
+      } catch (err) {
+        try {
+          const res = await localFetch('/api/sync/users');
+          const serverUsers = await res.json();
+          if (Array.isArray(serverUsers) && serverUsers.length > 0) {
+            wrappedOnUpdate(serverUsers);
+          }
+        } catch (_) {}
+      }
+    };
+
+    fetchSupabaseUsers();
 
     supabaseChannel = supabase
       .channel('users_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, async () => {
-        const { data } = await supabase.from('users').select('*');
-        if (data && data.length > 0) onUpdate(data as UserProfile[]);
+        if (usersDebounceTimer) clearTimeout(usersDebounceTimer);
+        usersDebounceTimer = setTimeout(fetchSupabaseUsers, 2500);
       })
       .subscribe();
   }
@@ -403,21 +516,32 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
 
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
-    supabase
-      .from('notifications')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .then(({ data, error }) => {
+    let notifDebounceTimer: any = null;
+    const fetchNotifs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .order('timestamp', { ascending: false });
         if (!error && data && data.length > 0) {
           onUpdate(data as StoreNotification[]);
         }
-      });
+      } catch (err) {
+        try {
+          const res = await localFetch('/api/sync/notifications');
+          const serverNotifs = await res.json();
+          if (Array.isArray(serverNotifs)) onUpdate(serverNotifs);
+        } catch (_) {}
+      }
+    };
+
+    fetchNotifs();
 
     supabaseChannel = supabase
       .channel('notifications_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
-        const { data } = await supabase.from('notifications').select('*').order('timestamp', { ascending: false });
-        if (data && data.length > 0) onUpdate(data as StoreNotification[]);
+        if (notifDebounceTimer) clearTimeout(notifDebounceTimer);
+        notifDebounceTimer = setTimeout(fetchNotifs, 3000);
       })
       .subscribe();
   }
@@ -860,38 +984,85 @@ export async function fetchRealtimeUserProfile(userId: string): Promise<UserProf
 
 
 
+const isMockCategory = (c: any) => {
+  if (!c) return false;
+  return [
+    'audio',
+    'electronics',
+    'wearables',
+    'accessories',
+    'lighting',
+    'home',
+    'leather-goods',
+    'timepieces',
+    'stationery',
+    'all',
+    'musical',
+    'appliances',
+    'apparel'
+  ].includes(c.id);
+};
+
 export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
   initSSE();
   if (!(listeners as any).categories) (listeners as any).categories = new Set();
   (listeners as any).categories.add(onUpdate);
 
-  let hasLoaded = false;
-  const cachedCat = getCache('gls_cache_categories');
-  if (cachedCat && Array.isArray(cachedCat) && cachedCat.length > 0) {
-    onUpdate(cachedCat);
-    hasLoaded = true;
+  const rawCached = getCache('gls_cache_categories');
+  const cached = Array.isArray(rawCached) ? rawCached.filter(c => !isMockCategory(c)) : null;
+  if (cached && cached.length > 0) {
+    onUpdate(cached);
   }
   
   const wrappedOnUpdateCat = (data: any[]) => {
-    setCache('gls_cache_categories', data);
-    onUpdate(data);
+    const clean = (Array.isArray(data) ? data : []).filter(c => !isMockCategory(c));
+    setCache('gls_cache_categories', clean);
+    onUpdate(clean);
   };
   
   localFetch('/api/sync/categories')
     .then(r => r.json())
     .then(serverCats => {
-      if (Array.isArray(serverCats) && serverCats.length > 0) { wrappedOnUpdateCat(serverCats); hasLoaded = true; }
+      if (Array.isArray(serverCats) && serverCats.length > 0) {
+        wrappedOnUpdateCat(serverCats);
+      } else if (!isSupabaseConfigured) {
+        wrappedOnUpdateCat(CATEGORIES as any);
+      }
     })
     .catch(() => {});
 
+  let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
-    supabase.from('categories').select('*').then(({ data, error }) => {
-      if (!error && data) { wrappedOnUpdateCat(data); hasLoaded = true; }
-      else if (error && !hasLoaded) wrappedOnUpdateCat(CATEGORIES as any);
-    });
-  } else {
-    setTimeout(() => { if (!hasLoaded) wrappedOnUpdateCat(CATEGORIES as any); }, 1000);
+    const fetchSupabaseCategories = async () => {
+      try {
+        const { data, error } = await supabase.from('categories').select('*');
+        if (!error && Array.isArray(data)) {
+          wrappedOnUpdateCat(data);
+          try {
+            await localFetch('/api/sync/categories/bulk-sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+          } catch (e) {}
+        }
+      } catch (err) {}
+    };
+
+    fetchSupabaseCategories();
+
+    supabaseChannel = supabase
+      .channel('categories_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
+        fetchSupabaseCategories();
+      })
+      .subscribe();
   }
+
+  return () => {
+    if ((listeners as any).categories) (listeners as any).categories.delete(onUpdate);
+    if (supabaseChannel) supabase.removeChannel(supabaseChannel);
+  };
 }
 
 export async function saveRealtimeCategory(category: any) {
@@ -922,38 +1093,79 @@ export async function deleteRealtimeCategory(categoryId: string) {
   }
 }
 
+const isMockBrand = (b: any) => {
+  if (!b) return false;
+  return (
+    b.origin === 'United States' ||
+    b.origin === 'Hong Kong' ||
+    b.origin === 'Taiwan' ||
+    b.origin === "Côte d'Ivoire" ||
+    b.name === 'Bang & Olufsen' ||
+    b.name === 'Teenage Engineering' ||
+    b.name === 'Leica'
+  );
+};
+
 export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
   initSSE();
   if (!(listeners as any).brands) (listeners as any).brands = new Set();
   (listeners as any).brands.add(onUpdate);
 
-  let hasLoaded = false;
-  const cachedBrand = getCache('gls_cache_brands');
-  if (cachedBrand && Array.isArray(cachedBrand) && cachedBrand.length > 0) {
-    onUpdate(cachedBrand);
-    hasLoaded = true;
+  const rawCached = getCache('gls_cache_brands');
+  const cached = Array.isArray(rawCached) ? rawCached.filter(b => !isMockBrand(b)) : null;
+  if (cached && cached.length > 0) {
+    onUpdate(cached);
   }
   
   const wrappedOnUpdateBrand = (data: any[]) => {
-    setCache('gls_cache_brands', data);
-    onUpdate(data);
+    const clean = (Array.isArray(data) ? data : []).filter(b => !isMockBrand(b));
+    setCache('gls_cache_brands', clean);
+    onUpdate(clean);
   };
   
   localFetch('/api/sync/brands')
     .then(r => r.json())
     .then(serverBrands => {
-      if (Array.isArray(serverBrands) && serverBrands.length > 0) { onUpdate(serverBrands); hasLoaded = true; }
+      if (Array.isArray(serverBrands) && serverBrands.length > 0) {
+        wrappedOnUpdateBrand(serverBrands);
+      } else if (!isSupabaseConfigured) {
+        wrappedOnUpdateBrand(INITIAL_BRANDS);
+      }
     })
     .catch(() => {});
 
+  let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
-    supabase.from('brands').select('*').then(({ data, error }) => {
-      if (!error && data && data.length > 0) { wrappedOnUpdateBrand(data); hasLoaded = true; }
-      else if (error && !hasLoaded) wrappedOnUpdateBrand(INITIAL_BRANDS);
-    });
-  } else {
-    setTimeout(() => { if (!hasLoaded) wrappedOnUpdateBrand(INITIAL_BRANDS); }, 1000);
+    const fetchSupabaseBrands = async () => {
+      try {
+        const { data, error } = await supabase.from('brands').select('name, origin');
+        if (!error && Array.isArray(data)) {
+          wrappedOnUpdateBrand(data);
+          try {
+            await localFetch('/api/sync/brands/bulk-sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+          } catch (e) {}
+        }
+      } catch (err) {}
+    };
+
+    fetchSupabaseBrands();
+
+    supabaseChannel = supabase
+      .channel('brands_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'brands' }, () => {
+        fetchSupabaseBrands();
+      })
+      .subscribe();
   }
+
+  return () => {
+    if ((listeners as any).brands) (listeners as any).brands.delete(onUpdate);
+    if (supabaseChannel) supabase.removeChannel(supabaseChannel);
+  };
 }
 
 export async function saveRealtimeBrand(brand: any) {

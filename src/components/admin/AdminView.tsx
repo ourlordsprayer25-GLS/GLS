@@ -620,7 +620,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                                       Order {o.orderNumber}
                                     </p>
                                     <p className="text-[10px] text-zinc-500 truncate">
-                                      {o.shippingAddress.firstName} {o.shippingAddress.lastName} · {o.shippingAddress.email}
+                                      {o.shippingAddress?.firstName || 'Customer'} {o.shippingAddress?.lastName || ''} · {o.shippingAddress?.email || ''}
                                     </p>
                                   </div>
                                 </div>
@@ -846,8 +846,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-400 font-mono text-xs font-bold">#{order.orderNumber.slice(-4)}</div>
                             <div>
-                              <p className="text-xs font-bold text-zinc-900">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
-                              <p className="text-[10px] text-zinc-400">{order.items.length} pieces · {order.date}</p>
+                              <p className="text-xs font-bold text-zinc-900">{order.shippingAddress?.firstName || 'Customer'} {order.shippingAddress?.lastName || ''}</p>
+                              <p className="text-[10px] text-zinc-400">{(order.items || []).length} pieces · {order.date}</p>
                             </div>
                           </div>
                           <div className="text-right">

@@ -159,12 +159,12 @@ function AppContent() {
   useEffect(() => {
     initServerSync({
       products: isSupabaseConfigured ? [] : INITIAL_PRODUCTS,
-      orders: INITIAL_ORDERS,
-      users: INITIAL_CUSTOMERS,
+      orders: isSupabaseConfigured ? [] : INITIAL_ORDERS,
+      users: isSupabaseConfigured ? [] : INITIAL_CUSTOMERS,
       notifications: INITIAL_NOTIFICATIONS,
       settings: DEFAULT_STORE_SETTINGS,
-      categories: CATEGORIES as any,
-      brands: INITIAL_BRANDS,
+      categories: isSupabaseConfigured ? [] : (CATEGORIES as any),
+      brands: isSupabaseConfigured ? [] : INITIAL_BRANDS,
     });
 
     const unsubProducts = subscribeToProducts(setProducts, () => setIsReady(true));

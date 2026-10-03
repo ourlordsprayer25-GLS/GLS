@@ -75,7 +75,7 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
     });
   }, [users, searchQuery, statusFilter, deviceFilter]);
 
-  // Aggregate all live activities into a chronological feed
+  // Aggregate all live activities into a chronological feed (newest first)
   const liveActivityFeed = useMemo(() => {
     const list: { user: UserProfile; event: UserActivityEvent }[] = [];
     users.forEach((u) => {
@@ -84,6 +84,11 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
           list.push({ user: u, event: act });
         });
       }
+    });
+    list.sort((a, b) => {
+      const timeA = typeof a.event.timestamp === 'number' ? a.event.timestamp : (parseInt(a.event.id.replace('act-', '')) || 0);
+      const timeB = typeof b.event.timestamp === 'number' ? b.event.timestamp : (parseInt(b.event.id.replace('act-', '')) || 0);
+      return timeB - timeA;
     });
     return list;
   }, [users]);
@@ -206,13 +211,13 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
               <Globe className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-              +19.4%
+              Live
             </span>
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Daily Web Visitors</p>
-            <h3 className="text-2xl font-display font-bold text-zinc-900 mt-1">1,482</h3>
-            <p className="text-[10px] text-zinc-400 mt-0.5">Unique storefront visits today</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Visitors Tracked</p>
+            <h3 className="text-2xl font-display font-bold text-zinc-900 mt-1">{users.length}</h3>
+            <p className="text-[10px] text-zinc-400 mt-0.5">Real visits recorded in Supabase</p>
           </div>
         </div>
 
@@ -223,13 +228,13 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
               <Users className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-              {users.length} Total
+              {users.filter(u => u.email).length} Registered
             </span>
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Daily Registered/Sign-ins</p>
-            <h3 className="text-2xl font-display font-bold text-zinc-900 mt-1">34</h3>
-            <p className="text-[10px] text-zinc-400 mt-0.5">Authentications logged today</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Registered Patrons</p>
+            <h3 className="text-2xl font-display font-bold text-zinc-900 mt-1">{users.filter(u => u.email).length}</h3>
+            <p className="text-[10px] text-zinc-400 mt-0.5">Authenticated customer profiles</p>
           </div>
         </div>
 
@@ -528,17 +533,19 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
                   className="flex items-start gap-4 p-4 rounded-xl border border-zinc-100 hover:border-zinc-200 bg-zinc-50/50 hover:bg-white transition-all"
                 >
                   <div className="w-10 h-10 rounded-full bg-zinc-950 text-white font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
-                    {(user.firstName?.[0] || 'C') + (user.lastName?.[0] || 'U')}
+                    {user.firstName ? user.firstName.trim().charAt(0).toUpperCase() : (user.email ? user.email.trim().charAt(0).toUpperCase() : 'V')}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-xs text-zinc-950">
-                          {user.firstName} {user.lastName}
+                          {user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : (user.email ? user.email : `Storefront Guest (${user.id.slice(0, 8)})`)}
                         </span>
-                        <span className="text-[10px] text-zinc-500 font-mono">
-                          ({user.location?.city}, {user.location?.country})
-                        </span>
+                        {user.location && (
+                          <span className="text-[10px] text-zinc-500 font-mono">
+                            ({user.location?.city || user.location?.country || "Côte d'Ivoire"})
+                          </span>
+                        )}
                         {user.deviceInfo?.isPwa ? (
                           <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
                             ⚡ PWA App
@@ -549,7 +556,11 @@ export const AdminCustomerTracker: React.FC<AdminCustomerTrackerProps> = ({ user
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] font-mono text-zinc-400">{event.timestamp}</span>
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        {typeof event.timestamp === 'number'
+                          ? new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                          : (event.timestamp || 'Just now')}
+                      </span>
                     </div>
 
                     <p className="text-xs font-semibold text-zinc-800 mt-1 flex items-center gap-1.5">

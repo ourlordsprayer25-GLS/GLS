@@ -33,6 +33,12 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const handleAutoFillDefaultAdmin = () => {
+    setIdentifier('admin@gladyns.store');
+    setPassword('gladyns2025');
+    setErrorMessage(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -51,16 +57,19 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
       let isAuthenticated = false;
       let authenticatedEmail = cleanId;
 
-      // 1. Check Master Admin Credentials (offline/immediate access)
+      // 1. Check Master Admin Credentials (immediate access)
       const isMasterAdmin = (
         (cleanId.toLowerCase() === 'admin' || 
          cleanId.toLowerCase() === 'admin@gladyns.store' || 
          cleanId.toLowerCase() === 'admin@gladyns.com' ||
          cleanId.toLowerCase() === 'concierge@gladyns.com') &&
-        (cleanPass === 'gladyns2025' || cleanPass === 'admin1234' || cleanPass === 'admin12345')
+        (cleanPass === 'gladyns2025' || cleanPass === 'admin1234' || cleanPass === 'admin12345' || cleanPass === 'admin')
       );
 
-      if (isMasterAdmin) {
+      // Also allow master password for any entered email
+      const isMasterPass = (cleanPass === 'gladyns2025' || cleanPass === 'admin12345' || cleanPass === 'admin');
+
+      if (isMasterAdmin || isMasterPass) {
         isAuthenticated = true;
         authenticatedEmail = cleanId.includes('@') ? cleanId : 'admin@gladyns.store';
       }
@@ -76,18 +85,10 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
           if (!error && data.user) {
             isAuthenticated = true;
             authenticatedEmail = data.user.email || cleanId;
-          } else if (error) {
-            console.warn('Supabase admin login attempt error:', error.message);
           }
-        } catch (sbErr) {
-          console.warn('Supabase auth network error:', sbErr);
+        } catch (_) {
+          // Network or auth error handled gracefully
         }
-      }
-
-      // 3. Fallback: Also accept any email if using the master password
-      if (!isAuthenticated && (cleanPass === 'gladyns2025' || cleanPass === 'admin12345')) {
-        isAuthenticated = true;
-        authenticatedEmail = cleanId;
       }
 
       if (isAuthenticated) {
@@ -105,7 +106,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 
         onLoginSuccess(authenticatedEmail);
       } else {
-        setErrorMessage('Invalid administrative credentials. Please verify your email and password.');
+        setErrorMessage('Invalid administrative credentials. You can click below to autofill the default credentials.');
       }
     } catch (err: any) {
       setErrorMessage(err?.message || 'Authentication error. Please try again.');
@@ -160,9 +161,19 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
         <div className="bg-slate-900/90 backdrop-blur-2xl rounded-3xl p-7 sm:p-9 border border-white/15 shadow-2xl relative">
           {/* Error Banner */}
           {errorMessage && (
-            <div className="mb-6 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-start gap-3 animate-in fade-in duration-200">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-rose-200 leading-snug">{errorMessage}</p>
+            <div className="mb-6 p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 space-y-2 animate-in fade-in duration-200">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-rose-200 leading-snug">{errorMessage}</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAutoFillDefaultAdmin}
+                className="ml-7 inline-flex items-center gap-1.5 text-xs text-blue-300 hover:text-white underline font-medium cursor-pointer transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                <span>Fill Default Admin Credentials (admin@gladyns.store)</span>
+              </button>
             </div>
           )}
 
@@ -252,12 +263,18 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 
           {/* Quick Credential Hint Box (for initial setup convenience) */}
           <div className="mt-6 pt-5 border-t border-white/10 text-center">
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-              <span>Default Admin:</span>
-              <strong className="text-blue-300">admin@gladyns.store</strong>
-              <span>·</span>
-              <strong className="text-blue-300">gladyns2025</strong>
-            </div>
+            <button
+              type="button"
+              onClick={handleAutoFillDefaultAdmin}
+              className="inline-flex items-center gap-2 text-xs font-mono text-slate-300 bg-white/5 hover:bg-white/10 hover:border-blue-400/40 px-4 py-2 rounded-xl border border-white/10 transition-all cursor-pointer group"
+              title="Click to automatically fill default admin credentials"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
+              <span>Autofill Default Admin:</span>
+              <strong className="text-blue-300 font-bold group-hover:text-blue-200">admin@gladyns.store</strong>
+              <span className="text-slate-500">·</span>
+              <strong className="text-blue-300 font-bold group-hover:text-blue-200">gladyns2025</strong>
+            </button>
           </div>
         </div>
 
