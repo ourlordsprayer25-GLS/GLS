@@ -133,17 +133,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <img
               src={slide.image}
               alt={slide.title}
-              className="w-full h-full object-cover object-center md:object-right transition-transform duration-700 ease-out"
+              className="w-full h-full object-cover object-center md:object-right transition-transform duration-700 ease-out brightness-[1.14] contrast-[1.05] saturate-[1.08]"
             />
-            {/* Directional lighting: Left & bottom fade protects text while leaving product 100% bright & vivid */}
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/90 via-zinc-950/50 to-transparent w-full md:w-3/4 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/20 to-transparent pointer-events-none" />
+            {/* Ultra-soft feathering: Keeps product 100% luminous, vivid & bright */}
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/65 via-zinc-950/20 to-transparent w-full md:w-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-zinc-950/50 to-transparent pointer-events-none" />
           </div>
         ))}
 
         {/* Content Overlay */}
         <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 sm:p-8 lg:p-12 w-full pointer-events-none">
-          <div className="max-w-xl pointer-events-auto space-y-3 sm:space-y-4 p-4 sm:p-0 rounded-2xl sm:rounded-none bg-zinc-950/35 sm:bg-transparent backdrop-blur-xs sm:backdrop-blur-none border border-white/5 sm:border-none">
+          <div className="max-w-xl pointer-events-auto space-y-3 sm:space-y-4 p-5 sm:p-7 rounded-3xl bg-zinc-950/45 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/40">
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 backdrop-blur-md border border-amber-400/40 text-xs font-bold text-amber-300 shadow-lg tracking-wider uppercase">
