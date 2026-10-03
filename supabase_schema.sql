@@ -222,15 +222,12 @@ CREATE TRIGGER trigger_sync_new_auth_user
 AFTER INSERT OR UPDATE ON auth.users
 FOR EACH ROW EXECUTE FUNCTION public.handle_new_auth_user();
 
--- Auto-confirm trigger
+-- Auto-confirm trigger (only updates email_confirmed_at since confirmed_at is a generated column)
 CREATE OR REPLACE FUNCTION public.auto_confirm_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.email_confirmed_at IS NULL THEN
     NEW.email_confirmed_at := NOW();
-  END IF;
-  IF NEW.confirmed_at IS NULL THEN
-    NEW.confirmed_at := NOW();
   END IF;
   RETURN NEW;
 END;
@@ -243,8 +240,7 @@ FOR EACH ROW EXECUTE FUNCTION public.auto_confirm_new_user();
 
 -- Retroactively auto-confirm existing unconfirmed customer accounts
 UPDATE auth.users
-SET email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
-    confirmed_at = COALESCE(confirmed_at, NOW())
+SET email_confirmed_at = COALESCE(email_confirmed_at, NOW())
 WHERE email_confirmed_at IS NULL;
 
 

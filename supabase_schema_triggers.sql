@@ -134,9 +134,6 @@ BEGIN
   IF NEW.email_confirmed_at IS NULL THEN
     NEW.email_confirmed_at := NOW();
   END IF;
-  IF NEW.confirmed_at IS NULL THEN
-    NEW.confirmed_at := NOW();
-  END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -148,8 +145,7 @@ FOR EACH ROW EXECUTE FUNCTION public.auto_confirm_new_user();
 
 -- 6. Retroactively auto-confirm and sync any existing unconfirmed customer accounts
 UPDATE auth.users
-SET email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
-    confirmed_at = COALESCE(confirmed_at, NOW())
+SET email_confirmed_at = COALESCE(email_confirmed_at, NOW())
 WHERE email_confirmed_at IS NULL;
 
 
