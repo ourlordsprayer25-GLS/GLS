@@ -503,6 +503,7 @@ function AppContent() {
 
   // Ref & localStorage tracking for already alerted product IDs so page refresh NEVER re-triggers arrival alerts
   const alertedProductIdsRef = useRef<Set<string> | null>(null);
+  const catalogHydratedRef = useRef<boolean>(false);
 
   // Ref to track products already alerted for low stock to avoid duplicate spam
   const lowStockAlertedRef = useRef<Record<string, boolean>>({});
@@ -519,20 +520,28 @@ function AppContent() {
           if (Array.isArray(parsed)) parsed.forEach((id: string) => alertedProductIdsRef.current?.add(id));
         }
       } catch (e) {}
+    }
 
-      // On first boot, mark all existing catalog products as alerted so refreshing NEVER re-fires toasts
+    // While booting or before catalog is stably ready, absorb all existing items as baseline without firing toasts
+    if (isInitialBootLoading || !isReady || !catalogHydratedRef.current) {
       products.forEach((p) => alertedProductIdsRef.current?.add(p.id));
       try {
         localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alertedProductIdsRef.current)));
       } catch (e) {}
-    } else {
-      // Detect newly added products during live session
-      products.forEach((product) => {
-        if (!alertedProductIdsRef.current?.has(product.id)) {
-          alertedProductIdsRef.current?.add(product.id);
-          try {
-            localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alertedProductIdsRef.current)));
-          } catch (e) {}
+
+      if (isReady && !isInitialBootLoading) {
+        catalogHydratedRef.current = true;
+      }
+      return;
+    }
+
+    // Detect truly newly added products during active session
+    products.forEach((product) => {
+      if (!alertedProductIdsRef.current?.has(product.id)) {
+        alertedProductIdsRef.current?.add(product.id);
+        try {
+          localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alertedProductIdsRef.current)));
+        } catch (e) {}
 
           const title = `✨ New Arrival: ${product.name}`;
           const message = `Discover our newest addition: "${product.name}" is now available in store for ${formatPrice(product.price)}.`;
@@ -562,7 +571,6 @@ function AppContent() {
           });
         }
       });
-    }
 
     // Check low stock
     products.forEach((product) => {
@@ -952,6 +960,19 @@ function AppContent() {
 
       if (!['drop', 'promo', 'wishlist', 'order', 'product', 'restock'].includes(n.type)) return;
 
+      // Filter out notifications for products that have been deleted or no longer exist in catalog
+      if ((n.type === 'product' || n.type === 'restock' || n.type === 'drop') && n.linkTarget && products.length > 0) {
+        const productExists = products.some(p => p.id === n.linkTarget || p.slug === n.linkTarget);
+        if (!productExists) return;
+      }
+
+      // Filter out stale broadcast alerts older than 7 days so visitors don't see ancient notifications from weeks ago
+      if (['drop', 'promo', 'product', 'restock'].includes(n.type) && n.timestamp) {
+        const timeMs = typeof n.timestamp === 'number' ? n.timestamp : new Date(n.timestamp).getTime();
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        if (!isNaN(timeMs) && timeMs < sevenDaysAgo) return;
+      }
+
       // Extract status keyword to merge DB trigger & client transition notifications for the same status change
       const titleLower = (n.title || '').toLowerCase();
       const statusKey = titleLower.includes('processing') ? 'processing'
@@ -970,7 +991,7 @@ function AppContent() {
       }
     });
     return Array.from(map.values());
-  }, [notifications, user]);
+  }, [notifications, user, products]);
   const adminNotifications = notifications.filter(n => n.isAdminOnly || n.type !== 'order' || !n.customerId);
   const unreadNotificationCount = customerNotifications.filter((n) => !n.read).length;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);

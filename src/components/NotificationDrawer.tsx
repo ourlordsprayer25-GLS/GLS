@@ -37,6 +37,29 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const formatNotificationDate = (timestamp: number) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24 && date.getDate() === now.getDate()) {
+      return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+    if (diffDays === 1 || (diffDays < 2 && date.getDate() === now.getDate() - 1)) {
+      return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+    if (diffDays < 7) {
+      return `${diffDays}d ago · ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+    return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
   const getIcon = (type: StoreNotification['type']) => {
     switch (type) {
       case 'order':
@@ -246,7 +269,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
                                     <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-zinc-100">
                                       <span className="text-[11px] text-zinc-400 font-mono">
-                                        {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {formatNotificationDate(notif.timestamp)}
                                       </span>
 
                                       {notif.linkTarget && (
