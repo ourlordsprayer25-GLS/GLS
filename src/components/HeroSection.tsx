@@ -133,18 +133,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <img
               src={slide.image}
               alt={slide.title}
-              className="w-full h-full object-cover object-center brightness-[0.85] contrast-[1.10]"
+              className="w-full h-full object-cover object-center md:object-right transition-transform duration-700 ease-out"
             />
-            {/* Multi-layered High-Contrast Scrims */}
-            <div className="absolute inset-0 bg-black/40" />
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/30" />
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/95 via-zinc-950/85 to-zinc-950/20 md:to-transparent" />
+            {/* Directional lighting: Left & bottom fade protects text while leaving product 100% bright & vivid */}
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/90 via-zinc-950/50 to-transparent w-full md:w-3/4 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/20 to-transparent pointer-events-none" />
           </div>
         ))}
 
         {/* Content Overlay */}
-        <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 sm:p-10 lg:p-14 w-full pointer-events-none">
-          <div className="max-w-2xl pointer-events-auto space-y-3 sm:space-y-4">
+        <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 sm:p-8 lg:p-12 w-full pointer-events-none">
+          <div className="max-w-xl pointer-events-auto space-y-3 sm:space-y-4 p-4 sm:p-0 rounded-2xl sm:rounded-none bg-zinc-950/35 sm:bg-transparent backdrop-blur-xs sm:backdrop-blur-none border border-white/5 sm:border-none">
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 backdrop-blur-md border border-amber-400/40 text-xs font-bold text-amber-300 shadow-lg tracking-wider uppercase">
