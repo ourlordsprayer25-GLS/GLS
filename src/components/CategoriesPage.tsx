@@ -47,10 +47,12 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
 
+  const CATEGORY_HERO_FALLBACK = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop';
+
   const heroSlides: Slide[] = [
     {
       id: 'cat-slide-1',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
       badge: 'Multi-Department Catalog',
       title: 'Shop All Store Departments',
       subtitle: 'Browse all curated disciplines across Musical Instruments, Precision Electronics, Home Appliances, Apparel, and Tuscan Leather Carry.',
@@ -58,7 +60,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-musical',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600&auto=format&fit=crop',
       badge: 'Musical Instruments & Studio',
       title: 'Polyphonic Synthesizers & Vinyl Hi-Fi',
       subtitle: 'Discrete 8-voice analog synthesizers, direct-drive turntables with carbon tonearms, and ribbon studio monitors.',
@@ -66,7 +68,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-appliances',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1600&auto=format&fit=crop',
       badge: 'Home Appliances & Living',
       title: 'Autonomous Living & Barista Craft',
       subtitle: 'LiDAR auto-empty robot vacuums, Italian dual-boiler espresso systems, and medical-grade HEPA 13 air purifiers.',
@@ -74,7 +76,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-electronics',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop',
       badge: 'Electronics & Audio',
       title: 'Planar Magnetic & Studio Tech',
       subtitle: 'High-res planar acoustic headphones, audiophile hi-fi components, and tactile machined studio gear.',
@@ -82,7 +84,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-2',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1600&auto=format&fit=crop',
       badge: 'Fashion & Tailoring',
       title: 'Architectural Cuts & Twill',
       subtitle: 'Double-faced Biella virgin wool overcoats and Japanese selvedge twill workwear jackets.',
@@ -90,7 +92,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     },
     {
       id: 'cat-slide-4',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1600&auto=format&fit=crop',
       badge: 'Tuscan Leather Carry',
       title: 'Vegetable-Tanned Travel Bags',
       subtitle: 'Consortium-certified full-grain cowhide burnished with organic beeswax to develop rich patina.',
@@ -256,15 +258,24 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
                   isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                 }`}
               >
+                {/* Luminous Ambient Luxury Base */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-zinc-950 via-zinc-900 to-blue-950 pointer-events-none" />
+
                 <img
-                  src={slide.image}
+                  src={slide.image || CATEGORY_HERO_FALLBACK}
                   alt={slide.title}
-                  className={`w-full h-full object-cover object-center transition-transform duration-7000 ease-out ${
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== CATEGORY_HERO_FALLBACK) {
+                      target.src = CATEGORY_HERO_FALLBACK;
+                    }
+                  }}
+                  className={`w-full h-full object-cover object-center transition-transform duration-7000 ease-out brightness-[1.12] contrast-[1.05] saturate-[1.08] ${
                     isActive ? 'scale-105' : 'scale-100'
                   }`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/95 via-zinc-950/45 to-zinc-950/20" />
-                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/75 via-transparent to-transparent hidden sm:block" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/35 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/65 via-transparent to-transparent hidden sm:block" />
 
                 <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 z-20 max-w-2xl">
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">

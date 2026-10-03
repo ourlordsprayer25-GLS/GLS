@@ -28,7 +28,42 @@ interface Slide {
   subtitle: string;
   ctaText?: string;
   filterAction?: () => void;
+  product?: Product;
 }
+
+const LUXURY_FALLBACKS: Record<SectionType, string[]> = {
+  'new-arrivals': [
+    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1600&auto=format&fit=crop',
+  ],
+  'hot-deals': [
+    'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1600&auto=format&fit=crop',
+  ],
+  'bestsellers': [
+    'https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=1600&auto=format&fit=crop',
+  ],
+  'categories': [
+    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop',
+  ],
+  'collection': [
+    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=1600&auto=format&fit=crop',
+  ],
+};
+
+const hasValidImage = (p: Product) => {
+  const img = p.primaryImage || p.images?.[0]?.url;
+  return typeof img === 'string' && img.trim().length > 15 && !img.includes('/src/assets/images/');
+};
 
 interface SectionPageProps {
   sectionType: SectionType;
@@ -60,6 +95,37 @@ export const SectionPage: React.FC<SectionPageProps> = ({
   const [isPausedHover, setIsPausedHover] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
+  // Filter products matching this section
+  const sectionBaseProducts = useMemo(() => {
+    if (sectionType === 'hot-deals') {
+      return allProducts.filter(
+        (p) => p.isHotDeal || (p.originalPrice && p.originalPrice > p.price)
+      );
+    }
+    if (sectionType === 'new-arrivals') {
+      const getTimestamp = (p: Product): number => {
+        if ((p as any).created_at) {
+          const parsed = Date.parse((p as any).created_at);
+          if (!isNaN(parsed)) return parsed;
+        }
+        const match = p.id.match(/\d{10,}/);
+        return match ? parseInt(match[0], 10) : 0;
+      };
+
+      const tagged = allProducts.filter(
+        (p) => p.isNewArrival || p.tag === 'New Season Drop' || p.tag === 'New Arrival'
+      );
+      const list = tagged.length > 0 ? tagged : allProducts;
+      return [...list].sort((a, b) => getTimestamp(b) - getTimestamp(a));
+    }
+    if (sectionType === 'bestsellers') {
+      return allProducts.filter(
+        (p) => p.tag === 'Bestseller' || p.rating >= 4.8 || p.reviewCount > 10
+      );
+    }
+    return allProducts;
+  }, [allProducts, sectionType]);
+
   // Configuration for each section's title, breadcrumbs, and slides
   const sectionConfig = useMemo(() => {
     switch (sectionType) {
@@ -71,7 +137,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'deal-slide-1',
-              image: '',
+              image: LUXURY_FALLBACKS['hot-deals'][0],
               badge: 'Archive Reductions',
               title: 'Seasonal Archive Vault',
               subtitle: 'Limited micro-batch pricing on tailored overcoats, raw selvedge twill, and knitwear.',
@@ -79,7 +145,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'deal-slide-2',
-              image: '',
+              image: LUXURY_FALLBACKS['hot-deals'][1],
               badge: 'Italian Double-Faced Wool',
               title: 'Architectural Trench & Overcoats',
               subtitle: 'Precision unlined split seams crafted with heritage wool mills in Biella, Italy.',
@@ -87,7 +153,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'deal-slide-3',
-              image: '',
+              image: LUXURY_FALLBACKS['hot-deals'][2],
               badge: 'Tuscan Leather Carry',
               title: 'Hand-Burnished Cabin Weekenders',
               subtitle: 'Full-grain certified vegetable-tanned leather designed to patinate with age.',
@@ -104,7 +170,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'new-slide-1',
-              image: '',
+              image: LUXURY_FALLBACKS['new-arrivals'][0],
               badge: 'Autumn / Winter Release',
               title: 'New Season Additions',
               subtitle: 'Architectural discipline in virgin wool trousers, heavy twill coats, and cashmere.',
@@ -112,7 +178,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'new-slide-2',
-              image: '',
+              image: LUXURY_FALLBACKS['new-arrivals'][1],
               badge: 'Featured Collection',
               title: 'Structured Everyday Foundations',
               subtitle: 'Japanese selvedge twill with clean-finished bound seams and corozo hardware.',
@@ -120,7 +186,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'new-slide-3',
-              image: '',
+              image: LUXURY_FALLBACKS['new-arrivals'][2],
               badge: 'Fine Gauge Knitwear',
               title: 'Tasmanian Merino Ribbed Knits',
               subtitle: '7-gauge fisherman rib engineered for thermoregulation and enduring shape.',
@@ -137,7 +203,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'best-slide-1',
-              image: '',
+              image: LUXURY_FALLBACKS['bestsellers'][0],
               badge: 'Highest Rated',
               title: 'Community Favorites',
               subtitle: 'The definitive selection of pieces that have defined the GLADYNS aesthetic.',
@@ -145,7 +211,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'best-slide-2',
-              image: '',
+              image: LUXURY_FALLBACKS['bestsellers'][1],
               badge: 'Perennial Classic',
               title: 'The Wool Trench Coat',
               subtitle: 'Our most sought-after outerwear piece, crafted for longevity and silhouette.',
@@ -153,7 +219,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'best-slide-3',
-              image: '',
+              image: LUXURY_FALLBACKS['bestsellers'][2],
               badge: 'Boutique Favorite',
               title: 'Structured Twill Chore Jacket',
               subtitle: 'A versatile foundation piece that continues to lead our seasonal requests.',
@@ -170,7 +236,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'cat-slide-1',
-              image: '',
+              image: LUXURY_FALLBACKS['categories'][0],
               badge: 'Multi-Department Showcase',
               title: 'All Store Departments',
               subtitle: 'Independent collections across Musical Instruments, Electronics & Audio, Home Appliances, and Apparel.',
@@ -178,7 +244,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'cat-slide-2',
-              image: '',
+              image: LUXURY_FALLBACKS['categories'][1],
               badge: 'Musical Instruments & Studio',
               title: 'Polyphonic Synthesizers & Vinyl Hi-Fi',
               subtitle: 'Discrete analog oscillators, direct-drive turntables, and ribbon nearfield monitors.',
@@ -186,7 +252,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'cat-slide-3',
-              image: '',
+              image: LUXURY_FALLBACKS['categories'][2],
               badge: 'Home Appliances & Living',
               title: 'Smart Home Automation & Appliances',
               subtitle: 'LiDAR auto-empty robot vacuum stations and dual-boiler commercial-grade espresso machines.',
@@ -194,7 +260,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'cat-slide-4',
-              image: '',
+              image: LUXURY_FALLBACKS['categories'][3],
               badge: 'Electronics & Audio',
               title: 'Planar Magnetic & Studio Tech',
               subtitle: 'Studio headphones, high-resolution audio processing, and acoustic monitors.',
@@ -212,7 +278,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           slides: [
             {
               id: 'col-slide-1',
-              image: '',
+              image: LUXURY_FALLBACKS['collection'][0],
               badge: 'The Complete Archive',
               title: 'Enduring Wardrobe Architecture',
               subtitle: 'Every object is designed with permanent materials, zero trends, and lifetime repairs.',
@@ -220,7 +286,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'col-slide-2',
-              image: '',
+              image: LUXURY_FALLBACKS['collection'][1],
               badge: 'Exclusive Network',
               title: 'Artisanal Portuguese & Italian Craft',
               subtitle: 'Transparent supply chains and carbon-neutral direct distribution.',
@@ -228,7 +294,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             },
             {
               id: 'col-slide-3',
-              image: '',
+              image: LUXURY_FALLBACKS['collection'][2],
               badge: 'Iconic Pieces',
               title: 'Japanese Twill Chore Jacket',
               subtitle: 'Custom-milled 14.5oz selvedge twill with functional internal pockets.',
@@ -239,7 +305,31 @@ export const SectionPage: React.FC<SectionPageProps> = ({
     }
   }, [sectionType]);
 
-  const slides = sectionConfig.slides;
+  // Dynamically assemble slides prioritizing real new products with valid images
+  const slides = useMemo(() => {
+    const validProducts = sectionBaseProducts.filter(hasValidImage);
+    const fallbacks = LUXURY_FALLBACKS[sectionType] || LUXURY_FALLBACKS['collection'];
+
+    const productSlides: Slide[] = validProducts.slice(0, 5).map((prod, idx) => ({
+      id: `prod-slide-${prod.id}`,
+      image: prod.primaryImage || prod.images?.[0]?.url || fallbacks[idx % fallbacks.length],
+      badge: prod.tag || prod.categoryLabel || (sectionType === 'new-arrivals' ? 'New Arrival' : sectionType === 'hot-deals' ? 'Special Deal' : 'Featured Piece'),
+      title: prod.name,
+      subtitle: prod.subtitle || prod.tagline || (prod.description ? prod.description.slice(0, 120) : ''),
+      ctaText: 'View Product',
+      product: prod,
+    }));
+
+    if (productSlides.length >= 3) {
+      return productSlides;
+    }
+
+    if (productSlides.length > 0) {
+      return [...productSlides, ...sectionConfig.slides].slice(0, 4);
+    }
+
+    return sectionConfig.slides;
+  }, [sectionBaseProducts, sectionConfig.slides, sectionType]);
 
   // Auto-slide effect
   useEffect(() => {
@@ -274,37 +364,6 @@ export const SectionPage: React.FC<SectionPageProps> = ({
     }
     touchStartX.current = null;
   };
-
-  // Filter products matching this section
-  const sectionBaseProducts = useMemo(() => {
-    if (sectionType === 'hot-deals') {
-      return allProducts.filter(
-        (p) => p.isHotDeal || (p.originalPrice && p.originalPrice > p.price)
-      );
-    }
-    if (sectionType === 'new-arrivals') {
-      const getTimestamp = (p: Product): number => {
-        if ((p as any).created_at) {
-          const parsed = Date.parse((p as any).created_at);
-          if (!isNaN(parsed)) return parsed;
-        }
-        const match = p.id.match(/\d{10,}/);
-        return match ? parseInt(match[0], 10) : 0;
-      };
-
-      const tagged = allProducts.filter(
-        (p) => p.isNewArrival || p.tag === 'New Season Drop' || p.tag === 'New Arrival'
-      );
-      const list = tagged.length > 0 ? tagged : allProducts;
-      return [...list].sort((a, b) => getTimestamp(b) - getTimestamp(a));
-    }
-    if (sectionType === 'bestsellers') {
-      return allProducts.filter(
-        (p) => p.tag === 'Bestseller' || p.rating >= 4.8 || p.reviewCount > 10
-      );
-    }
-    return allProducts;
-  }, [allProducts, sectionType]);
 
   // Apply Category & Sort filters
   const filteredProducts = useMemo(() => {
@@ -371,6 +430,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           {/* Slides Carousel */}
           {slides.map((slide, idx) => {
             const isActive = idx === currentSlide;
+            const defaultFallback = LUXURY_FALLBACKS[sectionType]?.[idx % (LUXURY_FALLBACKS[sectionType]?.length || 1)] || LUXURY_FALLBACKS['collection'][0];
             return (
               <div
                 key={slide.id}
@@ -378,25 +438,34 @@ export const SectionPage: React.FC<SectionPageProps> = ({
                   isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                 }`}
               >
+                {/* Luminous Ambient Luxury Base */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-blue-950 pointer-events-none" />
+
                 {/* Background Image with Zoom Effect */}
                 <img
-                  src={slide.image}
+                  src={slide.image || defaultFallback}
                   alt={slide.title}
                   referrerPolicy="no-referrer"
-                  className={`w-full h-full object-cover object-center transition-transform duration-7000 ease-out ${
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== defaultFallback) {
+                      target.src = defaultFallback;
+                    }
+                  }}
+                  className={`w-full h-full object-cover object-center transition-transform duration-7000 ease-out brightness-[1.14] contrast-[1.05] saturate-[1.08] ${
                     isActive ? 'scale-105' : 'scale-100'
                   }`}
                 />
 
-                {/* Dark Editorial Gradient Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-slate-950/15" />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-transparent hidden sm:block" />
+                {/* Dark Editorial Gradient Overlays (gentle scrim for maximum brightness) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-transparent to-transparent hidden sm:block" />
 
                 {/* Slide Text Content */}
                 <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 z-20 max-w-2xl">
                   {/* Subtle Badge */}
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white bg-blue-600/90 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-blue-400/30">
+                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white bg-blue-600/90 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-blue-400/30 shadow-xs">
                       {slide.badge}
                     </span>
                     <span className="text-[11px] font-mono text-blue-200">
@@ -405,12 +474,12 @@ export const SectionPage: React.FC<SectionPageProps> = ({
                   </div>
 
                   {/* Slide Title */}
-                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-white tracking-tight leading-tight sm:leading-none">
+                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-display font-bold text-white tracking-tight leading-tight sm:leading-none drop-shadow-sm">
                     {slide.title}
                   </h1>
 
                   {/* Subtitle */}
-                  <p className="text-xs sm:text-sm text-slate-200 mt-2 sm:mt-3 line-clamp-2 sm:line-clamp-none max-w-lg leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-200 mt-2 sm:mt-3 line-clamp-2 sm:line-clamp-none max-w-lg leading-relaxed drop-shadow-xs">
                     {slide.subtitle}
                   </p>
 
@@ -418,6 +487,10 @@ export const SectionPage: React.FC<SectionPageProps> = ({
                   <div className="mt-4 sm:mt-6 flex items-center gap-3">
                     <button
                       onClick={() => {
+                        if (slide.product) {
+                          onSelectProduct(slide.product);
+                          return;
+                        }
                         const el = document.getElementById('section-grid');
                         el?.scrollIntoView({ behavior: 'smooth' });
                       }}
@@ -429,7 +502,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
                       onClick={onBackToHome}
                       className="px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-xs text-white rounded-xl text-xs font-medium border border-white/25 transition-colors cursor-pointer"
                     >
-                      Explore All
+                      Back to Home
                     </button>
                   </div>
                 </div>

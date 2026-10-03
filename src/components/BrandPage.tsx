@@ -50,10 +50,12 @@ export const BrandPage: React.FC<BrandPageProps> = ({
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
 
+  const BRAND_HERO_FALLBACK = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop';
+
   const heroSlides: Slide[] = [
     {
       id: 'brand-slide-1',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
       badge: 'Brand Directory',
       title: 'The Maison & Brand Archive',
       subtitle: 'Complete alphabetical directory of monitored partner studios and heritage brands, from Adidas Originals to Tuscan leather houses.',
@@ -61,7 +63,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
     },
     {
       id: 'brand-slide-2',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop',
       badge: 'European Studio Guild',
       title: 'Direct Monitored Craft',
       subtitle: 'Permanent contracts with independent workshops across Porto, Biella, Kojima, and Tuscany with 100% material traceability.',
@@ -69,7 +71,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
     },
     {
       id: 'brand-slide-3',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1600&auto=format&fit=crop',
       badge: 'Material Sovereignty',
       title: 'Zero Synthetic Fillers',
       subtitle: 'Unlined split-face garments without synthetic fusible linings or microplastics that return harmoniously to the earth.',
@@ -77,7 +79,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
     },
     {
       id: 'brand-slide-4',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop',
       badge: 'Lifetime Covenant',
       title: 'Complimentary Product Support',
       subtitle: 'Every GLADYNS object is backed by dynamic technical support and lifetime product restoration.',
@@ -260,15 +262,24 @@ export const BrandPage: React.FC<BrandPageProps> = ({
                   isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                 }`}
               >
+                {/* Luminous Ambient Luxury Base */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-zinc-950 via-zinc-900 to-blue-950 pointer-events-none" />
+
                 <img
-                  src={slide.image}
+                  src={slide.image || BRAND_HERO_FALLBACK}
                   alt={slide.title}
-                  className={`w-full h-full object-cover object-center transition-transform duration-7000 ease-out ${
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== BRAND_HERO_FALLBACK) {
+                      target.src = BRAND_HERO_FALLBACK;
+                    }
+                  }}
+                  className={`w-full h-full object-cover object-center transition-transform duration-7000 ease-out brightness-[1.12] contrast-[1.05] saturate-[1.08] ${
                     isActive ? 'scale-105' : 'scale-100'
                   }`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/95 via-zinc-950/45 to-zinc-950/20" />
-                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/75 via-transparent to-transparent hidden sm:block" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/35 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/65 via-transparent to-transparent hidden sm:block" />
 
                 <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 z-20 max-w-2xl">
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">

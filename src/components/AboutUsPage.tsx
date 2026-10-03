@@ -165,10 +165,18 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
             {/* Shop Image */}
             <div className="lg:col-span-7 relative min-h-[340px] lg:min-h-full overflow-hidden bg-slate-950">
+              <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-blue-950 pointer-events-none" />
               <img
-                src={storeSettings?.aboutUs?.image || ''}
+                src={storeSettings?.aboutUs?.image || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop'}
                 alt={`${storeName} Official Boutique & Flagship`}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  const fallback = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop';
+                  if (target.src !== fallback) {
+                    target.src = fallback;
+                  }
+                }}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 brightness-[1.12] contrast-[1.05]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
               
