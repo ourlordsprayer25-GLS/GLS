@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export default async function handler(req, res) {
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'gls-sepia.vercel.app';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'gladyns.store';
   const url = new URL(req.url, `https://${host}`);
   const rawId = url.searchParams.get('id') || url.pathname.split('/').filter(Boolean).pop();
   const id = rawId ? rawId.replace(/\.(jpg|jpeg|png|webp)$/i, '') : null;

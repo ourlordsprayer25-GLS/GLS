@@ -161,7 +161,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
   // Share handler
   const handleShare = async () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gls-sepia.vercel.app';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store';
     const shareUrl = `${origin}/product/${product.id}`;
     const shareTitle = product.name;
     const shareText = `Check out ${product.name} on GLADYNS Studio: ${shareUrl}`;
@@ -538,7 +538,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
                   {/* Share on WhatsApp */}
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on GLADYNS: ${typeof window !== 'undefined' ? window.location.origin : 'https://gls-sepia.vercel.app'}/product/${product.id}`)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on GLADYNS: ${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-[52px] h-[52px] rounded-full border border-emerald-500 hover:bg-emerald-50 text-[#25D366] flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer bg-white shadow-2xs"
@@ -582,7 +582,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
               <div className="pt-1">
                 <a
                   href={getWhatsAppLink(
-                    `Hello GLADYNS Studio, I would like to inquire about the ${product.name} (Color: ${selectedColor.name}, Size: ${selectedSize.name}, Price: ${formatPrice(product.price)}).\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://gls-sepia.vercel.app'}/product/${product.id}`
+                    `Hello GLADYNS Studio, I would like to inquire about the ${product.name} (Color: ${selectedColor.name}, Size: ${selectedSize.name}, Price: ${formatPrice(product.price)}).\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
