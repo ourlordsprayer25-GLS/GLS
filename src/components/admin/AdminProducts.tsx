@@ -187,11 +187,46 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     setIsModalOpen(true);
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
+  const compressImageFile = (file: File, maxDim = 1000, quality = 0.8): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        if (!dataUrl || !file.type.startsWith('image/')) {
+          resolve(dataUrl);
+          return;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(dataUrl);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      };
       reader.onerror = error => reject(error);
     });
   };
@@ -211,7 +246,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     const filesToUpload = Array.from(files).slice(0, remainingSlots);
     
     try {
-      const base64Images = await Promise.all(filesToUpload.map(file => fileToBase64(file)));
+      const base64Images = await Promise.all(filesToUpload.map(file => compressImageFile(file)));
       const newImageObjects = base64Images.map(base64 => ({
         url: base64,
         alt: formData.name || 'Product Image'

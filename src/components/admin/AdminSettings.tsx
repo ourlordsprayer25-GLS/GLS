@@ -91,7 +91,32 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
     reader.onload = (event) => {
       const result = event.target?.result as string;
       if (result) {
-        updateNested('aboutUs.image', result);
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          const maxDim = 1200;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            updateNested('aboutUs.image', canvas.toDataURL('image/jpeg', 0.8));
+            return;
+          }
+          updateNested('aboutUs.image', result);
+        };
+        img.onerror = () => updateNested('aboutUs.image', result);
+        img.src = result;
       }
     };
     reader.readAsDataURL(file);
