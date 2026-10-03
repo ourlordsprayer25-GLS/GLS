@@ -687,6 +687,24 @@ export async function markRealtimeNotificationRead(notificationId: string) {
   }
 }
 
+export async function deleteRealtimeNotification(notificationId: string) {
+  try {
+    await localFetch(`/api/sync/notifications/${notificationId}`, {
+      method: 'DELETE',
+    });
+  } catch (err) {
+    console.warn('Server delete notification sync error:', err);
+  }
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('notifications').delete().eq('id', notificationId);
+    } catch (err) {
+      console.error('Supabase delete notification error:', err);
+    }
+  }
+}
+
 // ==========================================
 // CART & WISHLIST REAL-TIME CLOUD PERSISTENCE
 // ==========================================

@@ -27,6 +27,7 @@ import {
   saveRealtimeSettings,
   addRealtimeNotification,
   markRealtimeNotificationRead,
+  deleteRealtimeNotification,
   updateRealtimeUserProfile,
   fetchRealtimeCart,
   saveRealtimeCart,
@@ -130,6 +131,27 @@ function AppContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [notifications, setNotifications] = useState<StoreNotification[]>([]);
+  const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('gls_dismissed_notification_ids');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return new Set(parsed);
+      }
+    } catch (e) {}
+    return new Set<string>();
+  });
+
+  const recordDismissedNotification = (id: string) => {
+    setDismissedNotificationIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      try {
+        localStorage.setItem('gls_dismissed_notification_ids', JSON.stringify(Array.from(next)));
+      } catch (e) {}
+      return next;
+    });
+  };
   const [users, setUsers] = useState<UserProfile[]>([]);
 
   // Initialize and attach cross-device real-time sync listeners
@@ -806,10 +828,26 @@ function AppContent() {
   };
 
   const handleRemoveItem = (itemId: string) => setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-  const handleMarkAllNotificationsRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  const handleMarkNotificationRead = (id: string) => setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
-  const handleDeleteNotification = (id: string) => setNotifications((prev) => prev.filter((n) => n.id !== id));
-  const handleClearAllNotifications = () => setNotifications([]);
+  const handleMarkAllNotificationsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    customerNotifications.forEach((n) => markRealtimeNotificationRead(n.id));
+  };
+  const handleMarkNotificationRead = (id: string) => {
+    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
+    markRealtimeNotificationRead(id);
+  };
+  const handleDeleteNotification = (id: string) => {
+    recordDismissedNotification(id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    deleteRealtimeNotification(id);
+  };
+  const handleClearAllNotifications = () => {
+    customerNotifications.forEach((n) => {
+      recordDismissedNotification(n.id);
+      deleteRealtimeNotification(n.id);
+    });
+    setNotifications([]);
+  };
   const handleNavigateToProductFromNotification = (productId: string) => {
     const targetProduct = products.find((p) => p.id === productId);
     if (targetProduct) {
@@ -951,6 +989,9 @@ function AppContent() {
     notifications.forEach((n) => {
       if (n.isAdminOnly) return;
 
+      // Filter out dismissed notifications
+      if (dismissedNotificationIds.has(n.id)) return;
+
       // Order notifications are strictly private to the customer who placed the order
       if (n.type === 'order') {
         if (!n.customerId || n.customerId !== currentUserId) {
@@ -982,16 +1023,21 @@ function AppContent() {
         : titleLower.includes('cancelled') ? 'cancelled'
         : n.title || n.id;
 
-      const dedupeKey = n.type === 'order' && n.linkTarget
+      // Deduplicate arrival/drop/promo notices for the same product to prevent double entries
+      const dedupeKey = (n.type === 'product' || n.type === 'restock' || n.type === 'drop') && n.linkTarget
+        ? `product-notice-${n.linkTarget}`
+        : n.type === 'order' && n.linkTarget
         ? `order-${n.linkTarget}-${statusKey}`
         : n.id;
+
+      if (dismissedNotificationIds.has(dedupeKey)) return;
 
       if (!map.has(dedupeKey)) {
         map.set(dedupeKey, n);
       }
     });
     return Array.from(map.values());
-  }, [notifications, user, products]);
+  }, [notifications, user, products, dismissedNotificationIds]);
   const adminNotifications = notifications.filter(n => n.isAdminOnly || n.type !== 'order' || !n.customerId);
   const unreadNotificationCount = customerNotifications.filter((n) => !n.read).length;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
