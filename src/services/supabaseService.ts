@@ -151,8 +151,8 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
     }
   };
 
-  // Hard timeout: no matter what, dismiss loading screen after 1.5s max
-  const hardTimeout = setTimeout(() => callReady(), 1500);
+  // Maximum boot timeout for loading screen
+  const hardTimeout = setTimeout(() => callReady(), 7000);
 
   let hasLoaded = false;
   const cached = getCache('gls_cache_products');
@@ -160,7 +160,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
     onUpdate(cached);
     hasLoaded = true;
     clearTimeout(hardTimeout);
-    callReady(); // Instant dismiss if cache exists
+    callReady(); // Instant dismiss if valid local cache already exists
   }
   
   const wrappedOnUpdate = (data: Product[]) => {
@@ -171,18 +171,25 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   localFetch('/api/sync/products')
     .then(r => r.json())
     .then(serverProducts => {
-      if (Array.isArray(serverProducts)) {
-        if (!isSupabaseConfigured || serverProducts.length > 0) { wrappedOnUpdate(serverProducts); hasLoaded = true; }
-      } else {
-        if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; }
+      if (Array.isArray(serverProducts) && serverProducts.length > 0) {
+        wrappedOnUpdate(serverProducts);
+        hasLoaded = true;
+        clearTimeout(hardTimeout);
+        callReady();
+      } else if (!isSupabaseConfigured) {
+        wrappedOnUpdate([]);
+        hasLoaded = true;
+        clearTimeout(hardTimeout);
+        callReady();
       }
-      clearTimeout(hardTimeout);
-      callReady();
     })
     .catch(() => {
-      if (!isSupabaseConfigured) { wrappedOnUpdate([]); hasLoaded = true; }
-      clearTimeout(hardTimeout);
-      callReady();
+      if (!isSupabaseConfigured) {
+        wrappedOnUpdate([]);
+        hasLoaded = true;
+        clearTimeout(hardTimeout);
+        callReady();
+      }
     });
 
   let supabaseChannel: any = null;
@@ -195,16 +202,14 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
           wrappedOnUpdate(data as Product[]);
           hasLoaded = true;
         } else if (!error && data && data.length === 0) {
-          // Supabase products table is empty — seed default catalog
-          wrappedOnUpdate(INITIAL_PRODUCTS);
+          // Products table is empty
+          wrappedOnUpdate([]);
           hasLoaded = true;
-          try {
-            await supabase.from('products').upsert(INITIAL_PRODUCTS);
-          } catch (e) {
-            console.warn('Auto-seed products to Supabase failed:', e);
-          }
         } else if (error && !hasLoaded) {
-          wrappedOnUpdate(INITIAL_PRODUCTS);
+          console.warn('Supabase products fetch failed:', error.message);
+          // Never inject mock products into the live store
+          const fallback = getCache('gls_cache_products') || [];
+          onUpdate(fallback);
         }
         clearTimeout(hardTimeout);
         callReady();
