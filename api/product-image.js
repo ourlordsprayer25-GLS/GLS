@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (supabaseUrl && supabaseKey && id) {
     try {
       const encoded = encodeURIComponent(id);
-      const queryUrl = `${supabaseUrl}/rest/v1/products?or=(id.eq.${encoded},slug.eq.${encoded})&select=*`;
+      const queryUrl = `${supabaseUrl}/rest/v1/products?or=(id.eq.${encoded},slug.eq.${encoded})&select=id,slug,primaryImage,images`;
       const response = await fetch(queryUrl, {
         headers: {
           'apikey': supabaseKey,
@@ -58,7 +58,8 @@ export default async function handler(req, res) {
       const imgBuffer = Buffer.from(base64Data, 'base64');
 
       res.setHeader('Content-Type', mimeType);
-      res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+      res.setHeader('Content-Length', imgBuffer.length);
+      res.setHeader('Cache-Control', 'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400');
       return res.status(200).send(imgBuffer);
     }
   }

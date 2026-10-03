@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (supabaseUrl && supabaseKey && slug) {
     try {
       const encoded = encodeURIComponent(slug);
-      const queryUrl = `${supabaseUrl}/rest/v1/products?or=(id.eq.${encoded},slug.eq.${encoded})&select=*`;
+      const queryUrl = `${supabaseUrl}/rest/v1/products?or=(id.eq.${encoded},slug.eq.${encoded})&select=id,slug,name,subtitle,description,primaryImage,images`;
       const response = await fetch(queryUrl, {
         headers: {
           'apikey': supabaseKey,
