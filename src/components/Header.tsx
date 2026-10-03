@@ -33,7 +33,7 @@ import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   products?: Product[];
-  categories: any[];
+  categories?: any[];
   user: UserProfile | null;
   cartItemCount: number;
   unreadNotificationCount: number;

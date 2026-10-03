@@ -19,7 +19,7 @@ const localFetch = (url: string | URL | Request, init?: RequestInit) => {
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Product, Order, UserProfile, StoreNotification, StoreSettings } from '../types/store';
 import { INITIAL_PRODUCTS, CATEGORIES } from '../data/products';
-import { INITIAL_ORDERS, INITIAL_CUSTOMERS } from '../data/user';
+import { INITIAL_ORDERS, INITIAL_CUSTOMERS, INITIAL_BRANDS } from '../data/user';
 import { INITIAL_NOTIFICATIONS } from '../data/notifications';
 
 /**
@@ -948,11 +948,11 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
 
   if (isSupabaseConfigured) {
     supabase.from('brands').select('*').then(({ data, error }) => {
-      if (!error && data) { wrappedOnUpdateBrand(data); hasLoaded = true; }
-      else if (error && !hasLoaded) wrappedOnUpdateBrand([]);
+      if (!error && data && data.length > 0) { wrappedOnUpdateBrand(data); hasLoaded = true; }
+      else if (error && !hasLoaded) wrappedOnUpdateBrand(INITIAL_BRANDS);
     });
   } else {
-    setTimeout(() => { if (!hasLoaded) wrappedOnUpdateBrand([]); }, 1000);
+    setTimeout(() => { if (!hasLoaded) wrappedOnUpdateBrand(INITIAL_BRANDS); }, 1000);
   }
 }
 

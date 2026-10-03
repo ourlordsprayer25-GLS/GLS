@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Product, ProductVariant, ProductSize, CartItem, StoreNotification, Order, UserProfile, StoreSettings } from './types/store';
 import { INITIAL_PRODUCTS, CATEGORIES } from './data/products';
-import { INITIAL_ORDERS, INITIAL_CUSTOMERS, DEFAULT_USER_PROFILE } from './data/user';
+import { INITIAL_ORDERS, INITIAL_CUSTOMERS, DEFAULT_USER_PROFILE, INITIAL_BRANDS } from './data/user';
 import { INITIAL_NOTIFICATIONS } from './data/notifications';
 import { StorefrontView } from './components/StorefrontView';
 import { AdminView } from './components/admin/AdminView';
@@ -164,20 +164,18 @@ function AppContent() {
       notifications: INITIAL_NOTIFICATIONS,
       settings: DEFAULT_STORE_SETTINGS,
       categories: CATEGORIES as any,
-      brands: [],
+      brands: INITIAL_BRANDS,
     });
 
     const unsubProducts = subscribeToProducts(setProducts, () => setIsReady(true));
-    const unsubCats = subscribeToCategories(setCategories);
-    const unsubBrands = subscribeToBrands(setBrands);
+    subscribeToCategories(setCategories);
+    subscribeToBrands(setBrands);
     const unsubOrders = subscribeToOrders(setOrders);
     const unsubNotifs = subscribeToNotifications(setNotifications);
     const unsubSettings = subscribeToSettings(DEFAULT_STORE_SETTINGS, setStoreSettings);
     const unsubUsers = subscribeToUsers(setUsers);
 
     return () => {
-      if (unsubCats) unsubCats();
-      if (unsubBrands) unsubBrands();
       unsubProducts();
       unsubOrders();
       unsubNotifs();
@@ -695,7 +693,7 @@ function AppContent() {
   }, [cartItems, user?.id]);
 
   const [initialInvoiceNumber, setInitialInvoiceNumber] = useState<string | null>(null);
-  const [activeToast, setActiveToast] = useState<{ id: string; title: string; message: string; orderNumber: string } | null>(null);
+  const [activeToast, setActiveToast] = useState<{ id: string; title: string; message: string; orderNumber?: string } | null>(null);
 
   useEffect(() => {
     if (activeToast) {

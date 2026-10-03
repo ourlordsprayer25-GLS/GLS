@@ -1,9 +1,10 @@
 export interface ProductVariant {
-  id: string;
+  id?: string;
   name: string; // e.g. "Deep Olive", "Onyx Black"
-  colorHex: string;
+  colorHex?: string;
+  value?: string;
   image?: string;
-  inStock: boolean;
+  inStock?: boolean;
 }
 
 export interface ProductSize {
@@ -67,6 +68,7 @@ export interface Product {
   sku?: string;
   barcode?: string;
   stockLevel?: number;
+  created_at?: string;
 }
 
 export interface CartItem {
@@ -84,7 +86,7 @@ export interface StoreNotification {
   message: string;
   timestamp: number;
   read: boolean;
-  type: 'order' | 'drop' | 'restock' | 'promo' | 'wishlist';
+  type: 'order' | 'drop' | 'restock' | 'promo' | 'wishlist' | 'product';
   linkTarget?: string;
     customerId?: string;
     isAdminOnly?: boolean; // e.g. "product-chore-coat"
@@ -282,7 +284,7 @@ export interface UserProfile {
   registrationDetails?: CustomerRegistrationDetails;
   deviceInfo?: CustomerDeviceTracker;
   location?: CustomerLocationTracker;
-  sessionStatus?: 'online' | 'idle' | 'logged_out';
+  sessionStatus?: 'online' | 'idle' | 'logged_out' | 'offline';
   lastSeen?: string;
   sessionDurationMinutes?: number;
   recentActivity?: UserActivityEvent[];

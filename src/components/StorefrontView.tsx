@@ -73,7 +73,7 @@ interface StorefrontViewProps {
   authModalMode: 'login' | 'register';
   isMobileSidebarOpen: boolean;
   initialInvoiceNumber: string | null;
-  activeToast: { id: string; title: string; message: string; orderNumber: string } | null;
+  activeToast: { id: string; title: string; message: string; orderNumber?: string } | null;
   unreadNotificationCount: number;
   cartItemCount: number;
   wishlistCount: number;

@@ -43,6 +43,8 @@ import { AdminInventoryForecasting } from './AdminInventoryForecasting';
 import { NotificationDrawer } from '../NotificationDrawer';
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { Plus, FileText } from 'lucide-react';
+import { AdminLogin, ADMIN_SESSION_KEY } from './AdminLogin';
+import { INITIAL_ORDERS, INITIAL_CUSTOMERS, INITIAL_BRANDS } from '../../data/user';
 
 interface AdminViewProps {
   products: Product[];
@@ -82,6 +84,44 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'tracker' | 'orders' | 'products' | 'inventory' | 'categories' | 'brands' | 'reviews' | 'sections' | 'receipts' | 'settings'>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    try {
+      const local = localStorage.getItem(ADMIN_SESSION_KEY);
+      const session = sessionStorage.getItem(ADMIN_SESSION_KEY);
+      if (local || session) return true;
+    } catch (e) {}
+    return false;
+  });
+
+  const [adminEmail, setAdminEmail] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(ADMIN_SESSION_KEY) || sessionStorage.getItem(ADMIN_SESSION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.email || 'admin@gladyns.store';
+      }
+    } catch (e) {}
+    return 'admin@gladyns.store';
+  });
+
+  const handleAdminLogout = () => {
+    try {
+      localStorage.removeItem(ADMIN_SESSION_KEY);
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    } catch (e) {}
+    setIsAdminAuthenticated(false);
+  };
+
+  const handleSeedDemoData = () => {
+    setOrders(INITIAL_ORDERS);
+    setUsers(INITIAL_CUSTOMERS);
+    setBrands(INITIAL_BRANDS);
+    setNoticeToast({
+      message: 'Luxury demo orders, customer profiles, and brands loaded successfully.',
+      type: 'info',
+    });
+  };
 
   const { formatPrice, currency, setCurrency, language, setLanguage } = useLanguageCurrency();
 
@@ -292,6 +332,19 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setIsMobileMenuOpen(false);
   };
 
+  if (!isAdminAuthenticated) {
+    return (
+      <AdminLogin
+        onLoginSuccess={(email) => {
+          setAdminEmail(email);
+          setIsAdminAuthenticated(true);
+        }}
+        onBackToStore={onBackToStore}
+        storeName={storeSettings?.storeName}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col lg:flex-row relative">
       {/* Mobile Backdrop */}
@@ -348,13 +401,21 @@ export const AdminView: React.FC<AdminViewProps> = ({
           ))}
         </nav>
 
-        <div className="p-4 border-t border-zinc-800">
+        <div className="p-4 border-t border-zinc-800 space-y-1">
           <button
             onClick={onBackToStore}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-zinc-500 hover:text-white hover:bg-zinc-900 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all cursor-pointer"
           >
-            <ArrowLeft className="w-4.5 h-4.5 text-zinc-600" />
+            <ArrowLeft className="w-4.5 h-4.5 text-zinc-500" />
             <span>Return to Store</span>
+          </button>
+          <button
+            onClick={handleAdminLogout}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-all cursor-pointer"
+            title="Log out of admin session"
+          >
+            <LogOut className="w-4.5 h-4.5 text-rose-500" />
+            <span>Sign Out Admin</span>
           </button>
         </div>
       </aside>
@@ -693,12 +754,21 @@ export const AdminView: React.FC<AdminViewProps> = ({
             </div>
 
             <div className="h-8 w-[1px] bg-zinc-200 mx-1 sm:mx-2"></div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-zinc-900 leading-none">Super Admin</p>
-                <p className="text-[10px] text-zinc-500 mt-1">Full Access · {currency.symbol} ({currency.code})</p>
+                <p className="text-xs font-bold text-zinc-900 leading-none truncate max-w-[140px]">{adminEmail || 'Super Admin'}</p>
+                <p className="text-[10px] text-zinc-500 mt-1">Admin Access · {currency.symbol} ({currency.code})</p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-xs font-bold">SA</div>
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-xs">
+                {adminEmail?.[0]?.toUpperCase() || 'A'}
+              </div>
+              <button
+                onClick={handleAdminLogout}
+                className="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                title="Sign out of admin session"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </header>
@@ -707,6 +777,30 @@ export const AdminView: React.FC<AdminViewProps> = ({
         <div className="p-4 sm:p-6 lg:p-8">
           {activeTab === 'dashboard' && (
             <div className="space-y-8 animate-in fade-in duration-500">
+              {/* Empty Data Banner if no transactions exist yet */}
+              {orders.length === 0 && (
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-zinc-900">Admin Ledger Initialized</h4>
+                      <p className="text-xs text-zinc-600 mt-0.5">
+                        The store ledger has 0 orders because no checkout transactions have been completed yet. Click below to load realistic boutique demo transactions, VIP clients, and partner brands.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSeedDemoData}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shrink-0 cursor-pointer flex items-center gap-2"
+                  >
+                    <Package className="w-3.5 h-3.5" />
+                    <span>Load Demo Data</span>
+                  </button>
+                </div>
+              )}
+
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
@@ -775,33 +869,48 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   <div className="bg-zinc-900 rounded-2xl p-8 text-white relative overflow-hidden group">
                     <div className="relative z-10 space-y-4">
                       <h3 className="text-lg font-display font-bold">Admin Quick Actions</h3>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <button 
                           onClick={() => setActiveTab('products')}
-                          className="p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-2"
+                          className="p-3.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-1.5 cursor-pointer"
                         >
-                          <Plus className="w-5 h-5 text-blue-400" />
+                          <Plus className="w-4.5 h-4.5 text-blue-400" />
                           <p className="text-xs font-bold">New Product</p>
                         </button>
                         <button 
-                          onClick={() => setActiveTab('products')}
-                          className="p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-2"
+                          onClick={() => setActiveTab('orders')}
+                          className="p-3.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-1.5 cursor-pointer"
                         >
-                          <Sparkles className="w-5 h-5 text-amber-400" />
-                          <p className="text-xs font-bold">Flash Sale</p>
+                          <ShoppingBag className="w-4.5 h-4.5 text-amber-400" />
+                          <p className="text-xs font-bold">Logistics</p>
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('customers')}
+                          className="p-3.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-1.5 cursor-pointer"
+                        >
+                          <Users className="w-4.5 h-4.5 text-indigo-400" />
+                          <p className="text-xs font-bold">Clients</p>
                         </button>
                         <button 
                           onClick={() => setIsNotificationsOpen(true)}
-                          className="p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-2"
+                          className="p-3.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-1.5 cursor-pointer"
                         >
-                          <Bell className="w-5 h-5 text-blue-400" />
+                          <Bell className="w-4.5 h-4.5 text-blue-400" />
                           <p className="text-xs font-bold">Broadcast</p>
                         </button>
                         <button 
-                          onClick={() => setActiveTab('settings')}
-                          className="p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-2"
+                          onClick={handleSeedDemoData}
+                          className="p-3.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-1.5 cursor-pointer"
+                          title="Restore sample boutique orders & VIP clients"
                         >
-                          <Settings className="w-5 h-5 text-zinc-400" />
+                          <Package className="w-4.5 h-4.5 text-emerald-400" />
+                          <p className="text-xs font-bold">Seed Data</p>
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('settings')}
+                          className="p-3.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-left space-y-1.5 cursor-pointer"
+                        >
+                          <Settings className="w-4.5 h-4.5 text-zinc-400" />
                           <p className="text-xs font-bold">Settings</p>
                         </button>
                       </div>
