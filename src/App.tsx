@@ -35,6 +35,7 @@ import {
   saveRealtimeWishlist,
   fetchRealtimeUserProfile,
 } from './services/supabaseService';
+import { isSupabaseConfigured } from './lib/supabase';
 const getGuestId = () => {
   let gid = localStorage.getItem('guest_id');
   if (!gid) {
