@@ -154,18 +154,41 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   // Maximum boot timeout for loading screen
   const hardTimeout = setTimeout(() => callReady(), 7000);
 
+  const isMockProduct = (p: any) => {
+    if (!p) return false;
+    return (
+      p.id === 'prod-analog-synth' ||
+      p.id === 'prod-vinyl-turntable' ||
+      p.id === 'prod-audiophile-headphones' ||
+      p.id === 'prod-studio-monitors' ||
+      p.id === 'prod-leather-weekender' ||
+      p.id === 'prod-leather-tote' ||
+      (typeof p.name === 'string' && (
+        p.name.includes('Polyphonic Analog') ||
+        p.name.includes('Direct-Drive') ||
+        p.name.includes('Planar Magnetic') ||
+        p.name.includes('Active Ribbon')
+      ))
+    );
+  };
+
   let hasLoaded = false;
-  const cached = getCache('gls_cache_products');
-  if (cached && Array.isArray(cached) && cached.length > 0) {
+  const rawCached = getCache('gls_cache_products');
+  const cached = Array.isArray(rawCached) ? rawCached.filter(p => !isMockProduct(p)) : null;
+  if (cached && cached.length > 0) {
     onUpdate(cached);
+    setCache('gls_cache_products', cached);
     hasLoaded = true;
     clearTimeout(hardTimeout);
     callReady(); // Instant dismiss if valid local cache already exists
+  } else if (rawCached) {
+    localStorage.removeItem('gls_cache_products');
   }
   
   const wrappedOnUpdate = (data: Product[]) => {
-    setCache('gls_cache_products', data);
-    onUpdate(data);
+    const cleanData = (Array.isArray(data) ? data : []).filter(p => !isMockProduct(p));
+    setCache('gls_cache_products', cleanData);
+    onUpdate(cleanData);
   };
   
   localFetch('/api/sync/products')

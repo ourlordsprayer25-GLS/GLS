@@ -40,13 +40,31 @@ interface StoreDB {
   lastUpdated: number;
 }
 
+const isMockProduct = (p: any) => {
+  if (!p) return false;
+  return (
+    p.id === 'prod-analog-synth' ||
+    p.id === 'prod-vinyl-turntable' ||
+    p.id === 'prod-audiophile-headphones' ||
+    p.id === 'prod-studio-monitors' ||
+    p.id === 'prod-leather-weekender' ||
+    p.id === 'prod-leather-tote' ||
+    (typeof p.name === 'string' && (
+      p.name.includes('Polyphonic Analog') ||
+      p.name.includes('Direct-Drive') ||
+      p.name.includes('Planar Magnetic') ||
+      p.name.includes('Active Ribbon')
+    ))
+  );
+};
+
 function loadDB(): StoreDB {
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
       const parsed = JSON.parse(content);
       return {
-        products: Array.isArray(parsed.products) ? parsed.products : [],
+        products: Array.isArray(parsed.products) ? parsed.products.filter((p: any) => !isMockProduct(p)) : [],
         deletedProductIds: Array.isArray(parsed.deletedProductIds) ? parsed.deletedProductIds : [],
         orders: Array.isArray(parsed.orders) ? parsed.orders : [],
         users: Array.isArray(parsed.users) ? parsed.users : [],
@@ -172,12 +190,12 @@ async function startServer() {
 
     if (Array.isArray(products) && products.length > 0) {
       if (dbState.products.length === 0) {
-        dbState.products = products.filter(p => !deletedSet.has(p.id));
+        dbState.products = products.filter(p => !deletedSet.has(p.id) && !isMockProduct(p));
         changed = true;
       } else {
         const existingIds = new Set(dbState.products.map(p => p.id));
         for (const p of products) {
-          if (!existingIds.has(p.id) && !deletedSet.has(p.id)) {
+          if (!existingIds.has(p.id) && !deletedSet.has(p.id) && !isMockProduct(p)) {
             dbState.products.push(p);
             changed = true;
           }
