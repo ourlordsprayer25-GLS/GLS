@@ -117,12 +117,12 @@ function injectOGMetaTags(html: string, url: string, products: any[]): string {
       newHtml = newHtml.replace(/<meta\s+property=["']og:image["']\s+content=["'][^"']*["']\s*\/?>/g, '');
       newHtml = newHtml.replace(/<title>.*?<\/title>/g, '');
       
-      const metaTags = 
-        <title> + title + </title>
-        <meta property="og:title" content=" + title + " />
-        <meta property="og:description" content=" + desc + " />
-        <meta property="og:image" content=" + img + " />
-      ;
+      const metaTags = `
+        <title>${title}</title>
+        <meta property="og:title" content="${title}" />
+        <meta property="og:description" content="${desc}" />
+        <meta property="og:image" content="${img || ''}" />
+      `;
       
       return newHtml.replace('</head>', metaTags + '</head>');
     }
