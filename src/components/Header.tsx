@@ -302,7 +302,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer text-left"
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform shrink-0 border border-blue-900/20 bg-slate-950">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform shrink-0 border border-blue-500/30 bg-slate-900 shadow-blue-900/10">
                 <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col leading-tight">

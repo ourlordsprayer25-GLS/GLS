@@ -101,7 +101,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           
           {/* Branded Logo */}
           <div className="space-y-2 pt-2 flex flex-col items-center">
-            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border border-blue-900/30 bg-slate-950">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border border-blue-500/30 bg-slate-900 shadow-blue-900/10">
               <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
             </div>
             <div>

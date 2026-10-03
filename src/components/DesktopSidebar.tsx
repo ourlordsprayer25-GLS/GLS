@@ -88,7 +88,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
               onClick={onBackToHome}
               className="flex items-center gap-3 text-left group cursor-pointer min-w-0"
             >
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm group-hover:scale-105 transition-transform shrink-0 border border-blue-900/20 bg-slate-950">
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm group-hover:scale-105 transition-transform shrink-0 border border-blue-500/30 bg-slate-900 shadow-blue-900/10">
                 <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">
