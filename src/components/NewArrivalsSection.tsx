@@ -20,9 +20,33 @@ export const NewArrivalsSection: React.FC<NewArrivalsSectionProps> = ({
   onQuickAdd,
   onViewAllNew,
 }) => {
-  const newArrivals = products.filter(
-    (p) => p.isNewArrival || p.tag === 'New Season Drop' || p.tag === 'New Arrival'
-  );
+  const getProductTimestamp = (p: Product): number => {
+    if ((p as any).created_at) {
+      const parsed = Date.parse((p as any).created_at);
+      if (!isNaN(parsed)) return parsed;
+    }
+    const match = p.id.match(/\d{10,}/);
+    if (match) {
+      const num = parseInt(match[0], 10);
+      if (!isNaN(num)) return num;
+    }
+    return 0;
+  };
+
+  const newArrivals = React.useMemo(() => {
+    // 1. Check for products explicitly tagged as new arrival
+    const taggedNew = products.filter(
+      (p) => p.isNewArrival || p.tag === 'New Season Drop' || p.tag === 'New Arrival'
+    );
+
+    if (taggedNew.length > 0) {
+      // Sort newest added piece first
+      return [...taggedNew].sort((a, b) => getProductTimestamp(b) - getProductTimestamp(a));
+    }
+
+    // 2. Fallback: if no products explicitly tagged, showcase the latest additions to the store
+    return [...products].sort((a, b) => getProductTimestamp(b) - getProductTimestamp(a));
+  }, [products]);
 
   if (newArrivals.length === 0) return null;
 
@@ -44,9 +68,9 @@ export const NewArrivalsSection: React.FC<NewArrivalsSectionProps> = ({
         </button>
       </div>
 
-      {/* Grid of New Arrivals */}
+      {/* Grid of New Arrivals (Shows latest additions, up to 8 pieces) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 pt-5">
-        {newArrivals.slice(0, 4).map((product) => (
+        {newArrivals.slice(0, 8).map((product) => (
           <ProductCard
             key={product.id}
             product={product}

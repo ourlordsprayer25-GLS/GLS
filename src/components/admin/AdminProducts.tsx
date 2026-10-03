@@ -384,6 +384,9 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
           ...finalFormData,
           id: `prod-${Date.now()}`,
           slug: (formData.name || '')?.toLowerCase().replace(/\s+/g, '-'),
+          isNewArrival: true,
+          tag: finalFormData.tag || 'New Arrival',
+          created_at: new Date().toISOString(),
         };
         const res = await saveRealtimeProduct(product);
         if (!res.success) {

@@ -283,9 +283,20 @@ export const SectionPage: React.FC<SectionPageProps> = ({
       );
     }
     if (sectionType === 'new-arrivals') {
-      return allProducts.filter(
+      const getTimestamp = (p: Product): number => {
+        if ((p as any).created_at) {
+          const parsed = Date.parse((p as any).created_at);
+          if (!isNaN(parsed)) return parsed;
+        }
+        const match = p.id.match(/\d{10,}/);
+        return match ? parseInt(match[0], 10) : 0;
+      };
+
+      const tagged = allProducts.filter(
         (p) => p.isNewArrival || p.tag === 'New Season Drop' || p.tag === 'New Arrival'
       );
+      const list = tagged.length > 0 ? tagged : allProducts;
+      return [...list].sort((a, b) => getTimestamp(b) - getTimestamp(a));
     }
     if (sectionType === 'bestsellers') {
       return allProducts.filter(
