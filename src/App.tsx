@@ -157,7 +157,7 @@ function AppContent() {
   // Initialize and attach cross-device real-time sync listeners
   useEffect(() => {
     initServerSync({
-      products: INITIAL_PRODUCTS,
+      products: isSupabaseConfigured ? [] : INITIAL_PRODUCTS,
       orders: INITIAL_ORDERS,
       users: INITIAL_CUSTOMERS,
       notifications: INITIAL_NOTIFICATIONS,

@@ -12,6 +12,9 @@ interface HeroSectionProps {
   products?: Product[];
 }
 
+// Luxury fallback image so banner is never empty
+const LUXURY_HERO_FALLBACK = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop';
+
 // Build slides from real products
 const buildProductSlides = (
   products: Product[],
@@ -19,25 +22,44 @@ const buildProductSlides = (
   onExploreCollection: () => void,
   onOpenSection?: (s: any, cat?: string) => void
 ) => {
-  // Pick up to 5 priority products: featured first, then new arrivals, then any
-  const featured = products.filter(p => p.featured);
-  const newArrivals = products.filter(p => p.isNewArrival && !p.featured);
-  const rest = products.filter(p => !p.featured && !p.isNewArrival);
-  const pool = [...featured, ...newArrivals, ...rest].slice(0, 5);
+  // Check if a product has a real, working image (filters out non-existent /src/assets paths)
+  const hasValidImage = (p: Product) => {
+    const img = p.primaryImage || p.images?.[0]?.url;
+    return typeof img === 'string' && img.trim().length > 15 && !img.includes('/src/assets/images/');
+  };
 
-  return pool.map(product => ({
-    id: product.id,
-    image: product.primaryImage || (product.images?.[0]?.url) || '',
-    badge: product.tag || product.categoryLabel || 'New Arrival',
-    title: product.name,
-    subtitle: product.subtitle || product.tagline || product.description?.slice(0, 120) || '',
-    price: product.price,
-    originalPrice: product.originalPrice,
-    primaryCtaText: 'View Product',
-    onPrimaryClick: () => onSelectProduct(product),
-    secondaryCtaText: 'Shop All',
-    onSecondaryClick: () => onOpenSection?.('categories') ?? onExploreCollection(),
-  }));
+  const validProducts = products.filter(hasValidImage);
+  const candidates = validProducts.length > 0 ? validProducts : products;
+
+  // Sort newest added piece first
+  const sorted = [...candidates].sort((a, b) => {
+    const getTime = (p: Product) => {
+      const match = p.id.match(/\d{10,}/);
+      return match ? parseInt(match[0], 10) : 0;
+    };
+    return getTime(b) - getTime(a);
+  });
+
+  const pool = sorted.slice(0, 5);
+
+  return pool.map(product => {
+    const rawImg = product.primaryImage || (product.images?.[0]?.url) || '';
+    const image = (rawImg && !rawImg.includes('/src/assets/images/')) ? rawImg : LUXURY_HERO_FALLBACK;
+
+    return {
+      id: product.id,
+      image,
+      badge: product.tag || product.categoryLabel || 'New Arrival',
+      title: product.name,
+      subtitle: product.subtitle || product.tagline || product.description?.slice(0, 120) || '',
+      price: product.price,
+      originalPrice: product.originalPrice,
+      primaryCtaText: 'View Product',
+      onPrimaryClick: () => onSelectProduct(product),
+      secondaryCtaText: 'Shop All',
+      onSecondaryClick: () => onOpenSection?.('categories') ?? onExploreCollection(),
+    };
+  });
 };
 
 // Fallback slides when no products exist yet
@@ -46,7 +68,7 @@ const buildFallbackSlides = (
   onExploreCollection: () => void,
   onOpenSection?: (s: any, cat?: string) => void
 ) => {
-  const heroImg = storeSettings?.heroContent?.image || '';
+  const heroImg = storeSettings?.heroContent?.image || LUXURY_HERO_FALLBACK;
 
   return [{
     id: 'fallback-hero',
@@ -130,9 +152,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 : 'opacity-0 scale-105 pointer-events-none z-0'
             }`}
           >
+            {/* Luminous Ambient Luxury Base */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-blue-950 pointer-events-none" />
+
             <img
-              src={slide.image}
+              src={slide.image || LUXURY_HERO_FALLBACK}
               alt={slide.title}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (target.src !== LUXURY_HERO_FALLBACK) {
+                  target.src = LUXURY_HERO_FALLBACK;
+                }
+              }}
               className="w-full h-full object-cover object-center md:object-right transition-transform duration-700 ease-out brightness-[1.14] contrast-[1.05] saturate-[1.08]"
             />
             {/* Ultra-soft feathering: Keeps product 100% luminous, vivid & bright */}
