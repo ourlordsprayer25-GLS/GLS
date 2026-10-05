@@ -2,7 +2,11 @@ import fs from 'fs';
 import path from 'path';
 
 export default async function handler(req, res) {
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'gladyns.store';
+  let host = req.headers['x-forwarded-host'] || req.headers.host || 'www.gladyns.store';
+  // Canonicalize apex domain to www.gladyns.store to avoid Vercel 308 redirect which causes WhatsApp to drop preview images
+  if (host === 'gladyns.store') {
+    host = 'www.gladyns.store';
+  }
   const url = new URL(req.url, `https://${host}`);
   const slug = url.pathname.split('/').filter(Boolean).pop();
 
@@ -118,7 +122,7 @@ export default async function handler(req, res) {
     
     if (raw) {
       if (raw.startsWith('http://') || raw.startsWith('https://')) {
-        image = raw;
+        image = raw.replace('https://gladyns.store', 'https://www.gladyns.store').replace('http://gladyns.store', 'https://www.gladyns.store');
       } else if (raw.startsWith('/')) {
         image = `https://${host}${raw}`;
       } else if (raw.startsWith('data:image/')) {
@@ -134,6 +138,7 @@ export default async function handler(req, res) {
   }
 
   const productUrl = `https://${host}/product/${slug}`;
+  const imgType = (image && image.endsWith('.png')) ? 'image/png' : (image && image.endsWith('.webp')) ? 'image/webp' : 'image/jpeg';
 
   const html = `<!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns#">
@@ -145,7 +150,7 @@ export default async function handler(req, res) {
     <!-- Open Graph Image First for Mobile Parsers (WhatsApp, iMessage, Facebook) -->
     <meta property="og:image" content="${image}">
     <meta property="og:image:secure_url" content="${image}">
-    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:type" content="${imgType}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 

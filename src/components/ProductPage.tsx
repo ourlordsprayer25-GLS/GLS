@@ -159,10 +159,20 @@ export const ProductPage: React.FC<ProductPageProps> = ({
     }, 2000);
   };
 
+  // Helper to get clean, canonical share URL without apex domain redirect
+  const getProductShareUrl = () => {
+    let base = typeof window !== 'undefined' ? window.location.origin : 'https://www.gladyns.store';
+    // If browsing on apex domain gladyns.store, canonicalize to www.gladyns.store
+    // because Vercel 308-redirects gladyns.store to www.gladyns.store, which causes WhatsApp to drop preview images!
+    if (base.includes('gladyns.store') && !base.includes('www.gladyns.store')) {
+      base = base.replace('://gladyns.store', '://www.gladyns.store');
+    }
+    return `${base}/product/${product.id}`;
+  };
+
   // Share handler (sends single clean URL so WhatsApp shows only ONE link with rich card preview)
   const handleShare = async () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store';
-    const shareUrl = `${origin}/product/${product.id}`;
+    const shareUrl = getProductShareUrl();
 
     if (navigator.share) {
       try {
@@ -577,7 +587,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
                   {/* Share on WhatsApp */}
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(getProductShareUrl())}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-[52px] h-[52px] rounded-full border border-emerald-500 hover:bg-emerald-50 text-[#25D366] flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer bg-white shadow-2xs"

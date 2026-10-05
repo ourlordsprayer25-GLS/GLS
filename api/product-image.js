@@ -2,7 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 export default async function handler(req, res) {
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'gladyns.store';
+  let host = req.headers['x-forwarded-host'] || req.headers.host || 'www.gladyns.store';
+  if (host === 'gladyns.store') {
+    host = 'www.gladyns.store';
+  }
   const url = new URL(req.url, `https://${host}`);
   const rawId = url.searchParams.get('id') || url.pathname.split('/').filter(Boolean).pop();
   const id = rawId ? rawId.replace(/\.(jpg|jpeg|png|webp)$/i, '') : null;
@@ -64,9 +67,22 @@ export default async function handler(req, res) {
     }
   }
 
-  // 2. If standard HTTP/HTTPS URL, redirect directly
+  // 2. If standard HTTP/HTTPS URL, proxy buffer directly so crawlers get 200 OK with NO redirect
   if (rawImage && (rawImage.startsWith('http://') || rawImage.startsWith('https://'))) {
-    return res.redirect(302, rawImage);
+    try {
+      const cleanUrl = rawImage.replace('https://gladyns.store', 'https://www.gladyns.store').replace('http://gladyns.store', 'https://www.gladyns.store');
+      const imgRes = await fetch(cleanUrl);
+      if (imgRes.ok) {
+        const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+        const buffer = await imgRes.arrayBuffer();
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Length', buffer.byteLength);
+        res.setHeader('Cache-Control', 'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400');
+        return res.status(200).send(Buffer.from(buffer));
+      }
+    } catch (e) {
+      return res.redirect(302, rawImage);
+    }
   }
 
   // 3. Fallback: serve default store banner image
