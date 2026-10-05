@@ -199,12 +199,23 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
 
   const filteredProducts = products.filter((p) => {
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
+    if (!searchQuery.trim()) return matchesCategory;
+
+    const q = searchQuery.toLowerCase().trim();
+    const specsMatch = Array.isArray(p.specs) && p.specs.some(
+      s => s.label.toLowerCase().includes(q) || s.value.toLowerCase().includes(q)
+    );
+
     const matchesSearch =
-      !searchQuery.trim() ||
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.materials.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase());
+      Boolean(p.name && p.name.toLowerCase().includes(q)) ||
+      Boolean(p.subtitle && p.subtitle.toLowerCase().includes(q)) ||
+      Boolean(p.brand && p.brand.toLowerCase().includes(q)) ||
+      Boolean(p.categoryLabel && p.categoryLabel.toLowerCase().includes(q)) ||
+      Boolean(p.materials && p.materials.toLowerCase().includes(q)) ||
+      Boolean(p.condition && p.condition.toLowerCase().includes(q)) ||
+      Boolean(p.description && p.description.toLowerCase().includes(q)) ||
+      specsMatch;
+
     return matchesCategory && matchesSearch;
   });
 
@@ -225,7 +236,10 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
 
       <DesktopSidebar
         user={user}
-        onBackToHome={handleBackToShop}
+        onBackToHome={() => {
+          setIsNotificationsOpen(false);
+          handleBackToShop();
+        }}
         onOpenSection={handleOpenSectionPage}
         onOpenCategoriesPage={handleOpenCategoriesPage}
         onOpenBrandPage={handleOpenBrandPage}
@@ -250,11 +264,16 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
         <Header
           products={products}
+          categories={categories}
           user={user}
           cartItemCount={cartItemCount}
           unreadNotificationCount={unreadNotificationCount}
           wishlistCount={wishlistCount}
           storeSettings={storeSettings}
+          onBackToHome={() => {
+            setIsNotificationsOpen(false);
+            handleBackToShop();
+          }}
           onOpenSidebar={() => setIsMobileSidebarOpen(true)}
           onOpenCart={handleOpenCartPage}
           onOpenNotifications={() => setIsNotificationsOpen(true)}
@@ -269,7 +288,12 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onOpenCollectionsPage={handleOpenCollectionsPage}
           onSelectCategory={handleSelectCategory}
           onSelectProduct={handleSelectProduct}
-          onSearch={setSearchQuery}
+          onSearch={(query) => {
+            setSearchQuery(query);
+            if (query.trim()) {
+              handleBackToShop();
+            }
+          }}
           searchQuery={searchQuery}
           isProfileActive={isProfilePageOpen}
           isOrdersActive={isOrdersPageOpen}
@@ -644,6 +668,10 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onOpenCollectionsPage={handleOpenCollectionsPage}
           onSelectCategory={handleSelectCategory}
           onSelectProduct={handleSelectProduct}
+          onBackToHome={() => {
+            setIsNotificationsOpen(false);
+            handleBackToShop();
+          }}
           onSearch={setSearchQuery}
           searchQuery={searchQuery}
         />
@@ -659,7 +687,10 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onOpenWishlist={handleOpenWishlistPage}
           onOpenOrders={handleOpenOrders}
           onOpenProfile={handleOpenProfile}
-          onOpenHome={handleBackToShop}
+          onOpenHome={() => {
+            setIsNotificationsOpen(false);
+            handleBackToShop();
+          }}
           onOpenAuth={() => handleOpenAuth('login')}
         />
 

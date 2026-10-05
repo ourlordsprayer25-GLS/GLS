@@ -56,7 +56,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     city: defaultAddress?.city || '',
     state: defaultAddress?.state || '',
     postalCode: defaultAddress?.postalCode || '',
-    country: defaultAddress?.country || "C魌e d'Ivoire (Ivory Coast)",
+    country: defaultAddress?.country || "C锟絫e d'Ivoire (Ivory Coast)",
   });
 
   // Keep address in sync when user logs in or modal opens
@@ -76,7 +76,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         city: prev.city || defAddr?.city || '',
         state: prev.state || defAddr?.state || '',
         postalCode: prev.postalCode || defAddr?.postalCode || '',
-        country: prev.country || defAddr?.country || "C魌e d'Ivoire (Ivory Coast)",
+        country: prev.country || defAddr?.country || "C锟絫e d'Ivoire (Ivory Coast)",
       }));
     }
   }, [isOpen, user]);
@@ -276,7 +276,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <div>
                         <p className="font-medium text-slate-950">{it.product.name}</p>
                         <p className="text-slate-500 text-[11px]">
-                          {it.selectedColor?.name || 'Standard'} 路 {language === 'fr' ? 'Taille' : 'Size'} {it.selectedSize?.name || 'One Size'} 路 Qty {it.quantity}
+                          {(() => { const c = it.selectedColor?.name && !['standard', 'default'].includes(it.selectedColor.name.toLowerCase()) ? it.selectedColor.name : ''; const s = it.selectedSize?.name && !['standard', 'default', 'one size', 'taille unique'].includes(it.selectedSize.name.toLowerCase()) ? (language === 'fr' ? 'Taille ' : 'Size ') + it.selectedSize.name : ''; const q = 'Qty ' + it.quantity; return [c, s, q].filter(Boolean).join(' 路 '); })()}
                         </p>
                       </div>
                     </div>
@@ -888,7 +888,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <div>
                         <p className="font-semibold text-slate-950 truncate">{item.product.name}</p>
                         <p className="text-[11px] text-slate-500">
-                          {item.selectedColor?.name || 'Standard'} 路 {language === 'fr' ? 'Taille' : 'Size'} {item.selectedSize?.name || 'One Size'} 路 Qty {item.quantity}
+                          {(() => { const c = item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) ? item.selectedColor.name : ''; const s = item.selectedSize?.name && !['standard', 'default', 'one size', 'taille unique'].includes(item.selectedSize.name.toLowerCase()) ? (language === 'fr' ? 'Taille ' : 'Size ') + item.selectedSize.name : ''; const q = 'Qty ' + item.quantity; return [c, s, q].filter(Boolean).join(' 路 '); })()}
                         </p>
                       </div>
                       <p className="font-mono font-bold text-slate-950 tabular-nums">

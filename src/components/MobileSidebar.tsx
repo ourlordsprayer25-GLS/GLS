@@ -55,6 +55,7 @@ interface MobileSidebarProps {
   onOpenCollectionsPage?: () => void;
   onSearch: (query: string) => void;
   searchQuery: string;
+  onBackToHome?: () => void;
 }
 
 export const MobileSidebar: React.FC<MobileSidebarProps> = ({
@@ -80,6 +81,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
   onOpenCollectionsPage,
   onSearch,
   searchQuery,
+  onBackToHome,
 }) => {
   const { language, setLanguage, currency, country, t, setIsSelectorModalOpen } = useLanguageCurrency();
 
@@ -265,8 +267,12 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             {/* Home */}
             <button
               onClick={() => {
-                onSelectProduct(null);
-                onSelectCategory('all');
+                if (onBackToHome) {
+                  onBackToHome();
+                } else {
+                  onSelectProduct(null);
+                  onSelectCategory('all');
+                }
                 onClose();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}

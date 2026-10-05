@@ -30,8 +30,8 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
 
   const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
-    const defaultColor = product.colors[0];
-    const defaultSize = product.sizes.find((s) => s.inStock) || product.sizes[0];
+    const defaultColor = (product.colors && product.colors.length > 0) ? product.colors[0] : { id: 'default', name: 'Standard', colorHex: '#000000', inStock: true };
+    const defaultSize = (product.sizes && product.sizes.length > 0) ? product.sizes.find((s) => s.inStock) || product.sizes[0] : { name: 'One Size', inStock: true };
     onAddToCart(product, defaultColor, defaultSize, 1);
   };
 

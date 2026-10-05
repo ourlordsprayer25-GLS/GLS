@@ -39,6 +39,7 @@ export interface Product {
   categoryLabel: string;
   department?: 'Electronics' | 'Appliances' | 'Apparel' | 'Living' | string;
   warranty?: string;
+  condition?: 'Brand New' | 'Like New' | 'Refurbished' | 'Open Box' | 'Good' | string;
   specs?: { label: string; value: string }[];
   brand?: string;
   brandOrigin?: string;
@@ -199,7 +200,9 @@ export interface StoreSettings {
     title: string;
     lastUpdated?: string;
     content: string;
+    warrantyTitle?: string;
     warrantyPolicy?: string;
+    returnTitle?: string;
     returnPolicy?: string;
     privacyPolicy?: string;
     shippingPolicy?: string;

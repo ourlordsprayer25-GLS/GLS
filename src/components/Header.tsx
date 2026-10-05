@@ -57,6 +57,7 @@ interface HeaderProps {
   searchQuery: string;
   isProfileActive?: boolean;
   isOrdersActive?: boolean;
+  onBackToHome?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -85,6 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
   searchQuery,
   isProfileActive = false,
   isOrdersActive = false,
+  onBackToHome,
 }) => {
   const {
     language,
@@ -132,55 +134,86 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const trendingSearches = language === 'fr'
-    ? [
-        'Casque Planaire',
-        'Machine Expresso',
-        'Purificateur d\'Air',
-        'Bouilloire Induction',
-        'Veste de Travail',
-        'Pull Mérinos',
-        'Sac Week-end Cuir',
-      ]
-    : [
-        'Planar Headphones',
-        'Espresso Machine',
-        'Smart Air Purifier',
-        'Induction Kettle',
-        'Chore Coat',
-        'Merino Knitwear',
-        'Leather Weekender',
-      ];
+  const trendingSearches = useMemo(() => {
+    const list: string[] = [];
+    const seen = new Set<string>();
+
+    const addSuggestion = (term?: string) => {
+      if (!term) return;
+      const clean = term.trim();
+      if (!clean || clean.length < 2) return;
+      const lower = clean.toLowerCase();
+      if (lower === 'generic' || lower === 'all') return;
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        list.push(clean);
+      }
+    };
+
+    // 1. Prioritize distinct brands present in active inventory
+    if (products && products.length > 0) {
+      products.forEach((p) => {
+        if (p.brand) addSuggestion(p.brand);
+      });
+    }
+
+    // 2. Real product names / concise titles from catalog
+    if (products && products.length > 0) {
+      products.forEach((p) => {
+        if (p.name) {
+          const words = p.name.trim().split(/\s+/);
+          const shortName = words.length > 4 ? words.slice(0, 4).join(' ') : p.name;
+          addSuggestion(shortName);
+        }
+      });
+    }
+
+    // 3. Active store categories
+    if (categories && categories.length > 0) {
+      categories
+        .filter((c) => c.id !== 'all')
+        .forEach((c) => addSuggestion(c.label));
+    }
+
+    // Fallback if catalog is initially loading
+    if (list.length === 0) {
+      return ['Laptops', 'Computers', 'Accessories', 'Electronics'];
+    }
+
+    return list.slice(0, 8);
+  }, [products, categories]);
 
   const matchingProducts = useMemo(() => {
     if (!products || !searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase().trim();
     return products
-      .filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.subtitle.toLowerCase().includes(q) ||
-          p.categoryLabel.toLowerCase().includes(q) ||
-          p.materials.toLowerCase().includes(q) ||
-          (p.brand && p.brand.toLowerCase().includes(q))
-      )
-      .slice(0, 6);
+      .filter((p) => {
+        const specsMatch = Array.isArray(p.specs) && p.specs.some(
+          s => s.label.toLowerCase().includes(q) || s.value.toLowerCase().includes(q)
+        );
+        return (
+          Boolean(p.name && p.name.toLowerCase().includes(q)) ||
+          Boolean(p.subtitle && p.subtitle.toLowerCase().includes(q)) ||
+          Boolean(p.categoryLabel && p.categoryLabel.toLowerCase().includes(q)) ||
+          Boolean(p.materials && p.materials.toLowerCase().includes(q)) ||
+          Boolean(p.brand && p.brand.toLowerCase().includes(q)) ||
+          Boolean(p.condition && p.condition.toLowerCase().includes(q)) ||
+          specsMatch
+        );
+      })
+      .slice(0, 8);
   }, [products, searchQuery]);
 
   const matchingCategories = useMemo(() => {
-    if (!searchQuery.trim()) return [];
+    if (!searchQuery.trim() || !categories) return [];
     const q = searchQuery.toLowerCase().trim();
-    const categoriesList = [
-      { id: 'electronics', label: language === 'fr' ? 'Électronique & Audio' : 'Electronics & Audio' },
-      { id: 'musical', label: language === 'fr' ? 'Instruments de Musique & Studio' : 'Musical Instruments & Gear' },
-      { id: 'appliances', label: language === 'fr' ? 'Électroménager & Maison' : 'Home Appliances & Living' },
-      { id: 'apparel', label: language === 'fr' ? 'Mode & Prêt-à-porter' : 'Fashion & Apparel' },
-      { id: 'leather-goods', label: language === 'fr' ? 'Maroquinerie & Bagagerie' : 'Leather Goods & Accessories' },
-    ];
-    return categoriesList.filter(
-      (c) => c.label.toLowerCase().includes(q) || c.id.toLowerCase().includes(q)
-    );
-  }, [searchQuery, language]);
+    return categories
+      .filter((c) => c.id !== 'all' && (
+        (c.label && c.label.toLowerCase().includes(q)) ||
+        (c.id && c.id.toLowerCase().includes(q))
+      ))
+      .slice(0, 6);
+  }, [searchQuery, categories]);
 
   const featuredPreview = useMemo(() => {
     if (!products) return [];
@@ -296,8 +329,12 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => {
-                onSelectProduct(null);
-                onSelectCategory('all');
+                if (onBackToHome) {
+                  onBackToHome();
+                } else {
+                  onSelectProduct(null);
+                  onSelectCategory('all');
+                }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer text-left"
@@ -317,7 +354,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Unified Search Input Bar with Category Filter & Search Button */}
-          <div className="flex-1 min-w-0 max-w-2xl mx-1 sm:mx-3 relative">
+          <div className="flex-1 min-w-0 max-w-2xl mx-1 sm:mx-3 relative" ref={searchContainerRef}>
             <div className="flex items-center bg-slate-100/90 hover:bg-slate-100 focus-within:bg-white rounded-full border border-slate-200/80 p-1 pl-3 sm:pl-4 transition-all shadow-2xs focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent">
               
               {/* Left Category Dropdown (Desktop only) */}
@@ -332,30 +369,36 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
 
                 {isCategoriesDropdownOpen && (
-                  <div className="absolute left-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-2 z-50 text-xs animate-in fade-in zoom-in-95">
+                  <div className="absolute left-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-2 z-50 text-xs animate-in fade-in zoom-in-95 max-h-80 overflow-y-auto">
                     <div className="px-3 py-2 border-b border-slate-100 font-bold text-slate-900">
                       {language === 'fr' ? 'Catégories' : 'Departments'}
                     </div>
                     <div className="py-1 space-y-0.5">
-                      {[
-                        { id: 'electronics', label: language === 'fr' ? 'Électronique & Audio' : 'Electronics & Audio' },
-                        { id: 'musical', label: language === 'fr' ? 'Musique & Studio' : 'Musical Instruments' },
-                        { id: 'appliances', label: language === 'fr' ? 'Électroménager & Maison' : 'Home Appliances' },
-                        { id: 'apparel', label: language === 'fr' ? 'Mode & Prêt-à-porter' : 'Fashion & Apparel' },
-                        { id: 'leather-goods', label: language === 'fr' ? 'Maroquinerie' : 'Leather Goods' },
-                      ].map((cat) => (
-                        <button
-                          key={cat.id}
-                          onClick={() => {
-                            setIsCategoriesDropdownOpen(false);
-                            onSelectProduct(null);
-                            onSelectCategory(cat.id);
-                          }}
-                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-700 font-medium text-slate-800 cursor-pointer transition-colors"
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
+                      <button
+                        onClick={() => {
+                          setIsCategoriesDropdownOpen(false);
+                          onSelectProduct(null);
+                          onSelectCategory('all');
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-700 font-medium text-slate-800 cursor-pointer transition-colors"
+                      >
+                        {language === 'fr' ? 'Toutes les catégories' : 'All Departments'}
+                      </button>
+                      {categories && categories
+                        .filter((cat) => cat.id !== 'all')
+                        .map((cat) => (
+                          <button
+                            key={cat.id}
+                            onClick={() => {
+                              setIsCategoriesDropdownOpen(false);
+                              onSelectProduct(null);
+                              onSelectCategory(cat.id);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-700 font-medium text-slate-800 cursor-pointer transition-colors truncate"
+                          >
+                            {cat.label}
+                          </button>
+                        ))}
                     </div>
                   </div>
                 )}
@@ -365,17 +408,32 @@ export const Header: React.FC<HeaderProps> = ({
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => onSearch(e.target.value)}
-                placeholder={language === 'fr' ? 'Rechercher...' : 'Search...'}
+                onFocus={() => setIsSearchOpen(true)}
+                onChange={(e) => {
+                  onSearch(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    setIsSearchOpen(false);
+                    onSearch(searchQuery);
+                    const el = document.getElementById('catalog-section');
+                    el?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                placeholder={language === 'fr' ? 'Rechercher ordinateurs, marques, specs...' : 'Search laptops, brands, specs...'}
                 className="w-full min-w-0 px-1.5 sm:px-3 py-1 sm:py-2 bg-transparent text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-sans truncate"
               />
 
               {/* Camera & Microphone icons (Desktop only) */}
               <div className="hidden xl:flex items-center gap-1.5 text-slate-400 px-1 shrink-0">
-                <button type="button" aria-label="Visual Search" className="hover:text-blue-600 cursor-pointer p-1 transition-colors">
-                  <Camera className="w-4 h-4" />
-                </button>
-                <button type="button" aria-label="Voice Search" className="hover:text-blue-600 cursor-pointer p-1 transition-colors">
+                <button
+                  type="button"
+                  aria-label="Voice Search"
+                  onClick={startVoiceSearch}
+                  className={`hover:text-blue-600 cursor-pointer p-1 transition-colors ${isListening ? 'text-red-600 animate-pulse' : ''}`}
+                >
                   <Mic className="w-4 h-4" />
                 </button>
               </div>
@@ -384,7 +442,10 @@ export const Header: React.FC<HeaderProps> = ({
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => onSearch('')}
+                  onClick={() => {
+                    onSearch('');
+                    setIsSearchOpen(false);
+                  }}
                   aria-label="Clear search"
                   className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer mr-0.5 shrink-0"
                 >
@@ -396,7 +457,12 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  if (searchQuery.trim()) onSearch(searchQuery);
+                  setIsSearchOpen(false);
+                  if (searchQuery.trim()) {
+                    onSearch(searchQuery);
+                  }
+                  const el = document.getElementById('catalog-section');
+                  el?.scrollIntoView({ behavior: 'smooth' });
                 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white p-2 sm:px-4 sm:py-2 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
               >
@@ -404,6 +470,176 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">{language === 'fr' ? 'Rechercher' : 'Search'}</span>
               </button>
             </div>
+
+            {/* LIVE AUTOCOMPLETE DROPDOWN ATTACHED DIRECTLY UNDER SEARCH BAR */}
+            {isSearchOpen && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 z-[70] max-h-[75vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
+                {!searchQuery.trim() ? (
+                  /* Empty query: Popular searches & Quick department shortcuts */
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
+                        <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
+                        <span>{language === 'fr' ? 'Recherches populaires' : 'Popular Searches'}</span>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {trendingSearches.map((term) => (
+                          <button
+                            key={term}
+                            onClick={() => {
+                              onSearch(term);
+                              setIsSearchOpen(false);
+                              const el = document.getElementById('catalog-section');
+                              el?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-xs text-slate-800 font-medium transition-colors cursor-pointer"
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
+                        <Compass className="w-3.5 h-3.5 text-blue-600" />
+                        <span>{language === 'fr' ? 'Parcourir par rayon' : 'Browse by Department'}</span>
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {categories && categories
+                          .filter((c) => c.id !== 'all')
+                          .slice(0, 6)
+                          .map((cat) => (
+                            <button
+                              key={cat.id}
+                              onClick={() => {
+                                onSelectCategory(cat.id);
+                                setIsSearchOpen(false);
+                                const el = document.getElementById('catalog-section');
+                                el?.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                              className="px-3 py-2 rounded-xl bg-slate-50 hover:bg-blue-50 hover:border-blue-300 border border-slate-200/70 text-xs font-semibold text-slate-900 text-left transition-colors cursor-pointer truncate"
+                            >
+                              {cat.label}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Active query: Matching Categories & Live Matching Products */
+                  <div className="space-y-3">
+                    {matchingCategories.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-100">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          {t('allCategories')}:
+                        </span>
+                        {matchingCategories.map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => {
+                              onSelectCategory(c.id);
+                              setIsSearchOpen(false);
+                              const el = document.getElementById('catalog-section');
+                              el?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold hover:bg-blue-100 cursor-pointer transition-colors"
+                          >
+                            {c.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {matchingProducts.length > 0 ? (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                            {language === 'fr' ? 'Articles correspondants' : 'Matching Items'} ({matchingProducts.length})
+                          </p>
+                          <span className="text-[10px] text-blue-600 font-bold">
+                            Click item to open
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {matchingProducts.map((p) => (
+                            <div
+                              key={p.id}
+                              onClick={() => {
+                                onSelectProduct(p);
+                                setIsSearchOpen(false);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-500 transition-all cursor-pointer group shadow-2xs text-left"
+                            >
+                              <img
+                                src={p.primaryImage}
+                                alt={p.name}
+                                className="w-12 h-12 object-cover rounded-lg bg-slate-200 shrink-0"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 truncate">
+                                    {p.brand || p.categoryLabel}
+                                  </span>
+                                  {p.condition && (
+                                    <span className="text-[9px] font-medium text-slate-400 shrink-0">
+                                      • {p.condition}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs font-bold text-slate-900 truncate group-hover:text-blue-600">
+                                  {p.name}
+                                </p>
+                                <p className="text-[11px] font-mono font-bold text-blue-600">
+                                  {formatPrice(p.price)}
+                                </p>
+                              </div>
+                              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-6 text-center text-xs text-slate-500">
+                        {language === 'fr'
+                          ? `Aucun article trouvé pour "${searchQuery}".`
+                          : `No exact item found for "${searchQuery}".`}
+                      </div>
+                    )}
+
+                    {/* Footer link to jump to catalog */}
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <button
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          onSearch(searchQuery);
+                          const el = document.getElementById('catalog-section');
+                          el?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>
+                          {language === 'fr'
+                            ? `Voir tous les résultats dans le catalogue`
+                            : `View all results in catalog`}
+                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          onSearch('');
+                          setIsSearchOpen(false);
+                        }}
+                        className="text-xs text-slate-400 hover:text-slate-700 cursor-pointer font-semibold"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Action Pill Buttons */}
@@ -564,196 +800,6 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </header>
-
-        {/* Collapsible search bar with suggestions */}
-        {isSearchOpen && (
-          <div ref={searchContainerRef} className="border-t border-slate-200/80 bg-white/98 px-4 py-4 sm:px-6 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="max-w-2xl mx-auto space-y-4">
-              {/* Input field */}
-              <div className="flex items-center gap-3 bg-slate-50 rounded-2xl px-4 py-2.5 border border-slate-200 focus-within:border-blue-600 focus-within:bg-white transition-all">
-                <Search className="w-4 h-4 text-slate-400 shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => onSearch(e.target.value)}
-                  placeholder={t('searchPlaceholder')}
-                  autoFocus
-                  className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-                />
-                <button onClick={startVoiceSearch} className={`p-1 rounded-full ${isListening ? 'bg-red-100 text-red-600' : 'text-slate-400 hover:text-blue-600'}`}>
-                  <Mic className="w-4 h-4" />
-                </button>
-                <button onClick={() => fileInputRef.current?.click()} className="text-slate-400 hover:text-blue-600">
-                  <Camera className="w-4 h-4" />
-                  <input type="file" ref={fileInputRef} className="hidden" onChange={handleImageUpload} accept="image/*" />
-                </button>
-                {searchQuery && (
-                  <button
-                    onClick={() => onSearch('')}
-                    className="text-xs text-slate-400 hover:text-slate-700 px-1.5 py-0.5 rounded cursor-pointer"
-                  >
-                    Clear
-                  </button>
-                )}
-                <button
-                  onClick={() => setIsSearchOpen(false)}
-                  aria-label="Close search"
-                  className="p-1 text-slate-400 hover:text-slate-700 rounded-full cursor-pointer hover:bg-slate-200/50"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Suggestions Panel */}
-              {!searchQuery.trim() ? (
-                /* Empty state: Trending searches & Disciplines & Featured preview */
-                <div className="space-y-4 pt-1">
-                  {/* Trending Searches */}
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
-                      <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
-                      <span>{language === 'fr' ? 'Recherches populaires' : 'Popular Searches'}</span>
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {trendingSearches.map((term) => (
-                        <button
-                          key={term}
-                          onClick={() => onSearch(term)}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-xs text-slate-800 font-medium transition-colors cursor-pointer"
-                        >
-                          {term}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Explore Disciplines */}
-                  <div className="pt-2 border-t border-slate-100">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-2">
-                      <Compass className="w-3.5 h-3.5 text-blue-600" />
-                      <span>{language === 'fr' ? 'Parcourir par rayon' : 'Browse by Department'}</span>
-                    </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        { id: 'electronics', label: language === 'fr' ? 'Électronique & Audio' : 'Electronics & Audio' },
-                        { id: 'musical', label: language === 'fr' ? 'Instruments de Musique' : 'Musical Instruments' },
-                        { id: 'appliances', label: language === 'fr' ? 'Électroménager & Maison' : 'Home Appliances' },
-                        { id: 'apparel', label: language === 'fr' ? 'Mode & Prêt-à-porter' : 'Fashion & Apparel' },
-                        { id: 'leather-goods', label: language === 'fr' ? 'Maroquinerie & Bagagerie' : 'Leather Goods' },
-                      ].map((cat) => (
-                        <button
-                          key={cat.id}
-                          onClick={() => {
-                            onSelectCategory(cat.id);
-                            setIsSearchOpen(false);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className="px-3 py-2 rounded-xl bg-slate-50 hover:bg-blue-50 hover:border-blue-300 border border-slate-200/70 text-xs font-semibold text-slate-900 text-left transition-colors cursor-pointer"
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* Active query suggestions: Matching Products & Matching Categories */
-                <div className="space-y-3 pt-1">
-                  {matchingCategories.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-100">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        {t('allCategories')}:
-                      </span>
-                      {matchingCategories.map((c) => (
-                        <button
-                          key={c.id}
-                          onClick={() => {
-                            onSelectCategory(c.id);
-                            setIsSearchOpen(false);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold hover:bg-blue-100 cursor-pointer transition-colors"
-                        >
-                          {c.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {matchingProducts.length > 0 ? (
-                    <div>
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                        {language === 'fr' ? 'Articles correspondants' : 'Matching Items'} ({matchingProducts.length})
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {matchingProducts.map((p) => (
-                          <div
-                            key={p.id}
-                            onClick={() => {
-                              onSelectProduct(p);
-                              setIsSearchOpen(false);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 hover:bg-white border border-slate-200/80 hover:border-blue-600 transition-all cursor-pointer group shadow-2xs"
-                          >
-                            <img
-                              src={p.primaryImage}
-                              alt={p.name}
-                              className="w-12 h-12 object-cover rounded-lg bg-slate-200 shrink-0"
-                            />
-                            <div className="min-w-0 flex-1">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
-                                {p.categoryLabel}
-                              </span>
-                              <p className="text-xs font-semibold text-slate-900 truncate group-hover:text-blue-600">
-                                {p.name}
-                              </p>
-                              <p className="text-[11px] font-mono font-semibold text-blue-600">
-                                {p.price ? `$${p.price}` : ''}
-                              </p>
-                            </div>
-                            <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-4 text-center text-xs text-slate-500">
-                      {language === 'fr'
-                        ? `Aucun article trouvé pour "${searchQuery}".`
-                        : `No exact item found for "${searchQuery}".`}
-                    </div>
-                  )}
-
-                  {/* Submit All Results action */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                    <button
-                      onClick={() => {
-                        setIsSearchOpen(false);
-                        const el = document.getElementById('catalog-section');
-                        el?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>
-                        {language === 'fr'
-                          ? `Afficher tous les résultats pour "${searchQuery}"`
-                          : `Show all catalog results for "${searchQuery}"`}
-                      </span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => onSearch('')}
-                      className="text-xs text-slate-400 hover:text-slate-700 cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
     </>
   );
 };

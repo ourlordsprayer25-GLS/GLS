@@ -517,34 +517,48 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
 
               {/* Clause 2: Warranty Policy */}
               <div className="space-y-2 pt-4 border-t border-zinc-100">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <label className="text-xs font-bold text-zinc-900">
-                    2. Warranty & Quality Guarantee (2 Years)
-                  </label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="text-xs font-bold text-zinc-900">Clause 2 Title:</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={localSettings.terms?.warrantyTitle ?? '2. Warranty & Quality Guarantee'}
+                    onChange={(e) => updateNested('terms.warrantyTitle', e.target.value)}
+                    placeholder="e.g. 2. Warranty & Quality Guarantee"
+                    className="px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 focus:outline-none focus:border-blue-600 sm:w-80"
+                  />
                 </div>
                 <textarea
                   rows={3}
                   value={localSettings.terms?.warrantyPolicy || ''}
                   onChange={(e) => updateNested('terms.warrantyPolicy', e.target.value)}
-                  placeholder="All curated items come with a complimentary 2-year warranty..."
+                  placeholder="State your exact warranty coverage, duration, and conditions..."
                   className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all leading-relaxed"
                 />
               </div>
 
               {/* Clause 3: Returns & Refunds Policy */}
               <div className="space-y-2 pt-4 border-t border-zinc-100">
-                <div className="flex items-center gap-2">
-                  <RotateCcw className="w-4 h-4 text-blue-600" />
-                  <label className="text-xs font-bold text-zinc-900">
-                    3. Return & Refund Policy (30 Days)
-                  </label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <RotateCcw className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span className="text-xs font-bold text-zinc-900">Clause 3 Title:</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={localSettings.terms?.returnTitle ?? '3. Return & Refund Policy'}
+                    onChange={(e) => updateNested('terms.returnTitle', e.target.value)}
+                    placeholder="e.g. 3. Return & Refund Policy"
+                    className="px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 focus:outline-none focus:border-blue-600 sm:w-80"
+                  />
                 </div>
                 <textarea
                   rows={3}
                   value={localSettings.terms?.returnPolicy || ''}
                   onChange={(e) => updateNested('terms.returnPolicy', e.target.value)}
-                  placeholder="You have 30 days from delivery to return any unworn item with original tags..."
+                  placeholder="State your return conditions, return timeline window, and refund procedure..."
                   className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all leading-relaxed"
                 />
               </div>

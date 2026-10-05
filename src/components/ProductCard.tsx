@@ -19,11 +19,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onQuickAdd,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
-  const [selectedColor, setSelectedColor] = useState<ProductVariant>(product.colors[0]);
+  const [selectedColor, setSelectedColor] = useState<ProductVariant>(
+    product.colors && product.colors.length > 0
+      ? product.colors[0]
+      : { id: 'default', name: 'Standard', colorHex: '#000000', inStock: true }
+  );
   const [isAdded, setIsAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const isOutOfStock = !product.sizes.some((s) => s.inStock);
+  const isOutOfStock =
+    (product.stockLevel !== undefined && product.stockLevel === 0) ||
+    Boolean(product.sizes && product.sizes.length > 0 && !product.sizes.some((s) => s.inStock));
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -128,15 +134,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
           {/* Color Swatches */}
           <div className="flex items-center gap-1 sm:gap-1.5" onClick={(e) => e.stopPropagation()}>
-            {product.colors.map((color) => (
+            {product.colors && product.colors.length > 1 && product.colors.map((color) => (
               <button
-                key={color.id}
+                key={color.id || color.name}
                 type="button"
                 onClick={() => setSelectedColor(color)}
                 title={color.name}
                 aria-label={color.name}
                 className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full border transition-all cursor-pointer ${
-                  selectedColor.id === color.id
+                  selectedColor?.id === color.id
                     ? 'ring-2 ring-blue-600 ring-offset-1 scale-110'
                     : 'border-slate-300 hover:scale-105'
                 }`}

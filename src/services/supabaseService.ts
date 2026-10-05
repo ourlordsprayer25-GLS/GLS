@@ -182,9 +182,37 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
     );
   };
 
+  const sanitizeProductVariants = (p: Product): Product => {
+    let sizes = p.sizes || [];
+    let colors = p.colors || [];
+    const isApparelCategory = ['apparel', 'clothing', 'shoes', 'footwear', 'fashion', 'men', 'women'].includes((p.category || '').toLowerCase());
+    if (!isApparelCategory && sizes.length === 3 && sizes.every(s => ['S', 'M', 'L'].includes(s.name))) {
+      sizes = [];
+    }
+    if (colors.length === 1 && colors[0].name.toLowerCase() === 'standard') {
+      colors = [];
+    }
+    if (p.id === 'prod-1790854541223' && colors.length === 0) {
+      colors = [
+        { id: 'col-bose-1', name: 'Black', inStock: true, colorHex: '#000000' },
+        { id: 'col-bose-2', name: 'White Smoke', inStock: true, colorHex: '#E5E7EB' }
+      ];
+    }
+    if (p.id === 'prod-1790779519345' && colors.length === 0) {
+      colors = [
+        { id: 'col-jbl-1', name: 'Squad Camo', inStock: true, colorHex: '#3D4436' },
+        { id: 'col-jbl-2', name: 'Midnight Black', inStock: true, colorHex: '#000000' },
+        { id: 'col-jbl-3', name: 'Fiesta Red', inStock: true, colorHex: '#DC2626' }
+      ];
+    }
+    const specs = Array.isArray(p.specs) ? p.specs : [];
+    const condition = p.condition || 'Brand New';
+    return { ...p, sizes, colors, specs, condition };
+  };
+
   let hasLoaded = false;
   const rawCached = getCache('gls_cache_products');
-  const cached = Array.isArray(rawCached) ? rawCached.filter(p => !isMockProduct(p)) : null;
+  const cached = Array.isArray(rawCached) ? rawCached.filter(p => !isMockProduct(p)).map(sanitizeProductVariants) : null;
   if (cached && cached.length > 0) {
     onUpdate(cached);
     setCache('gls_cache_products', cached);
@@ -196,7 +224,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   }
   
   const wrappedOnUpdate = (data: Product[]) => {
-    const cleanData = (Array.isArray(data) ? data : []).filter(p => !isMockProduct(p));
+    const cleanData = (Array.isArray(data) ? data : []).filter(p => !isMockProduct(p)).map(sanitizeProductVariants);
     setCache('gls_cache_products', cleanData);
     onUpdate(cleanData);
   };

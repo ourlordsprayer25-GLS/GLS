@@ -18,6 +18,9 @@ import {
   Layers,
   FolderPlus,
   ShoppingCart,
+  SlidersHorizontal,
+  Laptop,
+  Cpu,
 } from 'lucide-react';
 import { Product, ProductVariant, ProductSize, Review, StoreSettings } from '../types/store';
 import { SizeChartModal } from './SizeChartModal';
@@ -67,7 +70,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   const [copiedShare, setCopiedShare] = useState(false);
 
   // Active Details Tab
-  const [activeTab, setActiveTab] = useState<'description' | 'details' | 'materials' | 'shipping'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'details' | 'specs' | 'materials' | 'shipping'>(
+    product.specs && product.specs.length > 0 ? 'specs' : 'description'
+  );
 
   // Interactive Reviews State
   const [reviewsList, setReviewsList] = useState<Review[]>(product.reviews || []);
@@ -410,115 +415,180 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   <span className="text-slate-400">({reviewsList.length})</span>
                 </a>
               </div>
-            </div>
 
-            {/* Variant 1: Color Swatches */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-800">
-                  {language === 'fr' ? 'Couleur' : 'Color'}: <span className="font-normal text-slate-600">{selectedColor.name}</span>
-                </span>
-                <span className="text-slate-400">{product.colors.length} {language === 'fr' ? 'options' : 'choices'}</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {product.colors.map((color) => {
-                  const isSelected = selectedColor.id === color.id;
-                  return (
-                    <button
-                      key={color.id}
-                      onClick={() => handleColorChange(color)}
-                      title={color.name}
-                      className={`group relative p-0.5 rounded-full transition-all cursor-pointer ${
-                        isSelected ? 'ring-2 ring-blue-600 ring-offset-2' : 'hover:ring-1 hover:ring-slate-400'
-                      }`}
+              {/* Marketplace Highlight Chips (Condition & Key Technical Specs) */}
+              {(product.condition || (product.specs && product.specs.length > 0)) && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-3">
+                  {product.condition && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60 shadow-2xs">
+                      {product.condition === 'Brand New' ? '✨ ' : product.condition === 'Refurbished' ? '🔄 ' : '✓ '}
+                      {product.condition}
+                    </span>
+                  )}
+                  {product.specs && product.specs.slice(0, 4).map((spec, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/60 font-mono shadow-2xs"
                     >
-                      <span
-                        className="block w-7 h-7 rounded-full border border-black/10 shadow-xs"
-                        style={{ backgroundColor: color.colorHex }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Variant 2: Size / Configuration Selector & Guide */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-800">
-                  {['electronics', 'appliances', 'musical'].includes(product.category)
-                    ? (language === 'fr' ? 'Modèle / Édition:' : 'Edition / Model:')
-                    : (language === 'fr' ? 'Taille / Format:' : 'Size:')}{' '}
-                  <span className="font-normal text-slate-600">{selectedSize.name}</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsSizeChartOpen(true)}
-                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 underline underline-offset-4 cursor-pointer font-medium"
-                >
-                  <Ruler className="w-3.5 h-3.5" />
-                  <span>
-                    {['electronics', 'appliances', 'musical'].includes(product.category)
-                      ? (language === 'fr' ? 'Guide des spécifications' : 'Dimensions & Specs Guide')
-                      : (language === 'fr' ? 'Guide des tailles' : 'Size & Dimensions Guide')}
-                  </span>
-                </button>
-              </div>
-
-              <div
-                className={
-                  product.sizes.some((s) => s.name.length > 5)
-                    ? 'grid grid-cols-1 sm:grid-cols-2 gap-2'
-                    : 'grid grid-cols-5 gap-2'
-                }
-              >
-                {product.sizes.map((size) => {
-                  const isSelected = selectedSize.name === size.name;
-                  const isOutOfStock = !size.inStock;
-
-                  return (
-                    <button
-                      key={size.name}
-                      disabled={isOutOfStock}
-                      onClick={() => setSelectedSize(size)}
-                      className={`relative px-3 py-2.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer flex flex-col items-center justify-center text-center ${
-                        isOutOfStock
-                          ? 'border-slate-200 bg-slate-50 text-slate-300 cursor-not-allowed line-through'
-                          : isSelected
-                          ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-800 hover:border-blue-600'
-                      }`}
-                    >
-                      <span>{size.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Warranty / Certified Banner if present */}
-              {product.warranty && (
-                <div className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between text-xs text-blue-900">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span>{product.warranty}</span>
-                  </span>
-                  <span className="text-[10px] text-blue-700 font-mono">100% Genuine Studio Certification</span>
+                      <span className="text-slate-400 font-sans mr-1">{spec.label.split(' ')[0]}:</span>
+                      {spec.value}
+                    </span>
+                  ))}
                 </div>
               )}
-
-              {/* Stock Warning Indicator */}
-              {selectedSize.stockCount !== undefined && selectedSize.stockCount > 0 && selectedSize.stockCount <= 4 && (
-                <p className="text-xs text-amber-700 font-medium flex items-center gap-1 mt-1">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>
-                    {language === 'fr'
-                      ? `Stock limité: plus que ${selectedSize.stockCount} unités disponibles.`
-                      : `Low stock: Only ${selectedSize.stockCount} units remaining in this configuration.`}
-                  </span>
-                </p>
-              )}
             </div>
+
+            {/* Determine variant availability */}
+            {(() => {
+              const hasColorVariants = Boolean(
+                product.colors &&
+                product.colors.length > 0 &&
+                !(
+                  product.colors.length === 1 &&
+                  (!product.colors[0].name ||
+                    product.colors[0].name.toLowerCase() === 'standard' ||
+                    product.colors[0].name.toLowerCase() === 'default')
+                )
+              );
+
+              const hasSizeVariants = Boolean(
+                product.sizes &&
+                product.sizes.length > 0 &&
+                !(
+                  product.sizes.length === 1 &&
+                  (!product.sizes[0].name ||
+                    product.sizes[0].name.toLowerCase() === 'standard' ||
+                    product.sizes[0].name.toLowerCase() === 'one size' ||
+                    product.sizes[0].name.toLowerCase() === 'default' ||
+                    product.sizes[0].name.toLowerCase() === 'taille unique')
+                )
+              );
+
+              const isApparelCategory = ['apparel', 'fashion', 'clothing', 'shoes', 'outerwear', 'knitwear'].includes(
+                (product.category || '').toLowerCase()
+              );
+              const isEquipmentCategory = ['electronics', 'appliances', 'musical', 'computer-it', 'electronics-audio'].includes(
+                (product.category || '').toLowerCase()
+              );
+
+              return (
+                <>
+                  {/* Variant 1: Color Swatches */}
+                  {hasColorVariants && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-800">
+                          {language === 'fr' ? 'Couleur' : 'Color'}: <span className="font-normal text-slate-600">{selectedColor.name}</span>
+                        </span>
+                        <span className="text-slate-400">{product.colors.length} {language === 'fr' ? 'options' : 'choices'}</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {product.colors.map((color) => {
+                          const isSelected = selectedColor.id === color.id;
+                          return (
+                            <button
+                              key={color.id || color.name}
+                              onClick={() => handleColorChange(color)}
+                              title={color.name}
+                              className={`group relative p-0.5 rounded-full transition-all cursor-pointer ${
+                                isSelected ? 'ring-2 ring-blue-600 ring-offset-2' : 'hover:ring-1 hover:ring-slate-400'
+                              }`}
+                            >
+                              <span
+                                className="block w-7 h-7 rounded-full border border-black/10 shadow-xs"
+                                style={{ backgroundColor: color.colorHex }}
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Variant 2: Size / Configuration Selector & Guide */}
+                  {hasSizeVariants && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-800">
+                          {['electronics', 'appliances', 'musical', 'computer-it', 'electronics-audio'].includes(product.category)
+                            ? (language === 'fr' ? 'Modèle / Spécification:' : 'Specification / Model:')
+                            : (language === 'fr' ? 'Taille / Format:' : 'Size:')}{' '}
+                          <span className="font-normal text-slate-600">{selectedSize.name}</span>
+                        </span>
+                        {(isApparelCategory || isEquipmentCategory) && (
+                          <button
+                            type="button"
+                            onClick={() => setIsSizeChartOpen(true)}
+                            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 underline underline-offset-4 cursor-pointer font-medium"
+                          >
+                            <Ruler className="w-3.5 h-3.5" />
+                            <span>
+                              {['electronics', 'appliances', 'musical', 'computer-it', 'electronics-audio'].includes(product.category)
+                                ? (language === 'fr' ? 'Guide des spécifications' : 'Dimensions & Specs Guide')
+                                : (language === 'fr' ? 'Guide des tailles' : 'Size & Dimensions Guide')}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div
+                        className={
+                          product.sizes.some((s) => s.name.length > 5)
+                            ? 'grid grid-cols-1 sm:grid-cols-2 gap-2'
+                            : 'grid grid-cols-5 gap-2'
+                        }
+                      >
+                        {product.sizes.map((size) => {
+                          const isSelected = selectedSize.name === size.name;
+                          const isOutOfStock = !size.inStock;
+
+                          return (
+                            <button
+                              key={size.name}
+                              disabled={isOutOfStock}
+                              onClick={() => setSelectedSize(size)}
+                              className={`relative px-3 py-2.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer flex flex-col items-center justify-center text-center ${
+                                isOutOfStock
+                                  ? 'border-slate-200 bg-slate-50 text-slate-300 cursor-not-allowed line-through'
+                                  : isSelected
+                                  ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
+                                  : 'border-slate-200 bg-white text-slate-800 hover:border-blue-600'
+                              }`}
+                            >
+                              <span>{size.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Stock Warning Indicator */}
+                      {selectedSize.stockCount !== undefined && selectedSize.stockCount > 0 && selectedSize.stockCount <= 4 && (
+                        <p className="text-xs text-amber-700 font-medium flex items-center gap-1 mt-1">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>
+                            {language === 'fr'
+                              ? `Stock limité: plus que ${selectedSize.stockCount} unités disponibles.`
+                              : `Low stock: Only ${selectedSize.stockCount} units remaining in this configuration.`}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Warranty / Certified Banner if present */}
+                  {product.warranty && (
+                    <div className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between text-xs text-blue-900">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                        <span>{product.warranty}</span>
+                      </span>
+                      <span className="text-[10px] text-blue-700 font-mono">100% Genuine Studio Certification</span>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             {/* Quantity and Primary Buy CTA */}
             <div className="space-y-3.5 pt-3">
@@ -627,11 +697,56 @@ export const ProductPage: React.FC<ProductPageProps> = ({
               </button>
             </div>
 
+            {/* Facebook Marketplace-style Hardware & Specifications Box */}
+            {product.specs && product.specs.length > 0 && (
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
+                    {language === 'fr' ? 'Caractéristiques Clés' : 'Item Specifications'}
+                  </span>
+                  {product.condition && (
+                    <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md">
+                      {product.condition}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {product.specs.slice(0, 6).map((spec, i) => (
+                    <div key={i} className="p-2.5 bg-white rounded-xl border border-slate-200/70 shadow-2xs">
+                      <div className="text-[10px] text-slate-400 font-medium truncate uppercase tracking-wider">{spec.label}</div>
+                      <div className="text-xs font-bold text-slate-900 mt-0.5 truncate font-mono" title={spec.value}>{spec.value}</div>
+                    </div>
+                  ))}
+                </div>
+                {product.specs.length > 6 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('specs');
+                      const el = document.getElementById('product-tabs-section');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="w-full text-center text-xs text-blue-600 hover:text-blue-800 font-semibold cursor-pointer pt-1"
+                  >
+                    {language === 'fr' ? `Voir toutes les caractéristiques (${product.specs.length}) ↓` : `View all ${product.specs.length} specifications ↓`}
+                  </button>
+                )}
+              </div>
+            )}
+
               {/* WhatsApp Concierge Inquiry Button */}
               <div className="pt-1">
                 <a
                   href={getWhatsAppLink(
-                    `Hello GLADYNS Studio, I would like to inquire about the ${product.name} (Color: ${selectedColor.name}, Size: ${selectedSize.name}, Price: ${formatPrice(product.price)}).\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`
+                    (() => {
+                      const hasColor = selectedColor?.name && !['standard', 'default'].includes(selectedColor.name.toLowerCase());
+                      const hasSize = selectedSize?.name && !['standard', 'default', 'one size', 'taille unique'].includes(selectedSize.name.toLowerCase());
+                      const colorPart = hasColor ? `Color: ${selectedColor.name}` : '';
+                      const sizePart = hasSize ? `Size: ${selectedSize.name}` : '';
+                      const specInfo = [colorPart, sizePart].filter(Boolean).join(', ');
+                      return `Hello GLADYNS Studio, I would like to inquire about the ${product.name}${specInfo ? ` (${specInfo})` : ''} - Price: ${formatPrice(product.price)}.\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`;
+                    })()
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -666,15 +781,16 @@ export const ProductPage: React.FC<ProductPageProps> = ({
           </div>
 
         {/* Tabbed Product Details & Specification Section */}
-        <section className="mt-16 bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-10 shadow-xs">
+        <section id="product-tabs-section" className="mt-16 bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-10 shadow-xs">
           {/* Tab Navigation */}
           <div className="flex border-b border-slate-200 overflow-x-auto gap-6 sm:gap-8 pb-3">
             {[
+              { id: 'specs', label: language === 'fr' ? 'Spécifications Techniques' : 'Technical Specifications' },
               { id: 'description', label: language === 'fr' ? 'Description & Histoire' : 'Description & Story' },
               { id: 'details', label: language === 'fr' ? 'Détails de Fabrication' : 'Construction Details' },
               { id: 'materials', label: language === 'fr' ? 'Matières & Entretien' : 'Materials & Care' },
               { id: 'shipping', label: language === 'fr' ? 'Livraison & Retours Offerts' : 'Shipping & Complimentary Returns' },
-            ].map((tab) => (
+            ].filter(tab => tab.id !== 'specs' || (product.specs && product.specs.length > 0)).map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -694,6 +810,48 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
           {/* Tab Content Panes */}
           <div className="pt-6">
+            {activeTab === 'specs' && (
+              <div className="max-w-4xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      {language === 'fr' ? 'Spécifications Complètes du Matériel' : 'Hardware & Configuration Details'}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {language === 'fr' ? 'Toutes les caractéristiques techniques vérifiées par notre équipe.' : 'Verified technical specifications and performance ratings.'}
+                    </p>
+                  </div>
+                  {product.condition && (
+                    <div className="self-start sm:self-auto px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                      <span>{language === 'fr' ? 'État :' : 'Condition:'}</span>
+                      <span className="font-extrabold">{product.condition}</span>
+                    </div>
+                  )}
+                </div>
+
+                {product.specs && product.specs.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {product.specs.map((spec, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start justify-between p-3.5 bg-slate-50 hover:bg-white rounded-xl border border-slate-200/80 transition-all shadow-2xs group"
+                      >
+                        <span className="text-xs font-semibold text-slate-500 group-hover:text-blue-600 transition-colors">
+                          {spec.label}
+                        </span>
+                        <span className="text-xs font-bold text-slate-900 text-right max-w-[60%] font-mono">
+                          {spec.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center text-sm text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    {language === 'fr' ? 'Aucune spécification détaillée enregistrée pour cet article.' : 'No detailed technical specifications configured for this piece.'}
+                  </div>
+                )}
+              </div>
+            )}
             {activeTab === 'description' && (
               <div className="space-y-4 max-w-3xl">
                 <p className="text-base text-slate-700 leading-relaxed font-light">

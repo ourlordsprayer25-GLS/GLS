@@ -24,7 +24,16 @@ import {
   Image as ImageIcon,
   Barcode,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Palette,
+  Ruler,
+  Check,
+  Laptop,
+  Smartphone,
+  Headphones,
+  SlidersHorizontal,
+  Cpu,
+  Wrench
 } from 'lucide-react';
 import JsBarcode from 'jsbarcode';
 import { Product } from '../../types/store';
@@ -33,6 +42,117 @@ import { saveRealtimeProduct, deleteRealtimeProduct, addRealtimeNotification } f
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { SUPPORTED_CURRENCIES } from '../../data/currencies';
 import { FastActionLoader } from '../FastLoadingScreen';
+import { HardwareSpecWizard } from './HardwareSpecWizard';
+
+const SPEC_PRESETS: Record<string, { label: string; value: string }[]> = {
+  laptop: [
+    { label: 'Processor (CPU)', value: 'Intel Core i7 (13th Gen) / Apple M3' },
+    { label: 'Installed RAM', value: '16GB DDR5 High-Speed' },
+    { label: 'Internal Storage', value: '512GB NVMe M.2 SSD' },
+    { label: 'Operating System', value: 'Windows 11 Pro 64-bit' },
+    { label: 'Graphics (GPU)', value: 'Intel Iris Xe / Dedicated GPU' },
+    { label: 'Display Size & Res', value: '15.6" Full HD (1920 x 1080) IPS' },
+    { label: 'Intended Use / Work', value: 'Office, Programming, Design & Multitasking' },
+    { label: 'Battery Health', value: 'Up to 9 Hours Battery Life' },
+  ],
+  phone: [
+    { label: 'Internal Storage', value: '256GB High-Speed Storage' },
+    { label: 'Installed RAM', value: '8GB RAM' },
+    { label: 'Display Size', value: '6.7" Super Retina / AMOLED 120Hz' },
+    { label: 'Operating System', value: 'iOS 17 / Android 14' },
+    { label: 'Battery Health', value: '100% (Brand New Battery)' },
+    { label: 'Network / SIM', value: '5G Unlocked / Dual SIM (eSIM + Nano)' },
+    { label: 'Main Camera', value: '48MP Ultra-Clear Triple Camera with 4K' },
+  ],
+  audio: [
+    { label: 'Connectivity', value: 'Bluetooth 5.3 + 3.5mm AUX Cable' },
+    { label: 'Noise Cancellation', value: 'Hybrid Active Noise Cancelling (ANC)' },
+    { label: 'Battery Playtime', value: 'Up to 35 Hours (ANC Enabled)' },
+    { label: 'Microphone Array', value: '4-Mic Beamforming Voice Array' },
+    { label: 'Charging Type', value: 'USB-C Fast Charging (15 min = 3 hrs)' },
+  ],
+  appliance: [
+    { label: 'Power / Wattage', value: '1800 Watts' },
+    { label: 'Operating Voltage', value: '220V - 240V, 50/60Hz' },
+    { label: 'Capacity / Volume', value: '5.5 Litres' },
+    { label: 'Energy Rating', value: 'Class A+++ Efficiency' },
+    { label: 'Warranty Duration', value: '2 Years Manufacturer Warranty' },
+  ],
+  fashion: [
+    { label: 'Material & Fabric', value: '100% Organic Combed Cotton' },
+    { label: 'Silhouette & Fit', value: 'Tailored Regular Fit' },
+    { label: 'Gender / Cut', value: 'Unisex' },
+    { label: 'Country of Origin', value: 'Made in Portugal' },
+    { label: 'Care Instructions', value: 'Machine Wash Cold / Dry Clean' },
+  ],
+};
+
+const autoDetectSpecsFromName = (title: string, desc: string = '') => {
+  const combined = `${title} ${desc}`;
+  const detected: { label: string; value: string }[] = [];
+
+  // 1. RAM detection
+  const explicitRam = combined.match(/\b(\d+)\s*(GB|gb)\s*(?:RAM|ram|memory)\b/i);
+  const generalRam = combined.match(/\b(4|8|16|24|32|64)\s*(?:GB|gb)\b/i);
+  if (explicitRam) {
+    detected.push({ label: 'Installed RAM', value: `${explicitRam[1]}GB DDR RAM` });
+  } else if (generalRam) {
+    detected.push({ label: 'Installed RAM', value: `${generalRam[1]}GB RAM` });
+  }
+
+  // 2. Storage detection
+  const storageWithUnit = combined.match(/\b(128|256|512|1000|1024)\s*(?:GB|gb)\s*(?:SSD|NVMe|HDD|Storage|ROM)?\b/i);
+  const tbStorage = combined.match(/\b(1|2|4)\s*(?:TB|tb)\s*(?:SSD|NVMe|HDD)?\b/i);
+  if (tbStorage) {
+    detected.push({ label: 'Internal Storage', value: `${tbStorage[1]}TB High-Speed NVMe SSD` });
+  } else if (storageWithUnit) {
+    detected.push({ label: 'Internal Storage', value: `${storageWithUnit[1]}GB High-Speed SSD` });
+  }
+
+  // 3. Operating System / Windows Type
+  if (/\b(?:windows\s*11\s*pro|win\s*11\s*pro)\b/i.test(combined)) {
+    detected.push({ label: 'Operating System', value: 'Windows 11 Pro (64-bit)' });
+  } else if (/\b(?:windows\s*11|win\s*11)\b/i.test(combined)) {
+    detected.push({ label: 'Operating System', value: 'Windows 11 Home' });
+  } else if (/\b(?:windows\s*10\s*pro|win\s*10\s*pro)\b/i.test(combined)) {
+    detected.push({ label: 'Operating System', value: 'Windows 10 Pro (64-bit)' });
+  } else if (/\b(?:windows\s*10|win\s*10)\b/i.test(combined)) {
+    detected.push({ label: 'Operating System', value: 'Windows 10' });
+  } else if (/\b(?:macos|mac\s*os|macbook|imac)\b/i.test(combined)) {
+    detected.push({ label: 'Operating System', value: 'Apple macOS' });
+  } else if (/\b(?:android)\b/i.test(combined)) {
+    detected.push({ label: 'Operating System', value: 'Android OS' });
+  } else if (/\b(?:ios|iphone|ipad)\b/i.test(combined)) {
+    detected.push({ label: 'Operating System', value: 'Apple iOS' });
+  }
+
+  // 4. Processor / CPU
+  const cpuMatch = combined.match(/\b(Intel\s*Core\s*i[3579](?:-\w+)?|Core\s*i[3579](?:-\w+)?|Ryzen\s*[3579](?:\s*\w+)?|Apple\s*M[1234](?:\s*(?:Pro|Max|Ultra))?|M[1234]\s*(?:Pro|Max|Ultra)?|Snapdragon\s*[\w\d]+|Celeron\s*\w+)\b/i);
+  if (cpuMatch) {
+    detected.push({ label: 'Processor (CPU)', value: cpuMatch[0].trim() });
+  }
+
+  // 5. Screen Size
+  const screenMatch = combined.match(/\b(\d{1,2}(?:\.\d)?)\s*(?:inch|"|'')\b/i);
+  if (screenMatch) {
+    detected.push({ label: 'Display Size & Res', value: `${screenMatch[1]}-inch High-Definition Display` });
+  }
+
+  // 6. Graphics GPU
+  const gpuMatch = combined.match(/\b(RTX\s*\d{4}|GTX\s*\d{4}|NVIDIA\s*(?:GeForce\s*)?[\w\d]+|Radeon\s*[\w\d]+|Intel\s*Iris\s*Xe)\b/i);
+  if (gpuMatch) {
+    detected.push({ label: 'Graphics (GPU)', value: gpuMatch[0].trim() });
+  }
+
+  // 7. Purpose / Recommended Work
+  if (/\b(?:gaming|gamer)\b/i.test(combined)) {
+    detected.push({ label: 'Intended Use / Work', value: 'High-Performance Gaming & 3D Workloads' });
+  } else if (detected.some(s => s.label.includes('Processor') || s.label.includes('RAM'))) {
+    detected.push({ label: 'Intended Use / Work', value: 'Office, Programming, Student & Business Work' });
+  }
+
+  return detected;
+};
 
 interface AdminProductsProps {
   products: Product[];
@@ -67,6 +187,202 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
   const [salePriceInput, setSalePriceInput] = useState<string>('');
   const [origPriceInput, setOrigPriceInput] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Variant Management States
+  const [customColorName, setCustomColorName] = useState('');
+  const [customColorHex, setCustomColorHex] = useState('#000000');
+  const [customSizeName, setCustomSizeName] = useState('');
+
+  // Specification Management States
+  const [newSpecLabel, setNewSpecLabel] = useState('');
+  const [newSpecValue, setNewSpecValue] = useState('');
+
+  const handleAddCustomSpec = () => {
+    if (!newSpecLabel.trim() || !newSpecValue.trim()) return;
+    const currentSpecs = formData.specs || [];
+    setFormData(prev => ({
+      ...prev,
+      specs: [...currentSpecs, { label: newSpecLabel.trim(), value: newSpecValue.trim() }]
+    }));
+    setNewSpecLabel('');
+    setNewSpecValue('');
+  };
+
+  const handleUpdateSpec = (index: number, field: 'label' | 'value', text: string) => {
+    const currentSpecs = [...(formData.specs || [])];
+    if (!currentSpecs[index]) return;
+    currentSpecs[index] = { ...currentSpecs[index], [field]: text };
+    setFormData(prev => ({ ...prev, specs: currentSpecs }));
+  };
+
+  const handleRemoveSpec = (index: number) => {
+    const currentSpecs = (formData.specs || []).filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, specs: currentSpecs }));
+  };
+
+  const handleApplySpecPreset = (presetKey: string) => {
+    const preset = SPEC_PRESETS[presetKey];
+    if (!preset) return;
+    setFormData(prev => ({
+      ...prev,
+      specs: [...preset]
+    }));
+  };
+
+  const handleClearAllSpecs = () => {
+    setFormData(prev => ({ ...prev, specs: [] }));
+  };
+
+  const handleSmartAutoDetectSpecs = () => {
+    const detected = autoDetectSpecsFromName(formData.name || '', formData.description || '');
+    if (detected.length === 0) {
+      const cat = (formData.category || '').toLowerCase();
+      if (cat.includes('elect') || cat.includes('it') || cat.includes('comp') || cat.includes('audio')) {
+        handleApplySpecPreset('laptop');
+      } else if (cat.includes('appliance')) {
+        handleApplySpecPreset('appliance');
+      } else {
+        handleApplySpecPreset('laptop');
+      }
+      return;
+    }
+    const current = formData.specs || [];
+    const merged = [...current];
+    detected.forEach(d => {
+      const idx = merged.findIndex(m => m.label.toLowerCase() === d.label.toLowerCase());
+      if (idx >= 0) {
+        merged[idx] = d;
+      } else {
+        merged.push(d);
+      }
+    });
+    setFormData(prev => ({ ...prev, specs: merged }));
+  };
+
+  const [isHardwareWizardOpen, setIsHardwareWizardOpen] = useState(false);
+
+  const handleApplyWizardSpecs = (
+    specs: { label: string; value: string }[],
+    generatedTitle?: string,
+    brandName?: string
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      specs,
+      name: generatedTitle || prev.name,
+      brand: brandName || prev.brand,
+      category: 'computer-it',
+      categoryLabel: 'COMPUTER & IT',
+    }));
+    setIsHardwareWizardOpen(false);
+  };
+
+  const handleAddCustomColor = () => {
+    if (!customColorName.trim()) return;
+    const newColor = {
+      id: `col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      name: customColorName.trim(),
+      colorHex: customColorHex,
+      inStock: true,
+    };
+    const currentColors = (formData.colors || []).filter(c => c.name.toLowerCase() !== 'standard');
+    setFormData(prev => ({
+      ...prev,
+      colors: [...currentColors, newColor]
+    }));
+    setCustomColorName('');
+  };
+
+  const handleAddCustomSize = () => {
+    if (!customSizeName.trim()) return;
+    const exists = (formData.sizes || []).some(s => s.name.toLowerCase() === customSizeName.trim().toLowerCase());
+    if (exists) return;
+    const newSize = {
+      name: customSizeName.trim(),
+      inStock: true,
+    };
+    const currentSizes = (formData.sizes || []).filter(s => !['standard', 'one size'].includes(s.name.toLowerCase()));
+    setFormData(prev => ({
+      ...prev,
+      sizes: [...currentSizes, newSize]
+    }));
+    setCustomSizeName('');
+  };
+
+  const POPULAR_COLOR_PRESETS = [
+    { name: 'Black', hex: '#000000' },
+    { name: 'White', hex: '#FFFFFF' },
+    { name: 'Silver', hex: '#C0C0C0' },
+    { name: 'Gold', hex: '#D4AF37' },
+    { name: 'Space Gray', hex: '#4B5563' },
+    { name: 'Navy Blue', hex: '#1E3A8A' },
+    { name: 'Royal Blue', hex: '#2563EB' },
+    { name: 'Forest Green', hex: '#15803D' },
+    { name: 'Burgundy', hex: '#831843' },
+    { name: 'Red', hex: '#DC2626' },
+    { name: 'Rose Gold', hex: '#B76E79' },
+    { name: 'Beige', hex: '#F5F5DC' },
+    { name: 'Brown', hex: '#78350F' },
+  ];
+
+  const handleAddPresetColor = (name: string, hex: string) => {
+    const current = (formData.colors || []).filter(c => c.name.toLowerCase() !== 'standard');
+    if (current.some(c => c.name.toLowerCase() === name.toLowerCase())) return;
+    setFormData(prev => ({
+      ...prev,
+      colors: [...current, {
+        id: `col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        name,
+        colorHex: hex,
+        inStock: true
+      }]
+    }));
+  };
+
+  const handleRemoveColor = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: (prev.colors || []).filter(c => c.id !== id)
+    }));
+  };
+
+  const handleToggleColorStock = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: (prev.colors || []).map(c => c.id === id ? { ...c, inStock: !c.inStock } : c)
+    }));
+  };
+
+  const handleApplySizePreset = (type: 'none' | 'clothing' | 'shoes' | 'tech' | 'fragrance') => {
+    if (type === 'none') {
+      setFormData(prev => ({ ...prev, sizes: [] }));
+      return;
+    }
+    let names: string[] = [];
+    if (type === 'clothing') names = ['XS', 'S', 'M', 'L', 'XL', '2XL'];
+    if (type === 'shoes') names = ['38', '39', '40', '41', '42', '43', '44', '45'];
+    if (type === 'tech') names = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+    if (type === 'fragrance') names = ['30ml', '50ml', '100ml'];
+
+    setFormData(prev => ({
+      ...prev,
+      sizes: names.map(n => ({ name: n, inStock: true }))
+    }));
+  };
+
+  const handleRemoveSize = (sizeName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: (prev.sizes || []).filter(s => s.name !== sizeName)
+    }));
+  };
+
+  const handleToggleSizeStock = (sizeName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: (prev.sizes || []).map(s => s.name === sizeName ? { ...s, inStock: !s.inStock } : s)
+    }));
+  };
 
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
@@ -106,26 +422,39 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     }));
   };
 
+  const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+
   const handleAutoGenerateDescription = async () => {
-    if (!formData.name || !formData.materials) {
-      setError('Please provide product name and materials first.');
+    if (!formData.name?.trim()) {
+      setError('Please provide at least a product name before generating a description.');
       return;
     }
     setError(null);
+    setIsGeneratingDesc(true);
     try {
       const response = await fetch('/api/generate-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formData.name, materials: formData.materials, category: formData.categoryLabel }),
+        body: JSON.stringify({
+          name: formData.name,
+          brand: formData.brand,
+          materials: formData.materials,
+          category: formData.categoryLabel || formData.category,
+          condition: formData.condition,
+          specs: formData.specs,
+          tagline: formData.tagline,
+        }),
       });
       const data = await response.json();
       if (data.description) {
         setFormData(prev => ({ ...prev, description: data.description }));
       } else {
-        setError('Failed to generate description.');
+        setError(data.error || 'Failed to generate description.');
       }
     } catch (e) {
       setError('Error connecting to description service.');
+    } finally {
+      setIsGeneratingDesc(false);
     }
   };
 
@@ -144,10 +473,17 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
 
       setFormData({
         ...product,
-        images: product.images || []
+        images: product.images || [],
+        colors: product.colors || [],
+        sizes: product.sizes || [],
+        specs: product.specs || [],
+        condition: product.condition || 'Brand New',
       });
     } else {
       setEditingProduct(null);
+      setCustomColorName('');
+      setCustomColorHex('#000000');
+      setCustomSizeName('');
       let draft: any = null;
       try {
         const raw = localStorage.getItem('gls_admin_product_draft');
@@ -182,12 +518,10 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
           isNewArrival: true,
           isHotDeal: false,
           images: [],
-          colors: [{ id: 'col-1', name: 'Standard', colorHex: '#000000', inStock: true }],
-          sizes: [
-            { name: 'S', inStock: true },
-            { name: 'M', inStock: true },
-            { name: 'L', inStock: true }
-          ],
+          colors: [],
+          sizes: [],
+          specs: [],
+          condition: 'Brand New',
           details: [],
           reviewCount: 0,
           rating: 5,
@@ -239,12 +573,8 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
       isNewArrival: true,
       isHotDeal: false,
       images: [],
-      colors: [{ id: 'col-1', name: 'Standard', colorHex: '#000000', inStock: true }],
-      sizes: [
-        { name: 'S', inStock: true },
-        { name: 'M', inStock: true },
-        { name: 'L', inStock: true }
-      ],
+      colors: [],
+      sizes: [],
       details: [],
       reviewCount: 0,
       rating: 5,
@@ -797,6 +1127,470 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
                 </div>
               </div>
 
+              {/* Product Color Variants Section */}
+              <div className="space-y-6 pt-6 border-t border-zinc-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-zinc-900">
+                    <Palette className="w-4 h-4 text-purple-600" />
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-widest">Color Variants</h4>
+                      <p className="text-[11px] text-zinc-500 font-normal">Add available colors. Leave empty if product has a single universal color.</p>
+                    </div>
+                  </div>
+                  {(formData.colors || []).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, colors: [] }))}
+                      className="text-[10px] font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider"
+                    >
+                      Clear All Colors
+                    </button>
+                  )}
+                </div>
+
+                {/* Popular Color Quick Presets */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Quick Presets</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {POPULAR_COLOR_PRESETS.map((preset) => {
+                      const isAdded = (formData.colors || []).some(c => c.name.toLowerCase() === preset.name.toLowerCase());
+                      return (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => handleAddPresetColor(preset.name, preset.hex)}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                            isAdded
+                              ? 'bg-purple-50 border-purple-200 text-purple-700 shadow-xs'
+                              : 'bg-white border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50'
+                          }`}
+                        >
+                          <span
+                            className="w-3 h-3 rounded-full border border-black/10 shrink-0"
+                            style={{ backgroundColor: preset.hex }}
+                          />
+                          <span>{preset.name}</span>
+                          {isAdded && <Check className="w-3 h-3 text-purple-600" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Custom Color Creator */}
+                <div className="p-3.5 bg-zinc-50 rounded-2xl border border-zinc-100 space-y-3">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Add Custom Color</label>
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                    <div className="flex items-center gap-2 bg-white border border-zinc-200 rounded-xl px-2 py-1.5 shrink-0">
+                      <input
+                        type="color"
+                        value={customColorHex}
+                        onChange={(e) => setCustomColorHex(e.target.value)}
+                        className="w-7 h-7 rounded-lg border-0 cursor-pointer p-0 bg-transparent"
+                        title="Pick Color"
+                      />
+                      <input
+                        type="text"
+                        value={customColorHex}
+                        onChange={(e) => setCustomColorHex(e.target.value)}
+                        placeholder="#000000"
+                        className="w-20 text-xs font-mono font-bold text-zinc-700 bg-transparent outline-none uppercase"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Color Name (e.g. Titanium, Midnight Black, Rosewood)"
+                      value={customColorName}
+                      onChange={(e) => setCustomColorName(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomColor(); } }}
+                      className="flex-1 min-w-[160px] px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-zinc-950/10 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomColor}
+                      disabled={!customColorName.trim()}
+                      className="px-4 py-2.5 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 cursor-pointer"
+                    >
+                      + Add Color
+                    </button>
+                  </div>
+                </div>
+
+                {/* Active Color Variants List */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                      Active Colors ({(formData.colors || []).length})
+                    </label>
+                    {(formData.colors || []).length === 0 && (
+                      <span className="text-[10px] text-zinc-400 italic">No color variants (Single standard item)</span>
+                    )}
+                  </div>
+                  {(formData.colors || []).length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {(formData.colors || []).map((col) => (
+                        <div
+                          key={col.id}
+                          className="inline-flex items-center gap-2 pl-2 pr-1.5 py-1.5 bg-white border border-zinc-200 rounded-xl shadow-xs"
+                        >
+                          <span
+                            className="w-4 h-4 rounded-full border border-black/10 shrink-0 shadow-inner"
+                            style={{ backgroundColor: col.colorHex }}
+                          />
+                          <span className="text-xs font-bold text-zinc-800">{col.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleColorStock(col.id)}
+                            title={col.inStock ? 'Mark out of stock' : 'Mark in stock'}
+                            className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase transition-all ${
+                              col.inStock
+                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                            }`}
+                          >
+                            {col.inStock ? 'In Stock' : 'Out'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveColor(col.id)}
+                            className="p-1 hover:bg-rose-50 text-zinc-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-zinc-50 border border-dashed border-zinc-200 rounded-xl text-center text-xs text-zinc-400">
+                      Product has no color options. Storefront will not show color swatches.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Product Size Variants Section */}
+              <div className="space-y-6 pt-6 border-t border-zinc-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-zinc-900">
+                    <Ruler className="w-4 h-4 text-indigo-600" />
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-widest">Sizes & Dimension Variants</h4>
+                      <p className="text-[11px] text-zinc-500 font-normal">Set sizes if applicable. Leave empty for electronics, perfumes, or IT hardware.</p>
+                    </div>
+                  </div>
+                  {(formData.sizes || []).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleApplySizePreset('none')}
+                      className="text-[10px] font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider"
+                    >
+                      Clear All Sizes
+                    </button>
+                  )}
+                </div>
+
+                {/* Size Presets */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Presets</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleApplySizePreset('none')}
+                      className="px-2.5 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-lg text-xs font-bold transition-all"
+                    >
+                      🚫 Universal / No Sizes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySizePreset('clothing')}
+                      className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 rounded-lg text-xs font-bold transition-all"
+                    >
+                      👔 Clothing (XS - 2XL)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySizePreset('shoes')}
+                      className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/60 rounded-lg text-xs font-bold transition-all"
+                    >
+                      👟 Shoes (EU 38 - 45)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySizePreset('tech')}
+                      className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 rounded-lg text-xs font-bold transition-all"
+                    >
+                      💾 Storage / Tech (64GB - 1TB)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySizePreset('fragrance')}
+                      className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/60 rounded-lg text-xs font-bold transition-all"
+                    >
+                      🧴 Volume (30ml - 100ml)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Custom Size Input */}
+                <div className="p-3.5 bg-zinc-50 rounded-2xl border border-zinc-100 space-y-3">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Add Custom Size</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Size label (e.g. 15-inch, 2TB, Extra Large, 100ml)"
+                      value={customSizeName}
+                      onChange={(e) => setCustomSizeName(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSize(); } }}
+                      className="flex-1 px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-zinc-950/10 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomSize}
+                      disabled={!customSizeName.trim()}
+                      className="px-4 py-2.5 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 cursor-pointer"
+                    >
+                      + Add Size
+                    </button>
+                  </div>
+                </div>
+
+                {/* Active Sizes List */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                      Active Sizes ({(formData.sizes || []).length})
+                    </label>
+                    {(formData.sizes || []).length === 0 && (
+                      <span className="text-[10px] text-zinc-400 italic">No size selector will be shown on storefront</span>
+                    )}
+                  </div>
+                  {(formData.sizes || []).length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {(formData.sizes || []).map((sz) => (
+                        <div
+                          key={sz.name}
+                          className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 bg-white border border-zinc-200 rounded-xl shadow-xs"
+                        >
+                          <span className="text-xs font-bold text-zinc-800">{sz.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSizeStock(sz.name)}
+                            title={sz.inStock ? 'Mark out of stock' : 'Mark in stock'}
+                            className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase transition-all ${
+                              sz.inStock
+                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                            }`}
+                          >
+                            {sz.inStock ? 'In Stock' : 'Out'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSize(sz.name)}
+                            className="p-1 hover:bg-rose-50 text-zinc-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-zinc-50 border border-dashed border-zinc-200 rounded-xl text-center text-xs text-zinc-400">
+                      Product has no size options. Clothing size selectors (S, M, L) and size guides are hidden.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Item Specifications & Hardware Details (Facebook Marketplace-Style) */}
+              <div className="space-y-6 pt-6 border-t border-zinc-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-zinc-900">
+                    <SlidersHorizontal className="w-4 h-4 text-blue-600" />
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-widest">
+                        Item Specifications & Details (Marketplace Attributes)
+                      </h4>
+                      <p className="text-[11px] text-zinc-500 font-normal">
+                        RAM, Operating System, Processor, Storage, Condition, Intended Work, etc.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setIsHardwareWizardOpen(true)}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white rounded-xl text-xs font-bold hover:shadow-md transition-all cursor-pointer shadow-xs active:scale-95"
+                      title="Open interactive cascading drill-down wizard for Laptop/Desktop, RAM, Storage, CPU, Generation & OS"
+                    >
+                      <Laptop className="w-3.5 h-3.5 text-amber-300" />
+                      <span>🛠️ Interactive Laptop / PC Builder</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSmartAutoDetectSpecs}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-900 text-white rounded-xl text-xs font-bold hover:shadow-md transition-all cursor-pointer shadow-xs active:scale-95"
+                      title="Automatically detect RAM, Processor, OS, Storage from product title and description"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                      <span>⚡ Auto-Generate from Name</span>
+                    </button>
+                    {(formData.specs || []).length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleClearAllSpecs}
+                        className="text-[10px] font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider cursor-pointer"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Condition Selector */}
+                <div className="p-3.5 bg-zinc-50 rounded-2xl border border-zinc-100 space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                    Item Condition (Marketplace Standard)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Brand New', 'Like New', 'Open Box', 'Refurbished', 'Good Condition'].map((cond) => (
+                      <button
+                        key={cond}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, condition: cond }))}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          (formData.condition || 'Brand New') === cond
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                        }`}
+                      >
+                        {cond === 'Brand New' ? '✨ ' : cond === 'Refurbished' ? '🔄 ' : cond === 'Open Box' ? '📦 ' : '✓ '}
+                        {cond}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Category Templates */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                    One-Click Specification Templates
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleApplySpecPreset('laptop')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      <Laptop className="w-3.5 h-3.5" />
+                      <span>💻 Laptop / PC Template</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySpecPreset('phone')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                      <span>📱 Phone / Tablet Template</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySpecPreset('audio')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      <Headphones className="w-3.5 h-3.5" />
+                      <span>🎧 Audio / Sound Template</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySpecPreset('appliance')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      <Package className="w-3.5 h-3.5" />
+                      <span>🔌 Appliances Template</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySpecPreset('fashion')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      <span>👔 Apparel Template</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Active Specs Table & Inline Editor */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                      Active Specifications ({(formData.specs || []).length})
+                    </label>
+                  </div>
+
+                  {(formData.specs || []).length > 0 ? (
+                    <div className="space-y-2 border border-zinc-200 rounded-2xl p-3 bg-zinc-50/50">
+                      {(formData.specs || []).map((spec, idx) => (
+                        <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-zinc-200 shadow-2xs">
+                          <input
+                            type="text"
+                            value={spec.label}
+                            onChange={(e) => handleUpdateSpec(idx, 'label', e.target.value)}
+                            placeholder="Attribute Label (e.g. Installed RAM)"
+                            className="w-1/3 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 focus:bg-white focus:ring-2 focus:ring-blue-600/20"
+                          />
+                          <input
+                            type="text"
+                            value={spec.value}
+                            onChange={(e) => handleUpdateSpec(idx, 'value', e.target.value)}
+                            placeholder="Attribute Value (e.g. 16GB DDR5)"
+                            className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-800 focus:bg-white focus:ring-2 focus:ring-blue-600/20"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSpec(idx)}
+                            className="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            title="Remove attribute"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-zinc-50 border border-dashed border-zinc-200 rounded-2xl text-center text-xs text-zinc-400">
+                      No technical details entered yet. Click <strong>⚡ Auto-Generate from Name</strong> or choose a template above.
+                    </div>
+                  )}
+
+                  {/* Add Custom Row */}
+                  <div className="p-3 bg-white rounded-xl border border-zinc-200 flex items-center gap-2 shadow-2xs">
+                    <input
+                      type="text"
+                      placeholder="Custom Attribute (e.g. GPU, Weight, Keyboard)"
+                      value={newSpecLabel}
+                      onChange={(e) => setNewSpecLabel(e.target.value)}
+                      className="w-1/3 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-semibold focus:bg-white"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value (e.g. NVIDIA RTX 4060, 1.4kg, QWERTY Backlit)"
+                      value={newSpecValue}
+                      onChange={(e) => setNewSpecValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSpec(); } }}
+                      className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs focus:bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomSpec}
+                      disabled={!newSpecLabel.trim() || !newSpecValue.trim()}
+                      className="px-4 py-2 bg-zinc-900 text-white rounded-lg text-xs font-bold hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
+                    >
+                      + Add Detail
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Content Section */}
               <div className="space-y-6 pt-6 border-t border-zinc-100">
                 <div className="flex items-center gap-2 text-zinc-900">
@@ -805,8 +1599,16 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center justify-between">
-                    Artisanal Narrative
-                    <button onClick={handleAutoGenerateDescription} className="text-blue-600 hover:underline">Auto-Generate</button>
+                    <span>Artisanal Narrative / Product Description</span>
+                    <button
+                      type="button"
+                      onClick={handleAutoGenerateDescription}
+                      disabled={isGeneratingDesc}
+                      className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      <Sparkles className={`w-3.5 h-3.5 ${isGeneratingDesc ? 'animate-spin text-blue-500' : 'text-blue-600'}`} />
+                      <span>{isGeneratingDesc ? 'Generating AI Description...' : 'Auto-Generate Description'}</span>
+                    </button>
                   </label>
                   <textarea 
                     rows={4}
@@ -1156,6 +1958,19 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
           </div>
         </div>
       )}
+      {/* Interactive Hardware Specification Wizard Modal */}
+      {isHardwareWizardOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 bg-zinc-950/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl max-h-[92vh] overflow-hidden">
+            <HardwareSpecWizard
+              initialBrand={formData.brand || 'HP'}
+              onApplySpecs={handleApplyWizardSpecs}
+              onClose={() => setIsHardwareWizardOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Fast Action Loading Feedback */}
       {isSaving && (
         <FastActionLoader message={editingProduct ? 'Saving Piece Updates...' : 'Publishing New Piece to Live Storefront...'} />

@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   "categoryLabel" text,
   "department" text,
   "warranty" text,
+  "condition" text DEFAULT 'Brand New',
   "specs" jsonb DEFAULT '[]'::jsonb,
   "brand" text,
   "brandOrigin" text,
@@ -242,5 +243,9 @@ FOR EACH ROW EXECUTE FUNCTION public.auto_confirm_new_user();
 UPDATE auth.users
 SET email_confirmed_at = COALESCE(email_confirmed_at, NOW())
 WHERE email_confirmed_at IS NULL;
+
+-- Ensure products table has condition and specs columns for existing databases
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "condition" text DEFAULT 'Brand New';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "specs" jsonb DEFAULT '[]'::jsonb;
 
 

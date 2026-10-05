@@ -40,17 +40,17 @@ export const TermsPage: React.FC<TermsPageProps> = ({
     },
     {
       icon: ShieldCheck,
-      title: isFr ? '2. Garantie GLADYNS 2 Ans & Qualité' : '2. 2-Year GLADYNS Warranty & Quality Standard',
+      title: storeSettings?.terms?.warrantyTitle || (isFr ? '2. Garantie & Qualité' : '2. Warranty & Quality Standard'),
       content: storeSettings?.terms?.warrantyPolicy || (isFr
-        ? 'Toutes nos pièces bénéficient d\'une garantie gratuite de 2 ans. En cas de défaut de fabrication, matériel ou de fonctionnement, nous prenons en charge la réparation ou le remplacement intégral.'
-        : 'All curated items and equipment come with a complimentary 2-year GLADYNS warranty. In the event of functional, material, or hardware issues, we repair or replace your item free of charge.'),
+        ? 'Toutes nos pièces bénéficient d\'une garantie. En cas de défaut de fabrication, matériel ou de fonctionnement, nous prenons en charge la réparation ou le remplacement intégral.'
+        : 'All curated items and equipment come with our comprehensive warranty coverage. In the event of functional, material, or hardware issues, we repair or replace your item in accordance with our guarantee policy.'),
     },
     {
       icon: RotateCcw,
-      title: isFr ? '3. Retours Gratuits sous 30 Jours & Remboursements' : '3. 30-Day Free Returns & Instant Refunds',
+      title: storeSettings?.terms?.returnTitle || (isFr ? '3. Retours & Remboursements' : '3. Return & Refund Policy'),
       content: storeSettings?.terms?.returnPolicy || (isFr
-        ? 'Vous disposez d\'un délai de 30 jours à compter de la réception pour retourner tout article dans son état d\'origine avec étiquettes. Les étiquettes de retour prépayées neutres en carbone sont téléchargeables directement dans votre espace Suivi de Commande.'
-        : 'You have 30 days from delivery to return any unworn item with original tags. Prepaid carbon-neutral return labels can be generated directly from your live Order Pipeline dashboard.'),
+        ? 'Vous disposez d\'un délai légal pour retourner tout article dans son état d\'origine avec étiquettes. Les étiquettes de retour sont téléchargeables directement dans votre espace Suivi de Commande.'
+        : 'You may return eligible items in accordance with our return guidelines. Contact customer service or use your Order Pipeline dashboard for quick assistance.'),
     },
     {
       icon: Lock,

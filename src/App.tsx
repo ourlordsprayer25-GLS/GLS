@@ -35,7 +35,7 @@ import {
   saveRealtimeWishlist,
   fetchRealtimeUserProfile,
 } from './services/supabaseService';
-import { isSupabaseConfigured } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 const getGuestId = () => {
   let gid = localStorage.getItem('guest_id');
   if (!gid) {
@@ -72,8 +72,10 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
     title: 'Terms & Conditions of Sale',
     lastUpdated: 'September 2025',
     content: 'These terms and conditions apply to all purchases placed through the official GLADYNS boutique. By completing an order, the customer agrees unconditionally to all service terms and warranty protocols.',
-    warrantyPolicy: 'All curated items, studio equipment, and appliances come with a complimentary 2-year GLADYNS warranty. In the event of functional, material, or hardware issues, we repair or replace your item free of charge.',
-    returnPolicy: 'You have 30 days from delivery to return any unworn item with original tags. Prepaid carbon-neutral return labels can be generated directly from your live Order Pipeline dashboard.',
+    warrantyTitle: '2. Warranty & Quality Guarantee',
+    warrantyPolicy: 'All curated items, studio equipment, and appliances come with our warranty and quality guarantee. In the event of functional, material, or hardware issues, we repair or replace your item in accordance with our guarantee policy.',
+    returnTitle: '3. Return & Refund Policy',
+    returnPolicy: 'You have a dedicated return period from delivery to return any unworn item with original tags. Prepaid return labels can be generated directly from your live Order Pipeline dashboard.',
     privacyPolicy: 'GLADYNS is committed to absolute personal data privacy adhering strictly to EU GDPR standards. Payment processing is secured using 256-bit SSL encryption, and financial credentials are never stored on our servers.',
     shippingPolicy: 'Global express dispatch with complimentary carbon-neutral courier delivery on all qualifying orders. Live 5-stage tracking is available for all member acquisitions.',
   },
@@ -225,7 +227,26 @@ function AppContent() {
     };
   }, []);
 
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = window.location.pathname.replace(/^\/+/, '');
+    if (raw.startsWith('product/')) {
+      const prodId = decodeURIComponent(raw.replace(/^product\/?/, '').replace(/\/+$/, '').split('?')[0].trim());
+      if (!prodId) return null;
+      try {
+        const cached = localStorage.getItem('gls_cache_products');
+        if (cached) {
+          const list = JSON.parse(cached);
+          if (Array.isArray(list)) {
+            const found = list.find((p: Product) => p.id === prodId || p.slug === prodId);
+            if (found) return found;
+          }
+        }
+      } catch (e) {}
+      return INITIAL_PRODUCTS.find((p) => p.id === prodId || p.slug === prodId) || null;
+    }
+    return null;
+  });
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured');
@@ -744,6 +765,15 @@ function AppContent() {
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
+  const closeAllMainViews = useCallback((exceptProduct = false) => {
+    setIsCategoriesPageOpen(false); setIsBrandPageOpen(false); setIsAboutUsPageOpen(false);
+    setIsTermsPageOpen(false); setIsRefundPolicyPageOpen(false); setIsStoreLocatorPageOpen(false); setIsCollectionsPageOpen(false);
+    setIsOrdersPageOpen(false); setIsProfilePageOpen(false); setIsAdminPageOpen(false);
+    setIsCartPageOpen(false); setIsWishlistPageOpen(false); setActiveSectionPage(null);
+    setIsNotificationsOpen(false);
+    if (!exceptProduct) setSelectedProduct(null);
+  }, []);
+
   const syncStateFromPath = useCallback(() => {
     const rawHash = window.location.pathname.replace(/^\/+/, '');
     if (!rawHash || rawHash === 'home') {
@@ -791,14 +821,48 @@ function AppContent() {
       setProfileTab(tab);
       setIsProfilePageOpen(true);
     } else if (rawHash.startsWith('product/')) {
-      const prodId = rawHash.replace('product/', '');
-      const p = products.find((prod) => prod.id === prodId || prod.slug === prodId);
+      const prodId = decodeURIComponent(rawHash.replace(/^product\/?/, '').replace(/\/+$/, '').split('?')[0].trim());
+      let p = products.find((prod) => prod.id === prodId || prod.slug === prodId);
+      if (!p) {
+        try {
+          const cached = localStorage.getItem('gls_cache_products');
+          if (cached) {
+            const list = JSON.parse(cached);
+            if (Array.isArray(list)) {
+              p = list.find((prod: Product) => prod.id === prodId || prod.slug === prodId);
+            }
+          }
+        } catch (e) {}
+      }
+      if (!p) {
+        p = INITIAL_PRODUCTS.find((prod) => prod.id === prodId || prod.slug === prodId);
+      }
       if (p) {
-        setSelectedProduct((prev) => {
-          if (prev?.id === p.id) return prev;
-          closeAllMainViews();
-          return p;
-        });
+        closeAllMainViews(true);
+        setSelectedProduct(p);
+      } else if (isSupabaseConfigured) {
+        // Fallback: fetch from Supabase if newly created cloud product
+        Promise.resolve(
+          supabase
+            .from('products')
+            .select('*')
+            .or(`id.eq.${prodId},slug.eq.${prodId}`)
+            .maybeSingle()
+        )
+          .then(({ data, error }) => {
+            if (data && !error) {
+              const mapped: Product = {
+                ...data,
+                images: Array.isArray(data.images) ? data.images : (data.image ? [data.image] : []),
+                colors: Array.isArray(data.colors) ? data.colors : [],
+                sizes: Array.isArray(data.sizes) ? data.sizes : [],
+                tags: Array.isArray(data.tags) ? data.tags : [],
+              };
+              closeAllMainViews(true);
+              setSelectedProduct(mapped);
+            }
+          })
+          .catch(() => {});
       }
     } else if (rawHash.startsWith('section/')) {
       const secName = rawHash.replace('section/', '') as SectionType;
@@ -809,7 +873,7 @@ function AppContent() {
       closeAllMainViews();
       setSelectedCategory(catName);
     }
-  }, [products]);
+  }, [products, closeAllMainViews]);
 
   useEffect(() => {
     syncStateFromPath();
@@ -840,26 +904,31 @@ function AppContent() {
   const handleMoveAllWishlistToBag = () => {
     const wishlistedProducts = products.filter((p) => wishlistIds.includes(p.id));
     wishlistedProducts.forEach((product) => {
-      const defaultColor = product.colors[0];
-      const defaultSize = product.sizes.find((s) => s.inStock);
-      if (defaultSize) handleAddToCart(product, defaultColor, defaultSize, 1);
+      const defaultColor = (product.colors && product.colors.length > 0) ? product.colors[0] : { id: 'default', name: 'Standard', colorHex: '#000000', inStock: true };
+      const defaultSize = (product.sizes && product.sizes.length > 0) ? (product.sizes.find((s) => s.inStock) || product.sizes[0]) : { name: 'One Size', inStock: true };
+      handleAddToCart(product, defaultColor, defaultSize, 1);
     });
     if (wishlistedProducts.length > 0) handleOpenCartPage();
   };
 
   const handleAddToCart = (product: Product, variant: any, size: any, quantity: number, openDrawer: boolean = false) => {
-    const itemId = `${product.id}-${variant.id}-${size.name}`;
+    const safeVariant = variant || (product.colors && product.colors.length > 0 ? product.colors[0] : { id: 'default', name: 'Standard', colorHex: '#000000', inStock: true });
+    const safeSize = size || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : { name: 'One Size', inStock: true });
+    const variantKey = safeVariant?.id || safeVariant?.name || 'default';
+    const sizeKey = typeof safeSize === 'object' ? (safeSize?.name || 'standard') : safeSize;
+    const itemId = `${product.id}-${variantKey}-${sizeKey}`;
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === itemId);
       if (existing) return prev.map((item) => item.id === itemId ? { ...item, quantity: item.quantity + quantity } : item);
-      return [...prev, { id: itemId, product, selectedColor: variant, selectedSize: size, quantity, addedAt: Date.now() }];
+      return [...prev, { id: itemId, product, selectedColor: safeVariant, selectedSize: safeSize, quantity, addedAt: Date.now() }];
     });
     if (openDrawer) handleOpenCartPage();
   };
 
   const handleQuickAdd = (product: Product, variant: any) => {
-    const defaultSize = product.sizes.find((s) => s.inStock) || product.sizes[0];
-    handleAddToCart(product, variant, defaultSize, 1, false);
+    const defaultColor = variant || (product.colors && product.colors.length > 0 ? product.colors[0] : { id: 'default', name: 'Standard', colorHex: '#000000', inStock: true });
+    const defaultSize = (product.sizes && product.sizes.length > 0) ? (product.sizes.find((s) => s.inStock) || product.sizes[0]) : { name: 'One Size', inStock: true };
+    handleAddToCart(product, defaultColor, defaultSize, 1, false);
   };
 
   const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
@@ -986,29 +1055,38 @@ function AppContent() {
     addRealtimeNotification(returnNotif);
   };
 
-  const closeAllMainViews = () => {
-    setIsCategoriesPageOpen(false); setIsBrandPageOpen(false); setIsAboutUsPageOpen(false);
-    setIsTermsPageOpen(false); setIsRefundPolicyPageOpen(false); setIsStoreLocatorPageOpen(false); setIsCollectionsPageOpen(false);
-    setIsOrdersPageOpen(false); setIsProfilePageOpen(false); setIsAdminPageOpen(false);
-    setIsCartPageOpen(false); setIsWishlistPageOpen(false); setActiveSectionPage(null); setSelectedProduct(null);
-  };
 
   const handleReorder = (items: CartItem[]) => { setCartItems((prev) => [...prev, ...items]); handleOpenCartPage(); };
-  const handleSelectProduct = (product: Product | null) => { if (product) { navigate(`/product/${product.id}`); } else { navigate('/home'); } };
-  const handleSelectCategory = (cat: string) => { if (cat === 'all') { navigate('/home'); } else { navigate(`/category/${cat}`); } };
-  const handleOpenSectionPage = (section: any, category: string = 'all') => { navigate(`/section/${section}`); setSectionPageCategory(category); };
-  const handleOpenCategoriesPage = () => navigate('/categories');
-  const handleOpenBrandPage = () => navigate('/brand');
-  const handleOpenAboutUsPage = () => navigate('/about-us');
-  const handleOpenTermsPage = () => navigate('/terms');
-  const handleOpenRefundPolicyPage = () => navigate('/refund-policy');
-  const handleOpenStoreLocatorPage = () => navigate('/find-us');
-  const handleOpenCollectionsPage = () => navigate('/collections');
-  const handleOpenOrders = (orderNumber?: string) => { if (orderNumber) setInitialInvoiceNumber(orderNumber); navigate('/orders'); };
-  const handleOpenProfile = (tab: any = 'profile') => { const safeTab = tab === 'preferences' ? 'profile' : tab; setProfileTab(safeTab); navigate(`/profile/${safeTab}`); };
-  const handleBackToShop = () => navigate('/home');
-  const handleOpenCartPage = () => navigate('/cart');
-  const handleOpenWishlistPage = () => navigate('/wishlist');
+  const handleSelectProduct = (product: Product | null) => {
+    setIsNotificationsOpen(false);
+    if (product) { navigate(`/product/${product.id}`); } else { navigate('/home'); }
+  };
+  const handleSelectCategory = (cat: string) => {
+    setIsNotificationsOpen(false);
+    if (cat === 'all') { navigate('/home'); } else { navigate(`/category/${cat}`); }
+  };
+  const handleOpenSectionPage = (section: any, category: string = 'all') => {
+    setIsNotificationsOpen(false);
+    navigate(`/section/${section}`);
+    setSectionPageCategory(category);
+  };
+  const handleOpenCategoriesPage = () => { setIsNotificationsOpen(false); navigate('/categories'); };
+  const handleOpenBrandPage = () => { setIsNotificationsOpen(false); navigate('/brand'); };
+  const handleOpenAboutUsPage = () => { setIsNotificationsOpen(false); navigate('/about-us'); };
+  const handleOpenTermsPage = () => { setIsNotificationsOpen(false); navigate('/terms'); };
+  const handleOpenRefundPolicyPage = () => { setIsNotificationsOpen(false); navigate('/refund-policy'); };
+  const handleOpenStoreLocatorPage = () => { setIsNotificationsOpen(false); navigate('/find-us'); };
+  const handleOpenCollectionsPage = () => { setIsNotificationsOpen(false); navigate('/collections'); };
+  const handleOpenOrders = (orderNumber?: string) => { setIsNotificationsOpen(false); if (orderNumber) setInitialInvoiceNumber(orderNumber); navigate('/orders'); };
+  const handleOpenProfile = (tab: any = 'profile') => { setIsNotificationsOpen(false); const safeTab = tab === 'preferences' ? 'profile' : tab; setProfileTab(safeTab); navigate(`/profile/${safeTab}`); };
+  const handleBackToShop = () => {
+    setIsNotificationsOpen(false);
+    setIsMobileSidebarOpen(false);
+    closeAllMainViews();
+    navigate('/home');
+  };
+  const handleOpenCartPage = () => { setIsNotificationsOpen(false); navigate('/cart'); };
+  const handleOpenWishlistPage = () => { setIsNotificationsOpen(false); navigate('/wishlist'); };
   const handleOpenAuth = (mode: 'login' | 'register' = 'login') => { setAuthModalMode(mode); setIsAuthModalOpen(true); };
 
   const handleLoginSuccess = (newUser: UserProfile) => {

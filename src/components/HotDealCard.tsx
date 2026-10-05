@@ -20,8 +20,12 @@ export const HotDealCard: React.FC<HotDealCardProps> = ({
   onQuickAdd,
   isFeaturedSpotlight = false,
 }) => {
-  const { formatPrice, t, language } = useLanguageCurrency();
-  const [selectedColor, setSelectedColor] = useState<ProductVariant>(product.colors[0]);
+  const { t, formatPrice, language } = useLanguageCurrency();
+  const [selectedColor, setSelectedColor] = useState<ProductVariant>(
+    product.colors && product.colors.length > 0
+      ? product.colors[0]
+      : { id: 'default', name: 'Standard', colorHex: '#000000', inStock: true }
+  );
   const [isAdded, setIsAdded] = useState(false);
 
   // Pseudo countdown timer per product for live atmosphere
@@ -52,7 +56,9 @@ export const HotDealCard: React.FC<HotDealCardProps> = ({
     return () => clearInterval(timer);
   }, [product.id]);
 
-  const isOutOfStock = !product.sizes.some((s) => s.inStock);
+  const isOutOfStock =
+    (product.stockLevel !== undefined && product.stockLevel === 0) ||
+    Boolean(product.sizes && product.sizes.length > 0 && !product.sizes.some((s) => s.inStock));
   const originalPrice = product.originalPrice || Math.round(product.price * 1.18);
   const savings = originalPrice - product.price;
   const discountPercent = Math.round((savings / originalPrice) * 100);
@@ -155,23 +161,25 @@ export const HotDealCard: React.FC<HotDealCardProps> = ({
 
           {/* Color swatches & Price */}
           <div className="flex items-center justify-between pt-2 border-t border-white/10">
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <span className="text-[11px] text-slate-400">Finish:</span>
-              {product.colors.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setSelectedColor(c)}
-                  className={`w-4 h-4 rounded-full border transition-all ${
-                    selectedColor.id === c.id
-                      ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900 scale-110'
-                      : 'border-white/30 opacity-70 hover:opacity-100'
-                  }`}
-                  style={{ backgroundColor: c.colorHex }}
-                  title={c.name}
-                />
-              ))}
-            </div>
+            {product.colors && product.colors.length > 1 ? (
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <span className="text-[11px] text-slate-400">Finish:</span>
+                {product.colors.map((c) => (
+                  <button
+                    key={c.id || c.name}
+                    type="button"
+                    onClick={() => setSelectedColor(c)}
+                    className={`w-4 h-4 rounded-full border transition-all ${
+                      selectedColor?.id === c.id
+                        ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900 scale-110'
+                        : 'border-white/30 opacity-70 hover:opacity-100'
+                    }`}
+                    style={{ backgroundColor: c.colorHex }}
+                    title={c.name}
+                  />
+                ))}
+              </div>
+            ) : <div />}
 
             <div className="text-right">
               <span className="text-xs text-slate-400 line-through mr-2 font-mono">{formatPrice(originalPrice)}</span>
@@ -308,13 +316,13 @@ export const HotDealCard: React.FC<HotDealCardProps> = ({
         {/* Swatches & Price */}
         <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100">
           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-            {product.colors.slice(0, 3).map((c) => (
+            {product.colors && product.colors.length > 1 && product.colors.slice(0, 3).map((c) => (
               <button
-                key={c.id}
+                key={c.id || c.name}
                 type="button"
                 onClick={() => setSelectedColor(c)}
                 className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border transition-all ${
-                  selectedColor.id === c.id
+                  selectedColor?.id === c.id
                     ? 'ring-2 ring-blue-600 ring-offset-1 scale-110'
                     : 'border-slate-300 hover:scale-105'
                 }`}

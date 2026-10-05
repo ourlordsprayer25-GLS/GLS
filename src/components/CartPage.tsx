@@ -85,7 +85,13 @@ export const CartPage: React.FC<CartPageProps> = ({
   const estimatedTotal = subtotal + shippingCost;
 
   const handleWhatsAppCheckout = () => {
-    const itemSummary = validItems.map(i => `${i.quantity}x ${i.product.name} (${i.selectedSize?.name || i.selectedSize}, ${i.selectedColor.name})`).join(', ');
+    const itemSummary = validItems.map(i => {
+      const color = i.selectedColor?.name && !['standard', 'default'].includes(i.selectedColor.name.toLowerCase()) ? i.selectedColor.name : '';
+      const sizeVal = typeof i.selectedSize === 'object' ? i.selectedSize?.name : i.selectedSize;
+      const size = sizeVal && !['standard', 'default', 'one size', 'taille unique'].includes(String(sizeVal).toLowerCase()) ? String(sizeVal) : '';
+      const spec = [color, size].filter(Boolean).join(', ');
+      return `${i.quantity}x ${i.product.name}${spec ? ` (${spec})` : ''}`;
+    }).join(', ');
     const text = `Hello GLADYNS Boutique, I would like to order: ${itemSummary}. Subtotal: ${formatPrice(subtotal)}. Please guide me with payment and dispatch.`;
     window.open(getWhatsAppLink(text, storeSettings?.whatsappNumber), '_blank');
   };
@@ -218,9 +224,16 @@ export const CartPage: React.FC<CartPageProps> = ({
                       </div>
 
                       <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 font-medium">
-                        <span>Color: <strong className="text-zinc-800">{item.selectedColor.name}</strong></span>
-                        <span>•</span>
-                        <span>Size: <strong className="text-zinc-800 uppercase">{typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize}</strong></span>
+                        {item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) && (
+                          <span>Color: <strong className="text-zinc-800">{item.selectedColor.name}</strong></span>
+                        )}
+                        {item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) &&
+                         item.selectedSize && !['standard', 'default', 'one size', 'taille unique'].includes(String(typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize).toLowerCase()) && (
+                          <span>•</span>
+                        )}
+                        {item.selectedSize && !['standard', 'default', 'one size', 'taille unique'].includes(String(typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize).toLowerCase()) && (
+                          <span>Size: <strong className="text-zinc-800 uppercase">{typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize}</strong></span>
+                        )}
                       </div>
 
                       <div className="flex items-center justify-between pt-2">
