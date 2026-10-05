@@ -4184,9 +4184,9 @@
     "storeName": "GLADYNS DEPARTMENT STORE",
     "storeDescription": "Curated Department House redefining modern living through audio precision, musical instruments, smart home appliances, and artisanal fashion.",
     "contactEmail": "concierge@gladyns.com",
-    "contactPhone": "+225 05 00 61 99 23",
+    "contactPhone": "+33 1 23 45 67 89",
     "contactAddress": "Rua Miguel Bombarda 142, 4050-377 Porto, Portugal",
-    "whatsappNumber": "+225 05 00 61 99 23",
+    "whatsappNumber": "+33 1 23 45 67 89",
     "operatingHours": "Monday – Saturday: 10:00 AM – 7:00 PM CET",
     "socialLinks": {
       "instagram": "https://instagram.com/gladyns",
@@ -4363,6 +4363,13 @@
       "description": "",
       "image": "",
       "badge": ""
+    },
+    {
+      "id": "bags",
+      "label": "BAGS ",
+      "description": "",
+      "image": "",
+      "badge": ""
     }
   ],
   "brands": [
@@ -4397,6 +4404,22 @@
     {
       "name": "SWEETOS",
       "origin": "CHINA"
+    },
+    {
+      "name": "TECHNO",
+      "origin": "China "
+    },
+    {
+      "name": "REGRSI",
+      "origin": "China "
+    },
+    {
+      "name": "MAX",
+      "origin": "China "
+    },
+    {
+      "name": "MARSHALL ",
+      "origin": "China "
     }
   ],
   "carts": {
@@ -4411,5 +4434,5 @@
     "guest-78tkxse-1791032952913": [],
     "guest-dn71xtd-1791050741186": []
   },
-  "lastUpdated": 1791055038498
+  "lastUpdated": 1791202889958
 }
