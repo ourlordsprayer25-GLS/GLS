@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (supabaseUrl && supabaseKey && slug) {
     try {
       const encoded = encodeURIComponent(slug);
-      const queryUrl = `${supabaseUrl}/rest/v1/products?or=(id.eq.${encoded},slug.eq.${encoded})&select=id,slug,name,subtitle,description,primaryImage,images`;
+      const queryUrl = `${supabaseUrl}/rest/v1/products?or=(id.eq.${encoded},slug.eq.${encoded})&select=*`;
       const response = await fetch(queryUrl, {
         headers: {
           'apikey': supabaseKey,
@@ -53,12 +53,61 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3. Build OG tag values
+  // 3. Build OG tag values matching reference format:
+  // Title: "Dahua Camera 4464 — FCFA 18,000.00"
+  // Description: "FCFA 18,000.00 (was FCFA 20,000.00, -10%) • In Stock • Dahua"
   const siteName = 'GLADYNS';
-  const title = product ? `${product.name} | ${siteName}` : `${siteName} — Curated Department Store`;
-  const description = product
-    ? (product.description || product.subtitle || `Explore ${product.name} on ${siteName}.`).replace(/"/g, '&quot;')
-    : 'Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel.';
+  let title = `${siteName} — Curated Department Store`;
+  let description = 'Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel.';
+
+  if (product) {
+    const rawPrice = Number(product.price);
+    const rawOrig = Number(product.originalPrice);
+
+    // Convert price to FCFA (in this store, USD base * 605 = FCFA)
+    const curPriceCFA = !isNaN(rawPrice) && rawPrice > 0
+      ? (rawPrice < 500 ? Math.round(rawPrice * 605) : Math.round(rawPrice))
+      : 0;
+
+    const origPriceCFA = !isNaN(rawOrig) && rawOrig > 0
+      ? (rawOrig < 500 ? Math.round(rawOrig * 605) : Math.round(rawOrig))
+      : 0;
+
+    const formatMoney = (n) => 'FCFA ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const formattedPrice = curPriceCFA > 0 ? formatMoney(curPriceCFA) : '';
+    const formattedOrig = origPriceCFA > 0 ? formatMoney(origPriceCFA) : '';
+
+    const discountPct = (origPriceCFA > curPriceCFA && curPriceCFA > 0)
+      ? Math.round(((origPriceCFA - curPriceCFA) / origPriceCFA) * 100)
+      : 0;
+
+    const isOutOfStock = product.inStock === false || product.stockLevel === 0;
+    const stockStr = isOutOfStock ? 'Out of Stock' : 'In Stock';
+    const brandStr = product.brand || 'GLADYNS';
+
+    // Title: "Product Name — FCFA 18,000.00"
+    if (formattedPrice) {
+      title = `${product.name} — ${formattedPrice}`;
+    } else {
+      title = `${product.name} | ${siteName}`;
+    }
+
+    // Description: "FCFA 18,000.00 (was FCFA 20,000.00, -10%) • In Stock • Dahua"
+    const descParts = [];
+    if (formattedPrice) {
+      if (discountPct > 0 && formattedOrig) {
+        descParts.push(`${formattedPrice} (was ${formattedOrig}, -${discountPct}%)`);
+      } else {
+        descParts.push(formattedPrice);
+      }
+      descParts.push(stockStr);
+      if (brandStr) descParts.push(brandStr);
+      description = descParts.join(' • ');
+    } else {
+      description = (product.description || product.subtitle || `Explore ${product.name} on ${siteName}.`).replace(/"/g, '&quot;');
+    }
+  }
 
   // Resolve the product image with explicit .jpg extension for WhatsApp Mobile Parser regex matching
   let image = null;

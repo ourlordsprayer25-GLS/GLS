@@ -159,18 +159,15 @@ export const ProductPage: React.FC<ProductPageProps> = ({
     }, 2000);
   };
 
-  // Share handler
+  // Share handler (sends single clean URL so WhatsApp shows only ONE link with rich card preview)
   const handleShare = async () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store';
     const shareUrl = `${origin}/product/${product.id}`;
-    const shareTitle = product.name;
-    const shareText = `Check out ${product.name} on GLADYNS Studio: ${shareUrl}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: shareTitle,
-          text: shareText,
+          title: product.name,
           url: shareUrl,
         });
         
@@ -204,18 +201,60 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   const currentImageAlt =
     product.images[selectedImageIndex]?.alt || product.name;
 
+  // Build rich OpenGraph title & description matching reference:
+  // Title: "Dahua Camera 4464 — FCFA 18,000.00"
+  // Description: "FCFA 18,000.00 (was FCFA 20,000.00, -10%) • In Stock • Dahua"
+  const rawPrice = Number(product.price);
+  const rawOrig = Number(product.originalPrice);
+
+  const curPriceCFA = !isNaN(rawPrice) && rawPrice > 0
+    ? (rawPrice < 500 ? Math.round(rawPrice * 605) : Math.round(rawPrice))
+    : 0;
+
+  const origPriceCFA = !isNaN(rawOrig) && rawOrig > 0
+    ? (rawOrig < 500 ? Math.round(rawOrig * 605) : Math.round(rawOrig))
+    : 0;
+
+  const formatMoney = (n: number) => 'FCFA ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const formattedPrice = curPriceCFA > 0 ? formatMoney(curPriceCFA) : '';
+  const formattedOrig = origPriceCFA > 0 ? formatMoney(origPriceCFA) : '';
+
+  const discountPct = (origPriceCFA > curPriceCFA && curPriceCFA > 0)
+    ? Math.round(((origPriceCFA - curPriceCFA) / origPriceCFA) * 100)
+    : 0;
+
+  const isOutOfStock = (product.stockLevel !== undefined && product.stockLevel === 0) || (product.sizes && product.sizes.length > 0 && !product.sizes.some(s => s.inStock));
+  const stockStr = isOutOfStock ? 'Out of Stock' : 'In Stock';
+  const brandStr = product.brand || 'GLADYNS';
+
+  const ogTitle = formattedPrice ? `${product.name} — ${formattedPrice}` : `${product.name} | ${storeName}`;
+
+  let descParts = [];
+  if (formattedPrice) {
+    if (discountPct > 0 && formattedOrig) {
+      descParts.push(`${formattedPrice} (was ${formattedOrig}, -${discountPct}%)`);
+    } else {
+      descParts.push(formattedPrice);
+    }
+    descParts.push(stockStr);
+    if (brandStr) descParts.push(brandStr);
+  }
+  const ogDescription = descParts.length > 0 ? descParts.join(' • ') : (product.description || product.subtitle || `Explore ${product.name} on ${storeName}.`);
+  const ogImage = selectedColor.image || product.images[0]?.url || product.primaryImage || '';
+
   return (
     <>
       <Helmet>
-        <title>{product.name} | {storeName}</title>
-        <meta name="description" content={product.description} />
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.description} />
-        <meta property="og:image" content={selectedColor.image || product.images[0].url} />
+        <title>{ogTitle}</title>
+        <meta name="description" content={ogDescription} />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content={ogImage} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={product.name} />
-        <meta name="twitter:description" content={product.description} />
-        <meta name="twitter:image" content={selectedColor.image || product.images[0].url} />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        <meta name="twitter:image" content={ogImage} />
       </Helmet>
       
       <div className="bg-[#FDFDFD] min-h-screen pb-24">
@@ -538,7 +577,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
                   {/* Share on WhatsApp */}
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on GLADYNS: ${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-[52px] h-[52px] rounded-full border border-emerald-500 hover:bg-emerald-50 text-[#25D366] flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer bg-white shadow-2xs"

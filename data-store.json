@@ -2711,13 +2711,13 @@
         "preferredSize": "M",
         "sustainablePackaging": false
       },
-      "registeredDateExact": "2026-10-03 10:29:02",
+      "registeredDateExact": "2026-10-03 18:48:58",
       "registrationDetails": {
         "day": 3,
-        "time": "10:29:02 AM",
+        "time": "06:48:58 PM",
         "year": 2026,
         "month": "October",
-        "exactTimestamp": "2026-10-03T10:29:02.384Z"
+        "exactTimestamp": "2026-10-03T18:48:58.156Z"
       },
       "deviceInfo": {
         "os": "Windows",
@@ -2734,40 +2734,10 @@
       },
       "sessionStatus": "online",
       "lastSeen": "Active Now",
-      "sessionDurationMinutes": 6,
+      "sessionDurationMinutes": 1,
       "recentActivity": [
         {
-          "id": "act-1791038177889",
-          "page": "Storefront Header",
-          "action": "Customer Successfully Signed In to GLADYNS",
-          "timestamp": "Just now"
-        },
-        {
-          "id": "act-1791033886409",
-          "page": "Storefront Header",
-          "action": "Customer Successfully Signed In to GLADYNS",
-          "timestamp": "Just now"
-        },
-        {
-          "id": "act-1791030326363",
-          "page": "Storefront Header",
-          "action": "Customer Successfully Signed In to GLADYNS",
-          "timestamp": "Just now"
-        },
-        {
-          "id": "act-1791028086616",
-          "page": "Storefront Header",
-          "action": "Customer Successfully Signed In to GLADYNS",
-          "timestamp": "Just now"
-        },
-        {
-          "id": "act-1791026803896",
-          "page": "Storefront Header",
-          "action": "Customer Successfully Signed In to GLADYNS",
-          "timestamp": "Just now"
-        },
-        {
-          "id": "act-1791023342384",
+          "id": "act-1791053338156",
           "page": "Storefront Header",
           "action": "Customer Successfully Signed In to GLADYNS",
           "timestamp": "Just now"
@@ -2775,7 +2745,7 @@
       ],
       "cart_items": [],
       "wishlist_ids": [],
-      "updated_at": "2026-10-03T14:36:15.189477+00:00"
+      "updated_at": "2026-10-03T18:49:01.525+00:00"
     },
     {
       "id": "guest-tf63tzn-1790863702863",
@@ -3179,7 +3149,7 @@
       "recentActivity": [],
       "cart_items": [],
       "wishlist_ids": [],
-      "updated_at": "2026-10-03T17:19:05.589+00:00"
+      "updated_at": "2026-10-03T19:09:41.406+00:00"
     },
     {
       "id": "guest-x9k25y9-1791024239592",
@@ -3357,31 +3327,6 @@
       "updated_at": "2026-10-02T22:50:16.194+00:00"
     },
     {
-      "id": "guest-lysnh3q-1790962566582",
-      "firstName": null,
-      "lastName": null,
-      "email": null,
-      "phone": null,
-      "memberSince": null,
-      "tier": null,
-      "loyaltyPoints": 0,
-      "lifetimePoints": 0,
-      "pointsHistory": [],
-      "addresses": [],
-      "preferences": {},
-      "registeredDateExact": null,
-      "registrationDetails": {},
-      "deviceInfo": {},
-      "location": {},
-      "sessionStatus": null,
-      "lastSeen": null,
-      "sessionDurationMinutes": 0,
-      "recentActivity": [],
-      "cart_items": [],
-      "wishlist_ids": [],
-      "updated_at": "2026-10-03T18:42:29.513+00:00"
-    },
-    {
       "id": "guest-uwc7skw-1791031721838",
       "firstName": null,
       "lastName": null,
@@ -3555,6 +3500,31 @@
       "cart_items": [],
       "wishlist_ids": [],
       "updated_at": "2026-10-02T19:08:20.668+00:00"
+    },
+    {
+      "id": "guest-lysnh3q-1790962566582",
+      "firstName": null,
+      "lastName": null,
+      "email": null,
+      "phone": null,
+      "memberSince": null,
+      "tier": null,
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "pointsHistory": [],
+      "addresses": [],
+      "preferences": {},
+      "registeredDateExact": null,
+      "registrationDetails": {},
+      "deviceInfo": {},
+      "location": {},
+      "sessionStatus": null,
+      "lastSeen": null,
+      "sessionDurationMinutes": 0,
+      "recentActivity": [],
+      "cart_items": [],
+      "wishlist_ids": [],
+      "updated_at": "2026-10-03T18:47:16.352+00:00"
     },
     {
       "id": "guest-2tht3a7-1791046874828",
@@ -4140,6 +4110,31 @@
       "updated_at": "2026-10-03T10:16:29.874+00:00"
     },
     {
+      "id": "guest-qhnooy0-1791048462254",
+      "firstName": null,
+      "lastName": null,
+      "email": null,
+      "phone": null,
+      "memberSince": null,
+      "tier": null,
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "pointsHistory": [],
+      "addresses": [],
+      "preferences": {},
+      "registeredDateExact": null,
+      "registrationDetails": {},
+      "deviceInfo": {},
+      "location": {},
+      "sessionStatus": null,
+      "lastSeen": null,
+      "sessionDurationMinutes": 0,
+      "recentActivity": [],
+      "cart_items": [],
+      "wishlist_ids": [],
+      "updated_at": "2026-10-03T19:08:10.429+00:00"
+    },
+    {
       "id": "guest-78tkxse-1791032952913",
       "firstName": null,
       "lastName": null,
@@ -4163,31 +4158,6 @@
       "cart_items": [],
       "wishlist_ids": [],
       "updated_at": "2026-10-03T17:54:09.847+00:00"
-    },
-    {
-      "id": "guest-qhnooy0-1791048462254",
-      "firstName": null,
-      "lastName": null,
-      "email": null,
-      "phone": null,
-      "memberSince": null,
-      "tier": null,
-      "loyaltyPoints": 0,
-      "lifetimePoints": 0,
-      "pointsHistory": [],
-      "addresses": [],
-      "preferences": {},
-      "registeredDateExact": null,
-      "registrationDetails": {},
-      "deviceInfo": {},
-      "location": {},
-      "sessionStatus": null,
-      "lastSeen": null,
-      "sessionDurationMinutes": 0,
-      "recentActivity": [],
-      "cart_items": [],
-      "wishlist_ids": [],
-      "updated_at": "2026-10-03T18:22:15.154+00:00"
     }
   ],
   "notifications": [
@@ -4441,5 +4411,5 @@
     "guest-78tkxse-1791032952913": [],
     "guest-dn71xtd-1791050741186": []
   },
-  "lastUpdated": 1791053071125
+  "lastUpdated": 1791055038498
 }

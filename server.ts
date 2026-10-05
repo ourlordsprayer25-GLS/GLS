@@ -193,9 +193,47 @@ function injectOGMetaTags(html: string, url: string, products: any[]): string {
     const prodId = url.replace('/product/', '').split('?')[0];
     const product = products.find(p => p.id === prodId || p.slug === prodId);
     if (product) {
-      const title = product.name + ' - GLADYNS Studio';
-      const desc = product.subtitle || product.tagline || 'Discover premium goods at GLADYNS Studio.';
-      const img = product.primaryImage;
+      const rawPrice = Number(product.price);
+      const rawOrig = Number(product.originalPrice);
+
+      const curPriceCFA = !isNaN(rawPrice) && rawPrice > 0
+        ? (rawPrice < 500 ? Math.round(rawPrice * 605) : Math.round(rawPrice))
+        : 0;
+
+      const origPriceCFA = !isNaN(rawOrig) && rawOrig > 0
+        ? (rawOrig < 500 ? Math.round(rawOrig * 605) : Math.round(rawOrig))
+        : 0;
+
+      const formatMoney = (n: number) => 'FCFA ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const formattedPrice = curPriceCFA > 0 ? formatMoney(curPriceCFA) : '';
+      const formattedOrig = origPriceCFA > 0 ? formatMoney(origPriceCFA) : '';
+
+      const discountPct = (origPriceCFA > curPriceCFA && curPriceCFA > 0)
+        ? Math.round(((origPriceCFA - curPriceCFA) / origPriceCFA) * 100)
+        : 0;
+
+      const isOutOfStock = product.inStock === false || product.stockLevel === 0;
+      const stockStr = isOutOfStock ? 'Out of Stock' : 'In Stock';
+      const brandStr = product.brand || 'GLADYNS';
+
+      let title = product.name;
+      if (formattedPrice) {
+        title = `${product.name} — ${formattedPrice}`;
+      }
+
+      let descParts = [];
+      if (formattedPrice) {
+        if (discountPct > 0 && formattedOrig) {
+          descParts.push(`${formattedPrice} (was ${formattedOrig}, -${discountPct}%)`);
+        } else {
+          descParts.push(formattedPrice);
+        }
+        descParts.push(stockStr);
+        if (brandStr) descParts.push(brandStr);
+      }
+      const desc = descParts.length > 0 ? descParts.join(' • ') : (product.subtitle || product.tagline || 'Discover premium goods at GLADYNS.');
+      const img = product.primaryImage || (product.images && product.images[0]?.url) || '';
       
       let newHtml = html;
       newHtml = newHtml.replace(/<meta\s+property=["']og:title["']\s+content=["'][^"']*["']\s*\/?>/g, '');
@@ -207,7 +245,7 @@ function injectOGMetaTags(html: string, url: string, products: any[]): string {
         <title>${title}</title>
         <meta property="og:title" content="${title}" />
         <meta property="og:description" content="${desc}" />
-        <meta property="og:image" content="${img || ''}" />
+        <meta property="og:image" content="${img}" />
       `;
       
       return newHtml.replace('</head>', metaTags + '</head>');
