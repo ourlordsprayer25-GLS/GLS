@@ -22,26 +22,26 @@ export const FastLoadingScreen: React.FC<FastLoadingScreenProps> = ({
   isReady = true,
   onFinish,
 }) => {
-  const [progress, setProgress] = useState(20);
+  const [progress, setProgress] = useState(25);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
 
-  // Smooth, snappy loading progression
+  // Smooth, snappy loading progression (fast & premium)
   useEffect(() => {
     const t1 = setTimeout(() => {
-      setProgress(58);
+      setProgress(65);
       setPhraseIndex(1);
-    }, 180);
+    }, 120);
 
     const t2 = setTimeout(() => {
-      setProgress(88);
+      setProgress(90);
       setPhraseIndex(2);
-    }, 360);
+    }, 250);
 
     const t3 = setTimeout(() => {
       setProgress(100);
       setPhraseIndex(3);
-    }, 550);
+    }, 400);
 
     return () => {
       clearTimeout(t1);
@@ -50,23 +50,23 @@ export const FastLoadingScreen: React.FC<FastLoadingScreenProps> = ({
     };
   }, []);
 
-  // Gracefully transition out once complete & ready
+  // Gracefully transition out once complete (with 750ms safety cap so user is never stuck)
   useEffect(() => {
-    if (isReady && progress >= 100) {
+    if (progress >= 100) {
       const exitTimer = setTimeout(() => {
         setIsFadingOut(true);
-      }, 150);
+      }, 100);
 
       const finishTimer = setTimeout(() => {
         if (onFinish) onFinish();
-      }, 480);
+      }, 400);
 
       return () => {
         clearTimeout(exitTimer);
         clearTimeout(finishTimer);
       };
     }
-  }, [isReady, progress, onFinish]);
+  }, [progress, onFinish]);
 
   return (
     <div

@@ -127,10 +127,28 @@ function AppContent() {
   }, []);
 
   const [isInitialBootLoading, setIsInitialBootLoading] = useState(true);
-    const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(true);
   const [storeSettings, setStoreSettings] = useState<StoreSettings>(DEFAULT_STORE_SETTINGS);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>(() => {
+    try {
+      const cached = localStorage.getItem('gls_cache_products');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_PRODUCTS;
+  });
+  const [orders, setOrders] = useState<Order[]>(() => {
+    try {
+      const cached = localStorage.getItem('gls_cache_orders');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_ORDERS;
+  });
   const [notifications, setNotifications] = useState<StoreNotification[]>([]);
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(() => {
     try {
@@ -155,16 +173,37 @@ function AppContent() {
   };
   const [users, setUsers] = useState<UserProfile[]>([]);
 
+  const [categories, setCategories] = useState<{ id: string; label: string }[]>(() => {
+    try {
+      const cached = localStorage.getItem('gls_cache_categories');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return CATEGORIES as any;
+  });
+  const [brands, setBrands] = useState<{ name: string; origin: string }[]>(() => {
+    try {
+      const cached = localStorage.getItem('gls_cache_brands');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_BRANDS;
+  });
+
   // Initialize and attach cross-device real-time sync listeners
   useEffect(() => {
     initServerSync({
-      products: isSupabaseConfigured ? [] : INITIAL_PRODUCTS,
-      orders: isSupabaseConfigured ? [] : INITIAL_ORDERS,
-      users: isSupabaseConfigured ? [] : INITIAL_CUSTOMERS,
+      products: INITIAL_PRODUCTS,
+      orders: INITIAL_ORDERS,
+      users: INITIAL_CUSTOMERS,
       notifications: INITIAL_NOTIFICATIONS,
       settings: DEFAULT_STORE_SETTINGS,
-      categories: isSupabaseConfigured ? [] : (CATEGORIES as any),
-      brands: isSupabaseConfigured ? [] : INITIAL_BRANDS,
+      categories: CATEGORIES as any,
+      brands: INITIAL_BRANDS,
     });
 
     const unsubProducts = subscribeToProducts(setProducts, () => setIsReady(true));
@@ -185,9 +224,6 @@ function AppContent() {
       unsubUsers();
     };
   }, []);
-
-  const [categories, setCategories] = useState<{ id: string; label: string }[]>([]);
-  const [brands, setBrands] = useState<{ name: string; origin: string }[]>([]);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

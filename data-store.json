@@ -2244,7 +2244,7 @@
         }
       ],
       "wishlist_ids": [],
-      "updated_at": "2026-10-05T09:56:36.146+00:00"
+      "updated_at": "2026-10-05T12:29:08.281+00:00"
     },
     {
       "id": "guest-r2l2lws-1790963224101",
@@ -2362,8 +2362,14 @@
       },
       "sessionStatus": "online",
       "lastSeen": "Active Now",
-      "sessionDurationMinutes": 1,
+      "sessionDurationMinutes": 2,
       "recentActivity": [
+        {
+          "id": "act-1791203731395",
+          "page": "Storefront Header",
+          "action": "Customer Successfully Signed In to GLADYNS",
+          "timestamp": "Just now"
+        },
         {
           "id": "act-1791202845725",
           "page": "Storefront Header",
@@ -2663,31 +2669,6 @@
       "updated_at": "2026-10-03T08:50:12.091+00:00"
     },
     {
-      "id": "guest-dn71xtd-1791050741186",
-      "firstName": null,
-      "lastName": null,
-      "email": null,
-      "phone": null,
-      "memberSince": null,
-      "tier": null,
-      "loyaltyPoints": 0,
-      "lifetimePoints": 0,
-      "pointsHistory": [],
-      "addresses": [],
-      "preferences": {},
-      "registeredDateExact": null,
-      "registrationDetails": {},
-      "deviceInfo": {},
-      "location": {},
-      "sessionStatus": null,
-      "lastSeen": null,
-      "sessionDurationMinutes": 0,
-      "recentActivity": [],
-      "cart_items": [],
-      "wishlist_ids": [],
-      "updated_at": "2026-10-03T18:37:57.396+00:00"
-    },
-    {
       "id": "guest-h1sgdzi-1790969749661",
       "firstName": null,
       "lastName": null,
@@ -2911,6 +2892,31 @@
       "cart_items": [],
       "wishlist_ids": [],
       "updated_at": "2026-10-04T23:30:44.149+00:00"
+    },
+    {
+      "id": "guest-dn71xtd-1791050741186",
+      "firstName": null,
+      "lastName": null,
+      "email": null,
+      "phone": null,
+      "memberSince": null,
+      "tier": null,
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "pointsHistory": [],
+      "addresses": [],
+      "preferences": {},
+      "registeredDateExact": null,
+      "registrationDetails": {},
+      "deviceInfo": {},
+      "location": {},
+      "sessionStatus": null,
+      "lastSeen": null,
+      "sessionDurationMinutes": 0,
+      "recentActivity": [],
+      "cart_items": [],
+      "wishlist_ids": [],
+      "updated_at": "2026-10-05T12:50:13.617+00:00"
     },
     {
       "id": "5817d454-eeca-419f-b8c6-ecbfc94e6c42",
@@ -3677,6 +3683,31 @@
       "updated_at": "2026-10-02T22:50:16.194+00:00"
     },
     {
+      "id": "guest-7axphlv-1791203055752",
+      "firstName": null,
+      "lastName": null,
+      "email": null,
+      "phone": null,
+      "memberSince": null,
+      "tier": null,
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "pointsHistory": [],
+      "addresses": [],
+      "preferences": {},
+      "registeredDateExact": null,
+      "registrationDetails": {},
+      "deviceInfo": {},
+      "location": {},
+      "sessionStatus": null,
+      "lastSeen": null,
+      "sessionDurationMinutes": 0,
+      "recentActivity": [],
+      "cart_items": [],
+      "wishlist_ids": [],
+      "updated_at": "2026-10-05T12:37:59.727+00:00"
+    },
+    {
       "id": "guest-uwc7skw-1791031721838",
       "firstName": null,
       "lastName": null,
@@ -3850,31 +3881,6 @@
       "cart_items": [],
       "wishlist_ids": [],
       "updated_at": "2026-10-02T19:08:20.668+00:00"
-    },
-    {
-      "id": "guest-lysnh3q-1790962566582",
-      "firstName": null,
-      "lastName": null,
-      "email": null,
-      "phone": null,
-      "memberSince": null,
-      "tier": null,
-      "loyaltyPoints": 0,
-      "lifetimePoints": 0,
-      "pointsHistory": [],
-      "addresses": [],
-      "preferences": {},
-      "registeredDateExact": null,
-      "registrationDetails": {},
-      "deviceInfo": {},
-      "location": {},
-      "sessionStatus": null,
-      "lastSeen": null,
-      "sessionDurationMinutes": 0,
-      "recentActivity": [],
-      "cart_items": [],
-      "wishlist_ids": [],
-      "updated_at": "2026-10-03T18:47:16.352+00:00"
     },
     {
       "id": "guest-v0rn7mq-1791092513048",
@@ -4125,6 +4131,31 @@
       "cart_items": [],
       "wishlist_ids": [],
       "updated_at": "2026-10-04T23:42:08.306+00:00"
+    },
+    {
+      "id": "guest-lysnh3q-1790962566582",
+      "firstName": null,
+      "lastName": null,
+      "email": null,
+      "phone": null,
+      "memberSince": null,
+      "tier": null,
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "pointsHistory": [],
+      "addresses": [],
+      "preferences": {},
+      "registeredDateExact": null,
+      "registrationDetails": {},
+      "deviceInfo": {},
+      "location": {},
+      "sessionStatus": null,
+      "lastSeen": null,
+      "sessionDurationMinutes": 0,
+      "recentActivity": [],
+      "cart_items": [],
+      "wishlist_ids": [],
+      "updated_at": "2026-10-05T12:22:42.221+00:00"
     },
     {
       "id": "guest-emqdke9-1790863998168",
@@ -5034,5 +5065,5 @@
     "guest-78tkxse-1791032952913": [],
     "guest-dn71xtd-1791050741186": []
   },
-  "lastUpdated": 1791203034915
+  "lastUpdated": 1791204643122
 }

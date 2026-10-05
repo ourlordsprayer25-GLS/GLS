@@ -161,8 +161,8 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
     }
   };
 
-  // Maximum boot timeout for loading screen
-  const hardTimeout = setTimeout(() => callReady(), 7000);
+  // Snappy maximum boot timeout for loading screen (under 1s)
+  const hardTimeout = setTimeout(() => callReady(), 800);
 
   const isMockProduct = (p: any) => {
     if (!p) return false;
@@ -209,21 +209,9 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
         hasLoaded = true;
         clearTimeout(hardTimeout);
         callReady();
-      } else if (!isSupabaseConfigured) {
-        wrappedOnUpdate([]);
-        hasLoaded = true;
-        clearTimeout(hardTimeout);
-        callReady();
       }
     })
-    .catch(() => {
-      if (!isSupabaseConfigured) {
-        wrappedOnUpdate([]);
-        hasLoaded = true;
-        clearTimeout(hardTimeout);
-        callReady();
-      }
-    });
+    .catch(() => {});
 
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
@@ -235,14 +223,12 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
           wrappedOnUpdate(data as Product[]);
           hasLoaded = true;
         } else if (!error && data && data.length === 0) {
-          // Products table is empty
-          wrappedOnUpdate([]);
+          // Products table in Supabase is empty: preserve current active catalog!
           hasLoaded = true;
         } else if (error && !hasLoaded) {
           console.warn('Supabase products fetch failed:', error.message);
-          // Never inject mock products into the live store
           const fallback = getCache('gls_cache_products') || [];
-          onUpdate(fallback);
+          if (fallback.length > 0) onUpdate(fallback);
         }
         clearTimeout(hardTimeout);
         callReady();
@@ -1041,7 +1027,7 @@ export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
     const fetchSupabaseCategories = async () => {
       try {
         const { data, error } = await supabase.from('categories').select('*');
-        if (!error && Array.isArray(data)) {
+        if (!error && Array.isArray(data) && data.length > 0) {
           wrappedOnUpdateCat(data);
           try {
             await localFetch('/api/sync/categories/bulk-sync', {
@@ -1143,7 +1129,7 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
     const fetchSupabaseBrands = async () => {
       try {
         const { data, error } = await supabase.from('brands').select('name, origin');
-        if (!error && Array.isArray(data)) {
+        if (!error && Array.isArray(data) && data.length > 0) {
           wrappedOnUpdateBrand(data);
           try {
             await localFetch('/api/sync/brands/bulk-sync', {
