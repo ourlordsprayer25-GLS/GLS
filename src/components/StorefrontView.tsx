@@ -376,6 +376,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
               onUpdateOrderStatus={handleUpdateOrderStatus}
               initialInvoiceNumber={initialInvoiceNumber}
               onClearInitialInvoiceNumber={() => setInitialInvoiceNumber(null)}
+              storeSettings={storeSettings}
             />
           ) : isProfilePageOpen ? (
             <ProfilePage
@@ -405,6 +406,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
               onAddToCart={handleAddToCart}
               onToggleWishlist={handleToggleWishlist}
               onBackToShop={handleBackToShop}
+              storeSettings={storeSettings}
             />
           ) : isWishlistPageOpen ? (
             <WishlistPage
@@ -661,7 +663,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onOpenAuth={() => handleOpenAuth('login')}
         />
 
-        <FloatingWhatsAppConcierge />
+        <FloatingWhatsAppConcierge storeSettings={storeSettings} />
 
         <FloatingCartWidget
           cartItemCount={cartItemCount}

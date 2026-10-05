@@ -22,8 +22,9 @@ import {
   User,
   Check,
 } from 'lucide-react';
-import { Order, CartItem, ProductVariant, ProductSize, Product } from '../types/store';
+import { Order, CartItem, ProductVariant, ProductSize, Product, StoreSettings } from '../types/store';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
+import { getWhatsAppLink } from './WhatsAppWidget';
 
 interface OrdersViewProps {
   orders: Order[];
@@ -32,6 +33,7 @@ interface OrdersViewProps {
   onReorder: (items: CartItem[]) => void;
   onSelectProduct: (product: Product) => void;
   onExploreCatalog: () => void;
+  storeSettings?: StoreSettings;
 }
 
 export const OrdersView: React.FC<OrdersViewProps> = ({
@@ -41,6 +43,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
   onReorder,
   onSelectProduct,
   onExploreCatalog,
+  storeSettings,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
   const [searchQuery, setSearchQuery] = useState('');
@@ -852,7 +855,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       <span>{language === 'fr' ? 'Imprimer' : 'Print Order'}</span>
                     </button>
                     <button
-                      onClick={() => window.open(`https://wa.me/23725500619923?text=Order%20Inquiry%20${invoiceModalOrder.orderNumber}`)}
+                      onClick={() => window.open(getWhatsAppLink(`Order Inquiry ${invoiceModalOrder.orderNumber}`, storeSettings?.whatsappNumber), '_blank')}
                       className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase text-center cursor-pointer transition-colors tracking-wider"
                     >
                       {language === 'fr' ? 'Contactez-nous' : 'Contact us'}

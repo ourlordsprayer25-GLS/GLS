@@ -182,7 +182,7 @@ export const Footer: React.FC<FooterProps> = ({
               </a>
             )}
             <a
-              href={getWhatsAppLink('Hello GLADYNS, I have a question.')}
+              href={getWhatsAppLink('Hello GLADYNS, I have a question.', storeSettings?.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"

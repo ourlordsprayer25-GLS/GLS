@@ -392,7 +392,8 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
             href={getWhatsAppLink(
               isFr
                 ? 'Bonjour Concierge GLADYNS, je souhaiterais obtenir des informations sur l\'histoire et les produits de votre boutique.'
-                : 'Hello GLADYNS Concierge, I would like to inquire about your brand history and products.'
+                : 'Hello GLADYNS Concierge, I would like to inquire about your brand history and products.',
+              storeSettings?.whatsappNumber
             )}
             target="_blank"
             rel="noopener noreferrer"

@@ -12,7 +12,7 @@ import {
   Store,
 } from 'lucide-react';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
-import { getWhatsAppLink, WhatsAppIcon } from './WhatsAppWidget';
+import { getWhatsAppLink, WhatsAppIcon, formatWhatsAppDisplay } from './WhatsAppWidget';
 import { StoreSettings } from '../types/store';
 
 interface StoreLocatorPageProps {
@@ -122,7 +122,7 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
 
                   <div className="flex items-center gap-3">
                     <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>{storeSettings?.contactPhone || '+33 1 23 45 67 89'}</span>
+                    <span>{storeSettings?.contactPhone ? formatWhatsAppDisplay(storeSettings.contactPhone) : '+225 05 00 61 99 23'}</span>
                   </div>
 
                   {storeSettings?.contactEmail && (
@@ -149,7 +149,8 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
                   href={getWhatsAppLink(
                     isFr
                       ? 'Bonjour, je souhaite réserver une visite privée à la boutique GLADYNS.'
-                      : 'Hello, I would like to arrange a private appointment at GLADYNS boutique.'
+                      : 'Hello, I would like to arrange a private appointment at GLADYNS boutique.',
+                    storeSettings?.whatsappNumber
                   )}
                   target="_blank"
                   rel="noopener noreferrer"

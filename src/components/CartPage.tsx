@@ -9,10 +9,11 @@ import {
   MessageCircle,
   Sparkles
 } from 'lucide-react';
-import { CartItem, Product, ProductVariant, ProductSize } from '../types/store';
+import { CartItem, Product, ProductVariant, ProductSize, StoreSettings } from '../types/store';
 
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { ProductCard } from './ProductCard';
+import { getWhatsAppLink } from './WhatsAppWidget';
 
 interface CartPageProps {
   items: CartItem[];
@@ -30,6 +31,7 @@ interface CartPageProps {
   ) => void;
   onToggleWishlist?: (productId: string) => void;
   onBackToShop: () => void;
+  storeSettings?: StoreSettings;
 }
 
 export const CartPage: React.FC<CartPageProps> = ({
@@ -43,6 +45,7 @@ export const CartPage: React.FC<CartPageProps> = ({
   onAddToCart,
   onToggleWishlist,
   onBackToShop,
+  storeSettings,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
 
@@ -83,8 +86,8 @@ export const CartPage: React.FC<CartPageProps> = ({
 
   const handleWhatsAppCheckout = () => {
     const itemSummary = validItems.map(i => `${i.quantity}x ${i.product.name} (${i.selectedSize?.name || i.selectedSize}, ${i.selectedColor.name})`).join(', ');
-    const text = encodeURIComponent(`Hello GLADYNS Boutique, I would like to order: ${itemSummary}. Subtotal: ${formatPrice(subtotal)}. Please guide me with payment and dispatch.`);
-    window.open(`https://wa.me/33123456789?text=${text}`, '_blank');
+    const text = `Hello GLADYNS Boutique, I would like to order: ${itemSummary}. Subtotal: ${formatPrice(subtotal)}. Please guide me with payment and dispatch.`;
+    window.open(getWhatsAppLink(text, storeSettings?.whatsappNumber), '_blank');
   };
 
   return (

@@ -784,7 +784,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     type="tel"
                     value={localSettings.contactPhone || ''}
                     onChange={(e) => setLocalSettings({...localSettings, contactPhone: e.target.value})}
-                    placeholder="+33 1 23 45 67 89"
+                    placeholder="+225 05 00 61 99 23"
                     className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-mono"
                   />
                 </div>
@@ -798,7 +798,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     type="tel"
                     value={localSettings.whatsappNumber || ''}
                     onChange={(e) => setLocalSettings({...localSettings, whatsappNumber: e.target.value})}
-                    placeholder="+33 1 23 45 67 89"
+                    placeholder="+225 05 00 61 99 23"
                     className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-mono"
                   />
                 </div>

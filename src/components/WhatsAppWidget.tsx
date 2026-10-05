@@ -1,15 +1,50 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageSquare, X, ArrowUpRight, Sparkles, Check, GripVertical } from 'lucide-react';
 
-export const WHATSAPP_NUMBER = '351912345678';
-export const WHATSAPP_FORMATTED = '+351 912 345 678';
+import { StoreSettings } from '../types/store';
 
-export const getWhatsAppLink = (message: string, phone: string = WHATSAPP_NUMBER) => {
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+export const WHATSAPP_NUMBER = '2250500619923';
+export const WHATSAPP_FORMATTED = '+225 05 00 61 99 23';
+
+/**
+ * Normalizes any phone number into clean numeric digits for wa.me/ URL.
+ * Automatically adds Côte d'Ivoire +225 country code if a 10-digit number starting with 0 is provided.
+ */
+export const cleanWhatsAppNumber = (rawPhone?: string): string => {
+  if (!rawPhone || !rawPhone.trim()) return WHATSAPP_NUMBER;
+  let digits = rawPhone.replace(/\D/g, '');
+  if (!digits) return WHATSAPP_NUMBER;
+  // If user entered 10 digits starting with 0 (e.g. 0500619923, 07..., 01...)
+  if (digits.length === 10 && digits.startsWith('0')) {
+    return '225' + digits;
+  }
+  return digits;
+};
+
+/**
+ * Formats a phone number for elegant human display.
+ * E.g. "0500619923" -> "+225 05 00 61 99 23"
+ */
+export const formatWhatsAppDisplay = (rawPhone?: string): string => {
+  if (!rawPhone || !rawPhone.trim()) return WHATSAPP_FORMATTED;
+  const clean = cleanWhatsAppNumber(rawPhone);
+  if (clean.startsWith('225') && clean.length === 13) {
+    return `+225 ${clean.slice(3, 5)} ${clean.slice(5, 7)} ${clean.slice(7, 9)} ${clean.slice(9, 11)} ${clean.slice(11, 13)}`;
+  }
+  if (clean.length === 10 && clean.startsWith('0')) {
+    return `+225 ${clean.slice(0, 2)} ${clean.slice(2, 4)} ${clean.slice(4, 6)} ${clean.slice(6, 8)} ${clean.slice(8, 10)}`;
+  }
+  return rawPhone;
+};
+
+export const getWhatsAppLink = (message: string, phone?: string) => {
+  const targetPhone = cleanWhatsAppNumber(phone);
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
 };
 
 interface WhatsAppButtonProps {
   message?: string;
+  phone?: string;
   className?: string;
   variant?: 'primary' | 'secondary' | 'subtle' | 'compact' | 'pill';
   label?: string;
@@ -38,12 +73,13 @@ export const WhatsAppIcon: React.FC<{ className?: string }> = ({ className = 'w-
 
 export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   message = 'Hello GLADYNS Concierge, I would like to inquire about products and studio assistance.',
+  phone,
   className = '',
   variant = 'primary',
   label = 'Chat on WhatsApp',
   showIcon = true,
 }) => {
-  const url = getWhatsAppLink(message);
+  const url = getWhatsAppLink(message, phone);
 
   let variantStyles = '';
   switch (variant) {
@@ -82,8 +118,18 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
   );
 };
 
+interface FloatingWhatsAppConciergeProps {
+  storeSettings?: StoreSettings;
+  phoneNumber?: string;
+}
+
 // Floating WhatsApp Concierge Beacon with Quick Concierge Modal & Draggable Position
-export const FloatingWhatsAppConcierge: React.FC = () => {
+export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps> = ({
+  storeSettings,
+  phoneNumber,
+}) => {
+  const activePhone = phoneNumber || storeSettings?.whatsappNumber || WHATSAPP_NUMBER;
+  const displayPhone = formatWhatsAppDisplay(activePhone);
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -217,7 +263,7 @@ export const FloatingWhatsAppConcierge: React.FC = () => {
             {conciergeOptions.map((opt, idx) => (
               <a
                 key={idx}
-                href={getWhatsAppLink(opt.msg)}
+                href={getWhatsAppLink(opt.msg, activePhone)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsOpen(false)}
@@ -235,7 +281,7 @@ export const FloatingWhatsAppConcierge: React.FC = () => {
           </div>
 
           <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-            <span>Direct: {WHATSAPP_FORMATTED}</span>
+            <span>Direct: {displayPhone}</span>
             <span className="text-emerald-700 font-semibold flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-emerald-600" />
               <span>Avg. reply: ~5 mins</span>

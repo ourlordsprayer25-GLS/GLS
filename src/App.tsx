@@ -49,9 +49,9 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
   storeName: 'GLADYNS DEPARTMENT STORE',
   storeDescription: 'Curated Department House redefining modern living through audio precision, musical instruments, smart home appliances, and artisanal fashion.',
   contactEmail: 'concierge@gladyns.com',
-  contactPhone: '+33 1 23 45 67 89',
+  contactPhone: '+225 05 00 61 99 23',
   contactAddress: 'Rua Miguel Bombarda 142, 4050-377 Porto, Portugal',
-  whatsappNumber: '+33 1 23 45 67 89',
+  whatsappNumber: '+225 05 00 61 99 23',
   operatingHours: 'Monday – Saturday: 10:00 AM – 7:00 PM CET',
   socialLinks: {
     instagram: 'https://instagram.com/gladyns',

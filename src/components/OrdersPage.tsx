@@ -27,10 +27,11 @@ import {
   Trash2,
   HelpCircle,
 } from 'lucide-react';
-import { Order, CartItem, Product, UserProfile, ProductVariant, ProductSize } from '../types/store';
+import { Order, CartItem, Product, UserProfile, ProductVariant, ProductSize, StoreSettings } from '../types/store';
 import { INITIAL_PRODUCTS } from '../data/products';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { ProductCard } from './ProductCard';
+import { getWhatsAppLink } from './WhatsAppWidget';
 
 interface OrdersPageProps {
   user: UserProfile | null;
@@ -49,6 +50,7 @@ interface OrdersPageProps {
   onUpdateOrderStatus?: (orderId: string, newStatus: Order['status']) => void;
   initialInvoiceNumber?: string | null;
   onClearInitialInvoiceNumber?: () => void;
+  storeSettings?: StoreSettings;
 }
 
 // The 5 distinct canonical lifecycle stages requested by the user
@@ -102,6 +104,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
   onUpdateOrderStatus,
   initialInvoiceNumber,
   onClearInitialInvoiceNumber,
+  storeSettings,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
   const [searchQuery, setSearchQuery] = useState('');
@@ -1228,7 +1231,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                       <span>{language === 'fr' ? 'Imprimer' : 'Print Order'}</span>
                     </button>
                     <button
-                      onClick={() => window.open(`https://wa.me/23725500619923?text=Order%20Inquiry%20${invoiceModalOrder.orderNumber}`)}
+                      onClick={() => window.open(getWhatsAppLink(`Order Inquiry ${invoiceModalOrder.orderNumber}`, storeSettings?.whatsappNumber), '_blank')}
                       className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase text-center cursor-pointer transition-colors tracking-wider"
                     >
                       {language === 'fr' ? 'Contactez-nous' : 'Contact us'}
