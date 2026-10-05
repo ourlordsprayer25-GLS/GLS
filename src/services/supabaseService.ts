@@ -23,6 +23,16 @@ import { INITIAL_ORDERS, INITIAL_CUSTOMERS, INITIAL_BRANDS } from '../data/user'
 import { INITIAL_NOTIFICATIONS } from '../data/notifications';
 
 /**
+ * Safely creates a uniquely named Supabase Realtime channel.
+ * Using unique names prevents the "cannot add postgres_changes callbacks after subscribe()"
+ * error caused by React StrictMode double-mounting or hot-module reloading.
+ */
+function createUniqueChannel(prefix: string) {
+  const channelName = `${prefix}_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`;
+  return supabase.channel(channelName);
+}
+
+/**
  * Universal Multi-Device Real-Time Sync Service
  * Seamlessly coordinates between Supabase and Centralized Server Sync Engine
  */
@@ -238,8 +248,7 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
         callReady();
       });
 
-    supabaseChannel = supabase
-      .channel('products_realtime')
+    supabaseChannel = createUniqueChannel('products_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
         const { data } = await supabase.from('products').select('*');
         if (data && data.length > 0) {
@@ -378,8 +387,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
 
     fetchSupabaseOrders();
 
-    supabaseChannel = supabase
-      .channel('orders_realtime')
+    supabaseChannel = createUniqueChannel('orders_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
         if (ordersDebounceTimer) clearTimeout(ordersDebounceTimer);
         ordersDebounceTimer = setTimeout(fetchSupabaseOrders, 2000);
@@ -481,8 +489,7 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
 
     fetchSupabaseUsers();
 
-    supabaseChannel = supabase
-      .channel('users_realtime')
+    supabaseChannel = createUniqueChannel('users_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, async () => {
         if (usersDebounceTimer) clearTimeout(usersDebounceTimer);
         usersDebounceTimer = setTimeout(fetchSupabaseUsers, 2500);
@@ -537,8 +544,7 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
 
     fetchNotifs();
 
-    supabaseChannel = supabase
-      .channel('notifications_realtime')
+    supabaseChannel = createUniqueChannel('notifications_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
         if (notifDebounceTimer) clearTimeout(notifDebounceTimer);
         notifDebounceTimer = setTimeout(fetchNotifs, 3000);
@@ -583,8 +589,7 @@ export function subscribeToSettings(defaultSettings: StoreSettings, onUpdate: (s
         }
       });
 
-    supabaseChannel = supabase
-      .channel('settings_realtime')
+    supabaseChannel = createUniqueChannel('settings_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, (payload) => {
         if (payload.new && (payload.new as any).config) {
           onUpdate((payload.new as any).config as StoreSettings);
@@ -1051,8 +1056,7 @@ export function subscribeToCategories(onUpdate: (categories: any[]) => void) {
 
     fetchSupabaseCategories();
 
-    supabaseChannel = supabase
-      .channel('categories_realtime')
+    supabaseChannel = createUniqueChannel('categories_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
         fetchSupabaseCategories();
       })
@@ -1154,8 +1158,7 @@ export function subscribeToBrands(onUpdate: (brands: any[]) => void) {
 
     fetchSupabaseBrands();
 
-    supabaseChannel = supabase
-      .channel('brands_realtime')
+    supabaseChannel = createUniqueChannel('brands_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'brands' }, () => {
         fetchSupabaseBrands();
       })

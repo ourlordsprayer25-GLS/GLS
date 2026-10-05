@@ -168,8 +168,8 @@ function AppContent() {
     });
 
     const unsubProducts = subscribeToProducts(setProducts, () => setIsReady(true));
-    subscribeToCategories(setCategories);
-    subscribeToBrands(setBrands);
+    const unsubCategories = subscribeToCategories(setCategories);
+    const unsubBrands = subscribeToBrands(setBrands);
     const unsubOrders = subscribeToOrders(setOrders);
     const unsubNotifs = subscribeToNotifications(setNotifications);
     const unsubSettings = subscribeToSettings(DEFAULT_STORE_SETTINGS, setStoreSettings);
@@ -177,6 +177,8 @@ function AppContent() {
 
     return () => {
       unsubProducts();
+      unsubCategories?.();
+      unsubBrands?.();
       unsubOrders();
       unsubNotifs();
       unsubSettings();
