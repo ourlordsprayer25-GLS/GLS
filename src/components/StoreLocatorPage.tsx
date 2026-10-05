@@ -30,53 +30,6 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
   const isFr = language === 'fr';
   const storeName = storeSettings?.storeName || 'GLADYNS';
 
-  const stores = [
-    {
-      id: 'porto',
-      city: 'Porto',
-      country: 'Portugal',
-      title: isFr ? 'Studio Central & Design' : 'Central Curation & Design Lab',
-      address: 'Rua Miguel Bombarda 142, 4050-377 Porto, Portugal',
-      hours: isFr ? 'Lun - Sam : 10h00 - 19h00' : 'Mon - Sat: 10:00 AM - 7:00 PM',
-      phone: '+351 22 600 1420',
-      badge: isFr ? 'Flagship Principal' : 'Primary Flagship',
-      mapsUrl: 'https://maps.google.com/?q=Rua+Miguel+Bombarda+142+Porto+Portugal',
-    },
-    {
-      id: 'florence',
-      city: 'Florence (Firenze)',
-      country: 'Italie',
-      title: isFr ? 'Maison & Tannerie Végétale' : 'Tuscan Leathercraft House',
-      address: 'Via de’ Tornabuoni 28, 50123 Firenze FI, Italy',
-      hours: isFr ? 'Mar - Dim : 10h30 - 19h30' : 'Tue - Sun: 10:30 AM - 7:30 PM',
-      phone: '+39 055 212 800',
-      badge: isFr ? 'Maroquinerie D\'Exception' : 'Fine Leather Lab',
-      mapsUrl: 'https://maps.google.com/?q=Via+de+Tornabuoni+28+Firenze+Italy',
-    },
-    {
-      id: 'milan',
-      city: 'Milan (Milano)',
-      country: 'Italie',
-      title: isFr ? 'Showroom Couture & Maille' : 'Knitwear & Couture Showroom',
-      address: 'Via Monte Napoleone 12, 20121 Milano MI, Italy',
-      hours: isFr ? 'Lun - Sam : 10h00 - 19h00' : 'Mon - Sat: 10:00 AM - 7:00 PM',
-      phone: '+39 02 760 0120',
-      badge: isFr ? 'Showroom Mode' : 'Fashion Showroom',
-      mapsUrl: 'https://maps.google.com/?q=Via+Monte+Napoleone+12+Milano+Italy',
-    },
-    {
-      id: 'paris',
-      city: 'Paris',
-      country: 'France',
-      title: isFr ? 'Boutique Éphémère Le Marais' : 'Le Marais Boutique & Concierge',
-      address: '74 Rue Vieille du Temple, 75003 Paris, France',
-      hours: isFr ? 'Lun - Dim : 11h00 - 19h30' : 'Mon - Sun: 11:00 AM - 7:30 PM',
-      phone: '+33 1 42 78 74 00',
-      badge: isFr ? 'Boutique Capitale' : 'Capital Flagship',
-      mapsUrl: 'https://maps.google.com/?q=74+Rue+Vieille+du+Temple+75003+Paris+France',
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-slate-50/60 pb-20 animate-in fade-in duration-200">
       {/* Top Bar Navigation */}
@@ -101,17 +54,17 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 text-center space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-bold">
             <MapPin className="w-4 h-4 text-blue-400" />
-            <span>{isFr ? 'Nous Trouver en Europe' : 'Global Store Network'}</span>
+            <span>{isFr ? 'Notre Espace Boutique' : 'Flagship Boutique'}</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight">
-            {isFr ? 'Boutiques GLADYNS' : 'Find GLADYNS Boutiques'}
+            {isFr ? `Boutique Officielle ${storeName}` : `${storeName} Flagship Boutique`}
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto font-sans leading-relaxed">
             {isFr
-              ? 'Découvrez nos espaces de vente et showrooms d\'exception à Porto, Florence, Milan et Paris.'
-              : 'Visit our curation labs and flagship boutiques in Porto, Florence, Milan, and Paris.'}
+              ? 'Découvrez notre espace de vente et showroom officiel.'
+              : 'Visit our official flagship boutique and curation showroom.'}
           </p>
         </div>
       </div>
@@ -208,81 +161,6 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="text-left pt-4">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold block">
-            {isFr ? 'RÉSEAU EUROPÉEN' : 'REGIONAL EUROPEAN LABS'}
-          </span>
-          <h3 className="text-xl font-display font-bold text-slate-950 mt-1">
-            {isFr ? 'Nos Autres Espaces & Showrooms' : 'Our European Studio Network'}
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {stores.map((st) => (
-            <div
-              key={st.id}
-              className="p-6 bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-shadow space-y-4 flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200/80">
-                    {st.badge}
-                  </span>
-                  <span className="text-xs font-bold text-slate-400">{st.country}</span>
-                </div>
-
-                <div>
-                  <h2 className="text-xl font-display font-bold text-slate-950">{st.city}</h2>
-                  <p className="text-xs text-slate-500 font-medium">{st.title}</p>
-                </div>
-
-                <div className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100 font-sans">
-                  <div className="flex items-start gap-2.5">
-                    <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                    <span>{st.address}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <Clock className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>{st.hours}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>{st.phone}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-                <a
-                  href={st.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-2.5 px-3 bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors"
-                >
-                  <Navigation className="w-3.5 h-3.5" />
-                  <span>{isFr ? 'Itinéraire Maps' : 'Get Directions'}</span>
-                </a>
-
-                <a
-                  href={getWhatsAppLink(
-                    isFr
-                      ? `Bonjour, je souhaite réserver un rendez-vous sur-mesure à la boutique GLADYNS de ${st.city}.`
-                      : `Hello, I would like to schedule a private fitting appointment at GLADYNS ${st.city}.`
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors"
-                >
-                  <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>{isFr ? 'Rendez-vous' : 'Book Visit'}</span>
-                </a>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
