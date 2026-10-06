@@ -9,24 +9,34 @@ let isAudioUnlocked = false;
 // Pre-synthesized base64 WAV chime fallback for browsers that block AudioContext
 let cachedWavUrl: string | null = null;
 
-function getAudioContext(): AudioContext | null {
+function getAudioContext(forceCreate = false): AudioContext | null {
   if (typeof window === 'undefined') return null;
   const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
   if (!AudioContextClass) return null;
   if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
-    sharedAudioCtx = new AudioContextClass();
+    if (!forceCreate && !isAudioUnlocked) return null;
+    try {
+      sharedAudioCtx = new AudioContextClass();
+    } catch (_) {
+      return null;
+    }
   }
   return sharedAudioCtx;
 }
 
-// Unlock audio context on initial user touch or click
+// Unlock audio context on initial user interaction (click, key, touch)
 if (typeof window !== 'undefined') {
   const unlock = () => {
     isAudioUnlocked = true;
-    const ctx = getAudioContext();
-    if (ctx && ctx.state === 'suspended') {
-      ctx.resume().catch(() => {});
-    }
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass && !sharedAudioCtx) {
+        sharedAudioCtx = new AudioContextClass();
+      }
+      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+    } catch (_) {}
     window.removeEventListener('pointerdown', unlock);
     window.removeEventListener('keydown', unlock);
     window.removeEventListener('touchstart', unlock);
@@ -97,7 +107,7 @@ function generateWavChimeUrl(): string {
  */
 export function playNotificationSound(): void {
   try {
-    const ctx = getAudioContext();
+    const ctx = getAudioContext(true);
     if (!ctx) {
       playFallbackWav();
       return;
