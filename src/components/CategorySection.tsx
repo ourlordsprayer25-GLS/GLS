@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { VISUAL_CATEGORIES, CategoryCardData } from '../data/products';
 import { Product } from '../types/store';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface CategorySectionProps {
   products?: Product[];
@@ -16,6 +17,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   onSelectCategory,
   onViewAllCategories,
 }) => {
+  const { language } = useLanguageCurrency();
+  const isFr = language === 'fr';
+
   const handleClick = (category: string) => {
     onSelectCategory(category);
   };
@@ -97,12 +101,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-zinc-200">
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-display font-medium text-zinc-950 tracking-tight">
-              Shop by Department
+              {isFr ? 'Rayons et Catégories' : 'Shop by Department'}
             </h2>
             {isMobile && activeCategories.length > 6 && (
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5 text-blue-600" />
-                Today's 6
+                {isFr ? 'Sélection du jour' : "Today's 6"}
               </span>
             )}
           </div>
@@ -112,7 +116,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               onClick={onViewAllCategories}
               className="text-xs font-semibold text-zinc-950 hover:text-zinc-600 transition-colors flex items-center gap-1 cursor-pointer group"
             >
-              <span>View All</span>
+              <span>{isFr ? 'Voir tout' : 'View All'}</span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
             </button>
           )}
@@ -129,7 +133,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               : cat.image;
 
             const displayCount = categoryProducts.length > 0
-              ? `${categoryProducts.length} ${categoryProducts.length === 1 ? 'Piece' : 'Pieces'}`
+              ? `${categoryProducts.length} ${isFr ? (categoryProducts.length === 1 ? 'article' : 'articles') : (categoryProducts.length === 1 ? 'Piece' : 'Pieces')}`
               : cat.count;
 
             return (
@@ -180,7 +184,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               onClick={onViewAllCategories}
               className="w-full py-2.5 px-4 bg-zinc-100 hover:bg-zinc-200 active:scale-[0.99] text-zinc-900 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 cursor-pointer"
             >
-              <span>Explore All {activeCategories.length} Categories</span>
+              <span>{isFr ? `Explorer les ${activeCategories.length} catégories` : `Explore All ${activeCategories.length} Categories`}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

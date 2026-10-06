@@ -89,8 +89,9 @@ export interface StoreNotification {
   read: boolean;
   type: 'order' | 'drop' | 'restock' | 'promo' | 'wishlist' | 'product';
   linkTarget?: string;
-    customerId?: string;
-    isAdminOnly?: boolean; // e.g. "product-chore-coat"
+  customerId?: string;
+  isAdminOnly?: boolean; // e.g. "product-chore-coat"
+  image?: string; // Product thumbnail or banner image
 }
 
 export interface ShippingAddress {

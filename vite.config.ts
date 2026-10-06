@@ -60,6 +60,11 @@ export default defineConfig(() => {
         },
       }),
     ],
+    build: {
+      target: ['es2015', 'chrome79', 'edge79', 'firefox72', 'safari13'],
+      cssTarget: ['chrome79', 'safari13'],
+      cssMinify: 'lightningcss',
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

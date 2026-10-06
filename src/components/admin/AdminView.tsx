@@ -247,6 +247,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       read: false,
       type: 'drop',
       linkTarget: newProduct.id,
+      image: newProduct.primaryImage || newProduct.images?.[0],
     };
     setNotifications(prev => [newNotif, ...prev]);
   };
@@ -1153,6 +1154,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         onNavigateToProduct={handleNavigateToProduct}
         onOpenOrders={handleOpenOrdersFromNotif}
         topClass="top-16"
+        products={products}
       />
 
       {/* Floating Notice Toast */}

@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   Sparkles,
   Tag,
+  Share2,
 } from 'lucide-react';
 import { Product, UserProfile, StoreSettings } from '../types/store';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
@@ -60,6 +61,7 @@ interface HeaderProps {
   isProfileActive?: boolean;
   isOrdersActive?: boolean;
   onBackToHome?: () => void;
+  onOpenShareModal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -89,6 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
   isProfileActive = false,
   isOrdersActive = false,
   onBackToHome,
+  onOpenShareModal,
 }) => {
   const {
     language,
@@ -131,7 +134,7 @@ export const Header: React.FC<HeaderProps> = ({
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      alert('Image search functionality coming soon!');
+      alert(language === 'fr' ? 'La recherche par image sera bientôt disponible !' : 'Image search functionality coming soon!');
       console.log('Image selected:', file);
     }
   };
@@ -573,7 +576,7 @@ export const Header: React.FC<HeaderProps> = ({
                             {language === 'fr' ? 'Articles correspondants' : 'Matching Items'} ({matchingProducts.length})
                           </p>
                           <span className="text-[10px] text-blue-600 font-bold">
-                            Click item to open
+                            {language === 'fr' ? 'Cliquez pour ouvrir' : 'Click item to open'}
                           </span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -648,7 +651,7 @@ export const Header: React.FC<HeaderProps> = ({
                         }}
                         className="text-xs text-slate-400 hover:text-slate-700 cursor-pointer font-semibold"
                       >
-                        Close
+                        {language === 'fr' ? 'Fermer' : 'Close'}
                       </button>
                     </div>
                   </div>
@@ -1024,6 +1027,19 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               )}
             </button>
+
+            {/* Share Boutique Button */}
+            {onOpenShareModal && (
+              <button
+                onClick={onOpenShareModal}
+                aria-label="Share Store"
+                title={language === 'fr' ? 'Partager la boutique GLADYNS & Obtenir la carte HD' : 'Share GLADYNS Boutique & Get HD Card'}
+                className="flex items-center justify-center p-2 sm:px-3 sm:py-2 bg-slate-100/90 hover:bg-blue-50 text-slate-800 hover:text-blue-600 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/60"
+              >
+                <Share2 className="w-4 h-4 text-blue-600 shrink-0" />
+                <span className="hidden xl:inline ml-1.5">{language === 'fr' ? 'Partager' : 'Share'}</span>
+              </button>
+            )}
 
             {/* Desktop Action Buttons (Wishlist, Cart, Language, User Sign In) - Visible on lg screens */}
             <div className="hidden lg:flex items-center gap-2 shrink-0">

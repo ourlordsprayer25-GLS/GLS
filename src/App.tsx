@@ -31,6 +31,7 @@ import {
   addRealtimeNotification,
   markRealtimeNotificationRead,
   deleteRealtimeNotification,
+  clearAllRealtimeNotifications,
   updateRealtimeUserProfile,
   fetchRealtimeCart,
   saveRealtimeCart,
@@ -124,7 +125,15 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
 
 function AppContent() {
   const { user: authUser, login: authLogin, logout: authLogout } = useAuth();
-  const { formatPrice } = useLanguageCurrency();
+  const { formatPrice, language } = useLanguageCurrency();
+
+  const formatCurrencyInText = useCallback((text?: string): string => {
+    if (!text) return '';
+    return text.replace(/\$(\d+(?:\.\d+)?)/g, (_, val) => {
+      const num = parseFloat(val);
+      return isNaN(num) ? _ : formatPrice(num);
+    });
+  }, [formatPrice]);
   
   const navigate = useCallback((path: string) => {
     window.history.pushState({}, '', path);
@@ -154,8 +163,7 @@ function AppContent() {
     } catch (e) {}
     return INITIAL_ORDERS;
   });
-  const [notifications, setNotifications] = useState<StoreNotification[]>([]);
-  const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(() => {
+  const getDismissedSet = (): Set<string> => {
     try {
       const saved = localStorage.getItem('gls_dismissed_notification_ids');
       if (saved) {
@@ -164,12 +172,46 @@ function AppContent() {
       }
     } catch (e) {}
     return new Set<string>();
+  };
+
+  const isNotificationDismissed = (n: StoreNotification, dismissed: Set<string>): boolean => {
+    if (dismissed.has(n.id)) return true;
+    if (n.linkTarget) {
+      if (dismissed.has(n.linkTarget)) return true;
+      if (dismissed.has(`product-notice-${n.linkTarget}`)) return true;
+      if (dismissed.has(`notif-product-${n.linkTarget}`)) return true;
+      if (dismissed.has(`notif-new-product-${n.linkTarget}`)) return true;
+      if (n.id.startsWith(`notif-new-product-${n.linkTarget}`)) return true;
+    }
+    return false;
+  };
+
+  const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(getDismissedSet);
+
+  const [notifications, setNotifications] = useState<StoreNotification[]>(() => {
+    try {
+      const cached = localStorage.getItem('gls_cache_notifications');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const dismissed = getDismissedSet();
+        if (Array.isArray(parsed)) {
+          return parsed.filter((n: StoreNotification) => !isNotificationDismissed(n, dismissed));
+        }
+      }
+    } catch (e) {}
+    return [];
   });
 
-  const recordDismissedNotification = (id: string) => {
+  const recordDismissedNotification = (id: string, linkTarget?: string) => {
     setDismissedNotificationIds((prev) => {
       const next = new Set(prev);
       next.add(id);
+      if (linkTarget) {
+        next.add(linkTarget);
+        next.add(`product-notice-${linkTarget}`);
+        next.add(`notif-new-product-${linkTarget}`);
+        next.add(`notif-product-${linkTarget}`);
+      }
       try {
         localStorage.setItem('gls_dismissed_notification_ids', JSON.stringify(Array.from(next)));
       } catch (e) {}
@@ -188,6 +230,26 @@ function AppContent() {
     } catch (e) {}
     return CATEGORIES as any;
   });
+
+  const localizedCategories = useMemo(() => {
+    if (language !== 'fr') return categories;
+    const frMap: Record<string, string> = {
+      'all': 'Tous les rayons',
+      'computer-it': 'Informatique & Ordinateurs',
+      'electronics-audio': 'Électronique & Son',
+      'accesssories': 'Accessoires',
+      'accessories': 'Accessoires',
+      'ram': 'Mémoire RAM & Stockage',
+      'musical': 'Instruments de Musique',
+      'appliances': 'Électroménager & Maison',
+      'apparel': 'Mode & Habillement',
+      'leather-goods': 'Maroquinerie & Cuir',
+    };
+    return categories.map((cat) => ({
+      ...cat,
+      label: frMap[cat.id.toLowerCase()] || cat.label,
+    }));
+  }, [categories, language]);
   const [brands, setBrands] = useState<{ name: string; origin: string }[]>(() => {
     try {
       const cached = localStorage.getItem('gls_cache_brands');
@@ -215,7 +277,11 @@ function AppContent() {
     const unsubCategories = subscribeToCategories(setCategories);
     const unsubBrands = subscribeToBrands(setBrands);
     const unsubOrders = subscribeToOrders(setOrders);
-    const unsubNotifs = subscribeToNotifications(setNotifications);
+    const unsubNotifs = subscribeToNotifications((incomingNotifs) => {
+      const currentDismissed = getDismissedSet();
+      const filtered = incomingNotifs.filter((n) => !isNotificationDismissed(n, currentDismissed));
+      setNotifications(filtered);
+    });
     const unsubSettings = subscribeToSettings(DEFAULT_STORE_SETTINGS, setStoreSettings);
     const unsubUsers = subscribeToUsers(setUsers);
 
@@ -599,40 +665,50 @@ function AppContent() {
 
     // Detect truly newly added products during active session
     products.forEach((product) => {
-      if (!alertedProductIdsRef.current?.has(product.id)) {
+      const currentDismissed = getDismissedSet();
+      const isDismissed = currentDismissed.has(`notif-new-product-${product.id}`) ||
+                          currentDismissed.has(`notif-product-${product.id}`) ||
+                          currentDismissed.has(`product-notice-${product.id}`) ||
+                          currentDismissed.has(product.id);
+
+      if (!alertedProductIdsRef.current?.has(product.id) && !isDismissed) {
         alertedProductIdsRef.current?.add(product.id);
         try {
           localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alertedProductIdsRef.current)));
         } catch (e) {}
 
-          const title = `✨ New Arrival: ${product.name}`;
-          const message = `Discover our newest addition: "${product.name}" is now available in store for ${formatPrice(product.price)}.`;
+        const title = `✨ New Arrival: ${product.name}`;
+        const message = `Discover our newest addition: "${product.name}" is now available in store for ${formatPrice(product.price)}.`;
 
-          const arrivalNotif: StoreNotification = {
-            id: `notif-new-product-${product.id}`,
-            title,
-            message,
-            timestamp: Date.now(),
-            read: false,
-            type: 'product',
-            linkTarget: product.id,
-          };
+        const arrivalNotif: StoreNotification = {
+          id: `notif-new-product-${product.id}`,
+          title,
+          message,
+          timestamp: Date.now(),
+          read: false,
+          type: 'product',
+          linkTarget: product.id,
+          image: product.primaryImage || product.images?.[0],
+        };
 
-          setNotifications((prev) => [arrivalNotif, ...prev]);
-          playPremiumChime();
-          triggerSystemNotification(title, {
-            body: `Now available in store for ${formatPrice(product.price)}. Tap to view!`,
-            tag: `new-product-${product.id}`,
-            icon: product.primaryImage || '/pwa-192x192.png',
-            data: { url: `/product/${product.id}` },
-          });
-          setActiveToast({
-            id: arrivalNotif.id,
-            title: arrivalNotif.title,
-            message: arrivalNotif.message,
-          });
-        }
-      });
+        setNotifications((prev) => [arrivalNotif, ...prev]);
+        addRealtimeNotification(arrivalNotif);
+        playPremiumChime();
+        triggerSystemNotification(title, {
+          body: `Now available in store for ${formatPrice(product.price)}. Tap to view!`,
+          tag: `new-product-${product.id}`,
+          icon: product.primaryImage || '/pwa-192x192.png',
+          image: product.primaryImage || product.images?.[0],
+          data: { url: `/product/${product.id}` },
+        });
+        setActiveToast({
+          id: arrivalNotif.id,
+          title: arrivalNotif.title,
+          message: arrivalNotif.message,
+          image: product.primaryImage || product.images?.[0],
+        });
+      }
+    });
 
     // Check low stock
     products.forEach((product) => {
@@ -668,33 +744,6 @@ function AppContent() {
       }
     });
   }, [products]);
-
-  // Real-time incoming notification audio feedback & toast watcher
-  const lastKnownNotifIdsRef = useRef<Set<string> | null>(null);
-  useEffect(() => {
-    if (!notifications || notifications.length === 0) return;
-
-    if (lastKnownNotifIdsRef.current === null) {
-      lastKnownNotifIdsRef.current = new Set(notifications.map(n => n.id));
-      return;
-    }
-
-    const newNotifs = notifications.filter(n => !lastKnownNotifIdsRef.current?.has(n.id) && !dismissedNotificationIds.has(n.id));
-    if (newNotifs.length > 0) {
-      newNotifs.forEach(n => lastKnownNotifIdsRef.current?.add(n.id));
-      const latest = newNotifs[0];
-      playNotificationSound();
-      setActiveToast({
-        id: latest.id,
-        title: latest.title,
-        message: latest.message,
-      });
-      triggerSystemNotification(latest.title, {
-        body: latest.message,
-        icon: '/pwa-192x192.png',
-      });
-    }
-  }, [notifications, dismissedNotificationIds, triggerSystemNotification]);
 
   // Dedicated Pages: Orders Page & Patron Profile Page & Section Sliding Hero Pages
   const [isOrdersPageOpen, setIsOrdersPageOpen] = useState(false);
@@ -761,7 +810,7 @@ function AppContent() {
   }, [cartItems, user?.id]);
 
   const [initialInvoiceNumber, setInitialInvoiceNumber] = useState<string | null>(null);
-  const [activeToast, setActiveToast] = useState<{ id: string; title: string; message: string; orderNumber?: string } | null>(null);
+  const [activeToast, setActiveToast] = useState<{ id: string; title: string; message: string; orderNumber?: string; image?: string } | null>(null);
 
   useEffect(() => {
     if (activeToast) {
@@ -902,6 +951,8 @@ function AppContent() {
         timestamp: Date.now(),
         read: false,
         type: 'wishlist',
+        linkTarget: productId,
+        image: targetProduct?.primaryImage || targetProduct?.images?.[0],
       };
       setNotifications((n) => [notif, ...n]);
       return exists ? prev.filter((id) => id !== productId) : [...prev, productId];
@@ -955,16 +1006,52 @@ function AppContent() {
     markRealtimeNotificationRead(id);
   };
   const handleDeleteNotification = (id: string) => {
-    recordDismissedNotification(id);
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    const target = notifications.find((n) => n.id === id) || customerNotifications.find((n) => n.id === id);
+    const linkTarget = target?.linkTarget;
+
+    recordDismissedNotification(id, linkTarget);
+
+    if (linkTarget) {
+      alertedProductIdsRef.current?.add(linkTarget);
+      try {
+        const alerted = new Set(JSON.parse(localStorage.getItem('gls_alerted_product_ids') || '[]'));
+        alerted.add(linkTarget);
+        localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alerted)));
+      } catch (e) {}
+    }
+
+    setNotifications((prev) => prev.filter((n) => {
+      if (n.id === id) return false;
+      if (linkTarget && n.linkTarget === linkTarget) return false;
+      return true;
+    }));
+
     deleteRealtimeNotification(id);
+    if (linkTarget) {
+      deleteRealtimeNotification(linkTarget);
+    }
   };
+
   const handleClearAllNotifications = () => {
     customerNotifications.forEach((n) => {
-      recordDismissedNotification(n.id);
+      recordDismissedNotification(n.id, n.linkTarget);
+      if (n.linkTarget) {
+        alertedProductIdsRef.current?.add(n.linkTarget);
+      }
       deleteRealtimeNotification(n.id);
+      if (n.linkTarget) {
+        deleteRealtimeNotification(n.linkTarget);
+      }
     });
+    try {
+      const alerted = new Set(JSON.parse(localStorage.getItem('gls_alerted_product_ids') || '[]'));
+      customerNotifications.forEach((n) => {
+        if (n.linkTarget) alerted.add(n.linkTarget);
+      });
+      localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alerted)));
+    } catch (e) {}
     setNotifications([]);
+    clearAllRealtimeNotifications();
   };
   const handleNavigateToProductFromNotification = (productId: string) => {
     const targetProduct = products.find((p) => p.id === productId);
@@ -986,6 +1073,8 @@ function AppContent() {
       setUser(updatedUser);
       updateRealtimeUserProfile(updatedUser);
     }
+    const firstItemImage = newOrder.items?.[0]?.product?.primaryImage || newOrder.items?.[0]?.product?.images?.[0];
+
     const customerNotification: StoreNotification = {
       id: `notif-${Date.now()}-c`,
       title: `Order ${newOrder.orderNumber} Placed`,
@@ -995,6 +1084,7 @@ function AppContent() {
       type: 'order',
       linkTarget: newOrder.orderNumber,
       customerId: user?.id || newOrder.customerId || getGuestId(),
+      image: firstItemImage,
     };
     const adminNotification: StoreNotification = {
       id: `notif-${Date.now()}-a`,
@@ -1005,11 +1095,18 @@ function AppContent() {
       type: 'order',
       linkTarget: newOrder.orderNumber,
       isAdminOnly: true,
+      image: firstItemImage,
     };
     setNotifications((prev) => [customerNotification, adminNotification, ...prev]);
     addRealtimeNotification(customerNotification);
     addRealtimeNotification(adminNotification);
-    setActiveToast({ id: customerNotification.id, title: customerNotification.title, message: customerNotification.message, orderNumber: newOrder.orderNumber });
+    setActiveToast({ 
+      id: customerNotification.id, 
+      title: customerNotification.title, 
+      message: customerNotification.message, 
+      orderNumber: newOrder.orderNumber,
+      image: firstItemImage,
+    });
     setInitialInvoiceNumber(newOrder.orderNumber);
     if (user?.email) dispatchOrderStatusEmail(user.email, newOrder.orderNumber, 'PLACED', `Order for ${formatPrice(newOrder.total)} received.`);
     setIsOrdersPageOpen(true);
@@ -1018,7 +1115,8 @@ function AppContent() {
     triggerSystemNotification('\u2705 Order ' + newOrder.orderNumber + ' Confirmed!', {
       body: 'Your order for ' + formatPrice(newOrder.total) + ' has been placed. We are on it!',
       tag: 'order-placed-' + newOrder.id,
-      icon: '/pwa-192x192.png',
+      icon: firstItemImage || '/pwa-192x192.png',
+      image: firstItemImage,
       data: { url: '/orders' },
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1118,6 +1216,13 @@ function AppContent() {
 
       // Filter out dismissed notifications
       if (dismissedNotificationIds.has(n.id)) return;
+      if (n.linkTarget && (
+        dismissedNotificationIds.has(n.linkTarget) ||
+        dismissedNotificationIds.has(`product-notice-${n.linkTarget}`) ||
+        dismissedNotificationIds.has(`notif-product-${n.linkTarget}`) ||
+        dismissedNotificationIds.has(`notif-new-product-${n.linkTarget}`) ||
+        n.id.startsWith(`notif-new-product-${n.linkTarget}`)
+      )) return;
 
       // Order notifications are strictly private to the customer who placed the order
       if (n.type === 'order') {
@@ -1176,7 +1281,13 @@ function AppContent() {
   const wishlistCount = wishlistIds.length;
 
   // Real-time Audio Chime & Active Toast alert when new customer notifications arrive
-  const alertedCustomerNotifIdsRef = useRef<Set<string>>(new Set());
+  const alertedCustomerNotifIdsRef = useRef<Set<string>>((() => {
+    try {
+      const saved = sessionStorage.getItem('gls_alerted_notif_ids');
+      if (saved) return new Set(JSON.parse(saved));
+    } catch (e) {}
+    return new Set<string>();
+  })());
   const initialNotifsAbsorbedRef = useRef(false);
 
   useEffect(() => {
@@ -1185,7 +1296,12 @@ function AppContent() {
     // On initial boot, absorb existing baseline without firing chime
     if (!initialNotifsAbsorbedRef.current || isInitialBootLoading) {
       customerNotifications.forEach(n => alertedCustomerNotifIdsRef.current.add(n.id));
-      if (!isInitialBootLoading) initialNotifsAbsorbedRef.current = true;
+      if (!isInitialBootLoading) {
+        initialNotifsAbsorbedRef.current = true;
+        try {
+          sessionStorage.setItem('gls_alerted_notif_ids', JSON.stringify(Array.from(alertedCustomerNotifIdsRef.current)));
+        } catch (e) {}
+      }
       return;
     }
 
@@ -1193,15 +1309,23 @@ function AppContent() {
     customerNotifications.forEach((n) => {
       if (!n.read && !alertedCustomerNotifIdsRef.current.has(n.id)) {
         alertedCustomerNotifIdsRef.current.add(n.id);
+        try {
+          sessionStorage.setItem('gls_alerted_notif_ids', JSON.stringify(Array.from(alertedCustomerNotifIdsRef.current)));
+        } catch (e) {}
         playNotificationSound();
+        const notifImg = n.image || (n.linkTarget ? products.find(p => p.id === n.linkTarget || p.slug === n.linkTarget)?.primaryImage : undefined);
+
         setActiveToast({
           id: n.id,
-          title: n.title,
-          message: n.message,
+          title: formatCurrencyInText(n.title),
+          message: formatCurrencyInText(n.message),
+          image: notifImg,
         });
-        triggerSystemNotification(n.title, {
-          body: n.message,
+        triggerSystemNotification(formatCurrencyInText(n.title), {
+          body: formatCurrencyInText(n.message),
           tag: n.id,
+          icon: notifImg || '/pwa-192x192.png',
+          image: notifImg,
           data: { url: n.linkTarget ? (n.type === 'order' ? '/orders' : `/product/${n.linkTarget}`) : '/orders' },
         });
       }
@@ -1243,7 +1367,7 @@ function AppContent() {
       ) : (
         <StorefrontView
           {...{
-            user, products, orders, categories, notifications: customerNotifications, cartItems, wishlistIds, searchQuery,
+            user, products, orders, categories: localizedCategories, notifications: customerNotifications, cartItems, wishlistIds, searchQuery,
             selectedCategory, sortBy, isCategoriesPageOpen, isAboutUsPageOpen, isTermsPageOpen,
             isRefundPolicyPageOpen,
             isStoreLocatorPageOpen, isBrandPageOpen, isCollectionsPageOpen, isOrdersPageOpen,

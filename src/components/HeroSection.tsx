@@ -20,8 +20,10 @@ const buildProductSlides = (
   products: Product[],
   onSelectProduct: (p: Product) => void,
   onExploreCollection: () => void,
-  onOpenSection?: (s: any, cat?: string) => void
+  onOpenSection?: (s: any, cat?: string) => void,
+  language: string = 'en'
 ) => {
+  const isFr = language === 'fr';
   // Check if a product has a real, working image (filters out non-existent /src/assets paths)
   const hasValidImage = (p: Product) => {
     const img = p.primaryImage || p.images?.[0]?.url;
@@ -46,17 +48,24 @@ const buildProductSlides = (
     const rawImg = product.primaryImage || (product.images?.[0]?.url) || '';
     const image = (rawImg && !rawImg.includes('/src/assets/images/')) ? rawImg : LUXURY_HERO_FALLBACK;
 
+    let badge = product.tag || product.categoryLabel || (isFr ? 'Nouveauté' : 'New Arrival');
+    if (isFr) {
+      if (badge.toLowerCase() === 'new arrival' || badge.toLowerCase() === 'new') badge = 'Nouveauté';
+      else if (badge.toLowerCase() === 'hot deal') badge = 'Offre Chaude';
+      else if (badge.toLowerCase() === 'best seller') badge = 'Meilleure Vente';
+    }
+
     return {
       id: product.id,
       image,
-      badge: product.tag || product.categoryLabel || 'New Arrival',
+      badge,
       title: product.name,
       subtitle: product.subtitle || product.tagline || product.description?.slice(0, 120) || '',
       price: product.price,
       originalPrice: product.originalPrice,
-      primaryCtaText: 'View Product',
+      primaryCtaText: isFr ? 'Voir le produit' : 'View Product',
       onPrimaryClick: () => onSelectProduct(product),
-      secondaryCtaText: 'Shop All',
+      secondaryCtaText: isFr ? 'Tout voir' : 'Shop All',
       onSecondaryClick: () => onOpenSection?.('categories') ?? onExploreCollection(),
     };
   });
@@ -66,19 +75,21 @@ const buildProductSlides = (
 const buildFallbackSlides = (
   storeSettings: StoreSettings | undefined,
   onExploreCollection: () => void,
-  onOpenSection?: (s: any, cat?: string) => void
+  onOpenSection?: (s: any, cat?: string) => void,
+  language: string = 'en'
 ) => {
+  const isFr = language === 'fr';
   const heroImg = storeSettings?.heroContent?.image || LUXURY_HERO_FALLBACK;
 
   return [{
     id: 'fallback-hero',
     image: heroImg,
-    badge: 'Welcome',
-    title: storeSettings?.storeName || 'GLADYNS Department Store',
-    subtitle: storeSettings?.storeDescription || 'Curated electronics, music, home appliances & fashion.',
+    badge: isFr ? 'Bienvenue' : 'Welcome',
+    title: storeSettings?.storeName || (isFr ? 'Grand Magasin GLADYNS' : 'GLADYNS Department Store'),
+    subtitle: storeSettings?.storeDescription || (isFr ? 'Électronique, équipement audio, électroménager et mode raffinée.' : 'Curated electronics, music, home appliances & fashion.'),
     price: null,
     originalPrice: null,
-    primaryCtaText: 'Browse Catalog',
+    primaryCtaText: isFr ? 'Découvrir le catalogue' : 'Browse Catalog',
     onPrimaryClick: () => onExploreCollection(),
     secondaryCtaText: undefined,
     onSecondaryClick: undefined,
@@ -93,15 +104,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   storeSettings,
   products = [],
 }) => {
-  const { formatPrice } = useLanguageCurrency();
+  const { formatPrice, language } = useLanguageCurrency();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isPausedHover, setIsPausedHover] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   const slides = products.length > 0
-    ? buildProductSlides(products, onSelectProduct || onShopFeatured, onExploreCollection, onOpenSection)
-    : buildFallbackSlides(storeSettings, onExploreCollection, onOpenSection);
+    ? buildProductSlides(products, onSelectProduct || onShopFeatured, onExploreCollection, onOpenSection, language)
+    : buildFallbackSlides(storeSettings, onExploreCollection, onOpenSection, language);
 
   // Reset to first slide when products change
   useEffect(() => {

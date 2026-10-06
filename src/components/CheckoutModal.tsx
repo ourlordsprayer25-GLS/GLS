@@ -118,8 +118,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const discountAmount = 0;
   const discountedSubtotal = subtotal;
 
-  const standardShippingCost = discountedSubtotal >= 150 ? 0 : 15;
-  const shippingCost = shippingMethod === 'standard' ? standardShippingCost : 28;
+  const STANDARD_DELIVERY_FEE_USD = 2000 / 605;
+  const EXPRESS_DELIVERY_FEE_USD = 3500 / 605;
+  const standardShippingCost = discountedSubtotal >= 150 ? 0 : STANDARD_DELIVERY_FEE_USD;
+  const shippingCost = shippingMethod === 'standard' ? standardShippingCost : EXPRESS_DELIVERY_FEE_USD;
   const estimatedTax = +(discountedSubtotal * 0.08).toFixed(2);
   const finalTotal = +(discountedSubtotal + shippingCost + estimatedTax).toFixed(2);
 
@@ -332,7 +334,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div className="pt-2">
                 <a
                   href={getWhatsAppLink(
-                    `Hello GLADYNS Studio, I would like direct updates and courier notes regarding my order ${confirmedOrder.orderNumber} (Tracking: ${confirmedOrder.trackingNumber}).`
+                    language === 'fr'
+                      ? `Bonjour GLADYNS Studio, je souhaite recevoir les notifications et informations de livraison pour ma commande ${confirmedOrder.orderNumber} (Suivi : ${confirmedOrder.trackingNumber}).`
+                      : `Hello GLADYNS Studio, I would like direct updates and courier notes regarding my order ${confirmedOrder.orderNumber} (Tracking: ${confirmedOrder.trackingNumber}).`
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -430,7 +434,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input
                           type="text"
-                          placeholder="Search for your country..."
+                          placeholder={language === 'fr' ? 'Recherchez votre pays...' : 'Search for your country...'}
                           value={address.country}
                           onFocus={() => setShowCountryDropdown(true)}
                           onChange={(e) => {
@@ -469,7 +473,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         disabled={isLocating}
                         onClick={() => {
                           if (!navigator.geolocation) {
-                            alert("Geolocation is not supported by your browser");
+                            alert(language === 'fr' ? "La géolocalisation n'est pas supportée par votre navigateur." : "Geolocation is not supported by your browser");
                             return;
                           }
                           setIsLocating(true);
@@ -516,7 +520,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                       >
                         <Navigation className={`w-3 h-3 ${isLocating ? 'animate-bounce' : ''}`} />
-                        <span>{isLocating ? 'Locating...' : 'Use My Current Location'}</span>
+                        <span>{isLocating ? (language === 'fr' ? 'Localisation en cours...' : 'Locating...') : (language === 'fr' ? 'Utiliser ma position actuelle' : 'Use My Current Location')}</span>
                       </button>
                     </div>
                     <input
@@ -588,7 +592,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           </div>
                         </div>
                         <span className="text-xs font-mono font-bold text-slate-950">
-                          {standardShippingCost === 0 ? (language === 'fr' ? 'Offerte' : 'Complimentary') : formatPrice(15)}
+                          {standardShippingCost === 0 ? (language === 'fr' ? 'Offerte' : 'Complimentary') : formatPrice(STANDARD_DELIVERY_FEE_USD)}
                         </span>
                       </label>
 
@@ -612,7 +616,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                             <p className="text-[11px] text-slate-500">{language === 'fr' ? '2–3 jours ouvrés express' : '2–3 business days expedited priority flight'}</p>
                           </div>
                         </div>
-                        <span className="text-xs font-mono font-bold text-slate-950">{formatPrice(28)}</span>
+                        <span className="text-xs font-mono font-bold text-slate-950">{formatPrice(EXPRESS_DELIVERY_FEE_USD)}</span>
                       </label>
                     </div>
                   </div>
@@ -888,7 +892,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <div>
                         <p className="font-semibold text-slate-950 truncate">{item.product.name}</p>
                         <p className="text-[11px] text-slate-500">
-                          {(() => { const c = item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) ? item.selectedColor.name : ''; const s = item.selectedSize?.name && !['standard', 'default', 'one size', 'taille unique'].includes(item.selectedSize.name.toLowerCase()) ? (language === 'fr' ? 'Taille ' : 'Size ') + item.selectedSize.name : ''; const q = 'Qty ' + item.quantity; return [c, s, q].filter(Boolean).join(' · '); })()}
+                          {(() => { const c = item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) ? item.selectedColor.name : ''; const s = item.selectedSize?.name && !['standard', 'default', 'one size', 'taille unique'].includes(item.selectedSize.name.toLowerCase()) ? (language === 'fr' ? 'Taille ' : 'Size ') + item.selectedSize.name : ''; const q = (language === 'fr' ? 'Qté ' : 'Qty ') + item.quantity; return [c, s, q].filter(Boolean).join(' · '); })()}
                         </p>
                       </div>
                       <p className="font-mono font-bold text-slate-950 tabular-nums">
@@ -936,7 +940,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <span>{language === 'fr' ? 'Assistance Directe' : 'Need Custom Checkout Help?'}</span>
                   </span>
                   <span className="text-[10px] text-emerald-800 bg-white/80 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">
-                    Live
+                    {language === 'fr' ? 'En direct' : 'Live'}
                   </span>
                 </div>
                 <p className="text-[11px] text-emerald-900 leading-relaxed">
@@ -944,7 +948,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </p>
                 <a
                   href={getWhatsAppLink(
-                    `Hello GLADYNS Concierge, I need assistance with my checkout order (${items.length} pieces, Total: ${formatPrice(finalTotal)}).`
+                    language === 'fr'
+                      ? `Bonjour Concierge GLADYNS, j'ai besoin d'aide pour finaliser ma commande (${items.length} articles, Total : ${formatPrice(finalTotal)}).`
+                      : `Hello GLADYNS Concierge, I need assistance with my checkout order (${items.length} pieces, Total: ${formatPrice(finalTotal)}).`
                   )}
                   target="_blank"
                   rel="noopener noreferrer"

@@ -117,14 +117,14 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
             onClick={() => setIsCollapsed(true)}
             className="w-full py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-xl text-[11px] font-extrabold tracking-wider uppercase flex items-center justify-between transition-colors cursor-pointer shadow-2xs"
           >
-            <span>COLLAPSE MENU</span>
+            <span>{language === 'fr' ? 'RÉDUIRE LE MENU' : 'COLLAPSE MENU'}</span>
             <ChevronLeft className="w-4 h-4 text-slate-500" />
           </button>
         ) : (
           <button
             onClick={() => setIsCollapsed(false)}
             className="mx-auto p-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl transition-colors cursor-pointer"
-            title="Expand Menu"
+            title={language === 'fr' ? 'Agrandir le menu' : 'Expand Menu'}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -332,7 +332,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
               onClick={() => onOpenSection('hot-deals')}
               className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-extrabold uppercase text-xs rounded-full shadow-md hover:shadow-lg transition-all cursor-pointer text-center tracking-wider"
             >
-              SPECIAL OFFER
+              {language === 'fr' ? 'OFFRE SPÉCIALE' : 'SPECIAL OFFER'}
             </button>
           </div>
         )}

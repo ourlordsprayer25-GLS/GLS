@@ -632,6 +632,25 @@ async function startServer() {
     res.status(404).json({ error: 'Notification not found' });
   });
 
+  app.delete('/api/sync/notifications/:id', (req, res) => {
+    const { id } = req.params;
+    dbState.notifications = dbState.notifications.filter(n => 
+      n.id !== id && 
+      n.linkTarget !== id &&
+      !n.id.includes(id)
+    );
+    saveDB();
+    broadcastSyncEvent('notifications', dbState.notifications);
+    res.json({ success: true, id });
+  });
+
+  app.delete('/api/sync/notifications', (_req, res) => {
+    dbState.notifications = [];
+    saveDB();
+    broadcastSyncEvent('notifications', dbState.notifications);
+    res.json({ success: true });
+  });
+
   // 9. User Cart Sync API (Cloud Persisted)
   app.get('/api/sync/cart/:userId', (req, res) => {
     const { userId } = req.params;

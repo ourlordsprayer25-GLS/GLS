@@ -110,10 +110,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           
           <div className="space-y-3">
             <h1 className="text-3xl font-display font-medium text-zinc-950 tracking-tight">
-              {language === 'fr' ? 'GLADYNS Customer Account' : 'GLADYNS Customer Account'}
+              {language === 'fr' ? 'Compte Client GLADYNS' : 'GLADYNS Customer Account'}
             </h1>
             <p className="text-sm text-zinc-500 leading-relaxed">
-              Identify yourself to access your personal dashboard, marketplace order history, and membership benefits.
+              {language === 'fr'
+                ? 'Identifiez-vous pour accéder à votre tableau de bord personnel, votre historique de commandes et vos avantages fidélité.'
+                : 'Identify yourself to access your personal dashboard, marketplace order history, and membership benefits.'}
             </p>
           </div>
 
@@ -129,7 +131,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               onClick={onBackToShop}
               className="w-full py-4 bg-zinc-50 hover:bg-zinc-100 text-zinc-600 rounded-2xl text-sm font-semibold transition-all"
             >
-              Return to Boutique
+              {language === 'fr' ? 'Retourner à la boutique' : 'Return to Boutique'}
             </button>
           </div>
         </div>
@@ -173,17 +175,25 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <ArrowRight className="w-5 h-5 rotate-180" />
             </button>
             <div className="flex items-center gap-2 text-sm font-medium">
-              <span className="text-zinc-400">Account</span>
+              <span className="text-zinc-400">{language === 'fr' ? 'Compte' : 'Account'}</span>
               <ChevronRight className="w-4 h-4 text-zinc-300" />
-              <span className="text-zinc-900">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
+              <span className="text-zinc-900">
+                {activeTab === 'dashboard' 
+                  ? (language === 'fr' ? 'Tableau de bord' : 'Dashboard') 
+                  : activeTab === 'profile' 
+                  ? (language === 'fr' ? 'Identité & Profil' : 'Profile') 
+                  : activeTab === 'loyalty' 
+                  ? (language === 'fr' ? 'Fidélité' : 'Loyalty') 
+                  : (language === 'fr' ? 'Adresses' : 'Addresses')}
+              </span>
             </div>
           </div>
           <button
             onClick={onLogout}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-all active:scale-95 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign Out</span>
+            <span className="hidden sm:inline">{language === 'fr' ? 'Se déconnecter' : 'Sign Out'}</span>
           </button>
         </div>
       </div>
@@ -206,15 +216,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
           <nav className="space-y-1">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: ShoppingBag },
-              { id: 'profile', label: 'Identity & Details', icon: User },
-              { id: 'loyalty', label: 'Loyalty Tiers', icon: Crown },
-              { id: 'addresses', label: 'Saved Addresses', icon: MapPin },
+              { id: 'dashboard', label: language === 'fr' ? 'Tableau de bord' : 'Dashboard', icon: ShoppingBag },
+              { id: 'profile', label: language === 'fr' ? 'Identité & Coordonnées' : 'Identity & Details', icon: User },
+              { id: 'loyalty', label: language === 'fr' ? 'Niveaux de fidélité' : 'Loyalty Tiers', icon: Crown },
+              { id: 'addresses', label: language === 'fr' ? 'Adresses enregistrées' : 'Saved Addresses', icon: MapPin },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group ${
+                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all group cursor-pointer ${
                   activeTab === tab.id
                     ? 'bg-zinc-950 text-white shadow-lg shadow-zinc-950/20'
                     : 'text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100'
@@ -232,13 +242,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           <div className="p-6 bg-blue-50 rounded-[2rem] border border-blue-100 space-y-4">
             <div className="flex items-center gap-2 text-blue-700">
               <ShieldCheck className="w-5 h-5" />
-              <span className="text-sm font-bold">Priority Support</span>
+              <span className="text-sm font-bold">{language === 'fr' ? 'Support Prioritaire' : 'Priority Support'}</span>
             </div>
             <p className="text-xs text-blue-600/80 leading-relaxed">
-              As a <b>{user.tier}</b> member, you have priority premium support assigned to your account.
+              {language === 'fr' ? (
+                <>En tant que membre <b>{user.tier}</b>, vous bénéficiez d'un support prioritaire dédié.</>
+              ) : (
+                <>As a <b>{user.tier}</b> member, you have priority premium support assigned to your account.</>
+              )}
             </p>
-            <button className="w-full py-2.5 bg-white border border-blue-200 text-blue-700 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors">
-              Chat with Specialist
+            <button className="w-full py-2.5 bg-white border border-blue-200 text-blue-700 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors cursor-pointer">
+              {language === 'fr' ? 'Contacter un spécialiste' : 'Chat with Specialist'}
             </button>
           </div>
         </aside>
@@ -250,8 +264,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           {activeTab === 'dashboard' && (
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
               <header className="space-y-2">
-                <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">GLADYNS Dashboard</h1>
-                <p className="text-zinc-500">Your personalized marketplace dashboard.</p>
+                <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">
+                  {language === 'fr' ? 'Tableau de bord GLADYNS' : 'GLADYNS Dashboard'}
+                </h1>
+                <p className="text-zinc-500">
+                  {language === 'fr' ? 'Votre espace client personnalisé.' : 'Your personalized marketplace dashboard.'}
+                </p>
               </header>
 
               {/* Bento Grid */}
@@ -266,11 +284,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           <Crown className="w-6 h-6 text-amber-600" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Membership Status</p>
-                          <h3 className="text-2xl font-display font-medium text-zinc-950">{user.tier} Tier</h3>
+                          <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                            {language === 'fr' ? 'Statut du compte' : 'Membership Status'}
+                          </p>
+                          <h3 className="text-2xl font-display font-medium text-zinc-950">
+                            {language === 'fr' ? `Niveau ${user.tier}` : `${user.tier} Tier`}
+                          </h3>
                         </div>
                       </div>
-                      <button onClick={() => setActiveTab('loyalty')} className="p-3 bg-zinc-50 rounded-2xl hover:bg-zinc-950 hover:text-white transition-all">
+                      <button onClick={() => setActiveTab('loyalty')} className="p-3 bg-zinc-50 rounded-2xl hover:bg-zinc-950 hover:text-white transition-all cursor-pointer">
                         <ArrowRight className="w-5 h-5" />
                       </button>
                     </div>
@@ -279,9 +301,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <div className="flex items-end justify-between">
                         <div className="space-y-1">
                           <span className="text-3xl font-mono font-bold text-zinc-950">{user.loyaltyPoints.toLocaleString()}</span>
-                          <span className="text-sm font-semibold text-zinc-400 ml-2">Total Points Earned</span>
+                          <span className="text-sm font-semibold text-zinc-400 ml-2">
+                            {language === 'fr' ? 'Points cumulés' : 'Total Points Earned'}
+                          </span>
                         </div>
-                        <p className="text-xs font-bold text-zinc-500">Next: {loyalty.nextTier?.name || 'Platinum Max'}</p>
+                        <p className="text-xs font-bold text-zinc-500">
+                          {language === 'fr' ? `Suivant : ${loyalty.nextTier?.name || 'Platine Max'}` : `Next: ${loyalty.nextTier?.name || 'Platinum Max'}`}
+                        </p>
                       </div>
                       <div className="h-3 w-full bg-zinc-100 rounded-full overflow-hidden p-0.5 border border-zinc-200">
                         <div 
@@ -308,19 +334,23 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center">
                         <Package className="w-5 h-5 text-zinc-900" />
                       </div>
-                      <h4 className="text-sm font-bold text-zinc-950">Active Orders</h4>
+                      <h4 className="text-sm font-bold text-zinc-950">
+                        {language === 'fr' ? 'Commandes en cours' : 'Active Orders'}
+                      </h4>
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-3xl font-mono font-bold text-zinc-950">
                         {orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length}
                       </span>
-                      <span className="text-xs text-zinc-500">Currently in pipeline</span>
+                      <span className="text-xs text-zinc-500">
+                        {language === 'fr' ? 'En cours de traitement' : 'Currently in pipeline'}
+                      </span>
                     </div>
                     <button 
                       onClick={onOpenOrders}
-                      className="w-full mt-4 py-2.5 bg-zinc-950 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-colors"
+                      className="w-full mt-4 py-2.5 bg-zinc-950 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
                     >
-                      Track Shipment
+                      {language === 'fr' ? 'Suivre ma commande' : 'Track Shipment'}
                     </button>
                   </div>
 
@@ -330,13 +360,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center">
                           <Gift className="w-5 h-5 text-white" />
                         </div>
-                        <h4 className="text-sm font-bold">Prestige Credit</h4>
+                        <h4 className="text-sm font-bold">
+                          {language === 'fr' ? 'Crédit Privilège' : 'Prestige Credit'}
+                        </h4>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-mono font-bold">{formatPrice(loyalty.creditValueUSD)}</span>
                       </div>
                       <p className="text-[10px] text-white/50 leading-relaxed">
-                        Convert your loyalty points into exclusive platform credit during checkout.
+                        {language === 'fr' 
+                          ? 'Convertissez vos points fidélité en crédit d\'achat lors du paiement.' 
+                          : 'Convert your loyalty points into exclusive platform credit during checkout.'}
                       </p>
                     </div>
                     {/* Abstract background shape */}
@@ -347,9 +381,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 {/* Recent Activity Card */}
                 <div className="md:col-span-3 bg-white rounded-[2.5rem] border border-zinc-200 overflow-hidden shadow-sm">
                   <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between">
-                    <h3 className="text-lg font-display font-medium text-zinc-950">Recent Order History</h3>
-                    <button onClick={onOpenOrders} className="text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors flex items-center gap-1">
-                      <span>View All History</span>
+                    <h3 className="text-lg font-display font-medium text-zinc-950">
+                      {language === 'fr' ? 'Commandes récentes' : 'Recent Order History'}
+                    </h3>
+                    <button onClick={onOpenOrders} className="text-xs font-bold text-zinc-500 hover:text-zinc-950 transition-colors flex items-center gap-1 cursor-pointer">
+                      <span>{language === 'fr' ? 'Voir tout l\'historique' : 'View All History'}</span>
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -363,7 +399,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                             </div>
                             <div>
                               <p className="text-sm font-bold text-zinc-950">{order.orderNumber}</p>
-                              <p className="text-xs text-zinc-500">{order.date} • {order.items.length} pieces</p>
+                              <p className="text-xs text-zinc-500">
+                                {order.date} • {order.items.length} {language === 'fr' ? (order.items.length > 1 ? 'articles' : 'article') : 'pieces'}
+                              </p>
                             </div>
                           </div>
                           <div className="text-right flex items-center gap-6">
@@ -371,7 +409,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                                 order.status === 'delivered' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
                               }`}>
-                                {order.status}
+                                {language === 'fr' 
+                                  ? (order.status === 'delivered' ? 'Livré' : order.status === 'cancelled' ? 'Annulé' : order.status === 'shipping' || order.status === 'shipped' ? 'Expédié' : order.status === 'processing' ? 'En cours' : 'Confirmé')
+                                  : order.status}
                               </span>
                             </div>
                             <span className="text-sm font-mono font-bold text-zinc-950">{formatPrice(order.total)}</span>
@@ -383,7 +423,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-4">
                           <ShoppingBag className="w-8 h-8 text-zinc-300" />
                         </div>
-                        <p className="text-sm text-zinc-400">No acquisition history recorded yet.</p>
+                        <p className="text-sm text-zinc-400">
+                          {language === 'fr' ? 'Aucune commande enregistrée pour le moment.' : 'No acquisition history recorded yet.'}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -396,23 +438,33 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           {activeTab === 'profile' && (
             <div className="max-w-2xl space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
               <header className="space-y-2">
-                <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">Identity & Interests</h1>
-                <p className="text-zinc-500">Manage your profile data and curation preferences.</p>
+                <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">
+                  {language === 'fr' ? 'Identité & Coordonnées' : 'Identity & Interests'}
+                </h1>
+                <p className="text-zinc-500">
+                  {language === 'fr' ? 'Gérez vos données personnelles et vos coordonnées.' : 'Manage your profile data and curation preferences.'}
+                </p>
               </header>
 
               <form onSubmit={handleSaveProfile} className="space-y-10">
                 {saveSuccess && (
                   <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-sm animate-in fade-in zoom-in-95">
                     <Check className="w-5 h-5 text-emerald-600" />
-                    <span className="font-semibold">Your changes have been saved successfully.</span>
+                    <span className="font-semibold">
+                      {language === 'fr' ? 'Vos modifications ont été enregistrées avec succès.' : 'Your changes have been saved successfully.'}
+                    </span>
                   </div>
                 )}
 
                 <section className="space-y-6">
-                  <h3 className="text-lg font-display font-medium text-zinc-950 border-b border-zinc-100 pb-2">Account Details</h3>
+                  <h3 className="text-lg font-display font-medium text-zinc-950 border-b border-zinc-100 pb-2">
+                    {language === 'fr' ? 'Détails du compte' : 'Account Details'}
+                  </h3>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">First Name</label>
+                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                        {language === 'fr' ? 'Prénom' : 'First Name'}
+                      </label>
                       <input 
                         type="text" 
                         value={editFirstName}
@@ -421,7 +473,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Last Name</label>
+                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                        {language === 'fr' ? 'Nom' : 'Last Name'}
+                      </label>
                       <input 
                         type="text" 
                         value={editLastName}
@@ -430,7 +484,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       />
                     </div>
                     <div className="col-span-2 space-y-2">
-                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Registered Email</label>
+                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                        {language === 'fr' ? 'E-mail enregistré' : 'Registered Email'}
+                      </label>
                       <input 
                         type="email" 
                         value={editEmail}
@@ -439,7 +495,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       />
                     </div>
                     <div className="col-span-2 space-y-2">
-                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Phone Number</label>
+                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                        {language === 'fr' ? 'Numéro de téléphone' : 'Phone Number'}
+                      </label>
                       <div className="flex gap-2">
                         <select
                           value={profilePhoneDialCode}
@@ -467,14 +525,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="w-full h-16 bg-zinc-950 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50"
+                  className="w-full h-16 bg-zinc-950 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                 >
                   {isSaving ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
                       <Check className="w-5 h-5" />
-                      <span>Save Profile Updates</span>
+                      <span>{language === 'fr' ? 'Enregistrer les modifications' : 'Save Profile Updates'}</span>
                     </>
                   )}
                 </button>
@@ -483,17 +541,23 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <section className="space-y-6 pt-6 border-t border-zinc-100">
                 <div className="flex items-center gap-3 text-rose-600">
                   <Clock className="w-5 h-5" />
-                  <h3 className="text-sm font-bold uppercase tracking-widest">Danger Zone</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-widest">
+                    {language === 'fr' ? 'Zone de danger' : 'Danger Zone'}
+                  </h3>
                 </div>
                 <div className="p-6 border border-rose-100 rounded-[2rem] bg-rose-50/30 flex items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-rose-950">Deactivate Account</p>
+                    <p className="text-sm font-bold text-rose-950">
+                      {language === 'fr' ? 'Désactiver le compte' : 'Deactivate Account'}
+                    </p>
                     <p className="text-xs text-rose-900/60 leading-relaxed">
-                      Permanently erase your order history and customer account.
+                      {language === 'fr' 
+                        ? 'Supprimer définitivement votre historique et votre compte client.' 
+                        : 'Permanently erase your order history and customer account.'}
                     </p>
                   </div>
-                  <button className="px-4 py-2 text-xs font-bold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 rounded-xl transition-all">
-                    Delete Account
+                  <button className="px-4 py-2 text-xs font-bold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 rounded-xl transition-all cursor-pointer">
+                    {language === 'fr' ? 'Supprimer le compte' : 'Delete Account'}
                   </button>
                 </div>
               </section>
@@ -504,8 +568,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           {activeTab === 'loyalty' && (
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
               <header className="space-y-2">
-                <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">Prestige Loyalty</h1>
-                <p className="text-zinc-500">The more you acquire, the more we dedicate to your experience.</p>
+                <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">
+                  {language === 'fr' ? 'Programme de Fidélité' : 'Prestige Loyalty'}
+                </h1>
+                <p className="text-zinc-500">
+                  {language === 'fr' 
+                    ? 'Plus vous commandez, plus vous profitez d\'attentions exclusives.' 
+                    : 'The more you acquire, the more we dedicate to your experience.'}
+                </p>
               </header>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -531,7 +601,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           </div>
                           {isCurrent && (
                             <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">
-                              Current Rank
+                              {language === 'fr' ? 'Rang Actuel' : 'Current Rank'}
                             </span>
                           )}
                         </div>
@@ -539,7 +609,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         <div>
                           <h3 className="text-2xl font-display font-medium">{tier.name}</h3>
                           <p className={`text-xs mt-1 ${isCurrent ? 'text-white/60' : 'text-zinc-500'}`}>
-                            {tier.minPoints.toLocaleString()} Points Entry
+                            {tier.minPoints.toLocaleString()} {language === 'fr' ? 'Points requis' : 'Points Entry'}
                           </p>
                         </div>
 
@@ -556,7 +626,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       {!isUnlocked && (
                         <div className="mt-8 pt-6 border-t border-zinc-200">
                           <p className="text-xs font-bold text-zinc-400 italic">
-                            Earn {(tier.minPoints - user.loyaltyPoints).toLocaleString()} more points to unlock.
+                            {language === 'fr' 
+                              ? `Cumulez ${(tier.minPoints - user.loyaltyPoints).toLocaleString()} points de plus pour débloquer.` 
+                              : `Earn ${(tier.minPoints - user.loyaltyPoints).toLocaleString()} more points to unlock.`}
                           </p>
                         </div>
                       )}
@@ -572,15 +644,19 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="max-w-4xl space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
               <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div className="space-y-2">
-                  <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">Saved Addresses</h1>
-                  <p className="text-zinc-500">Manage your global delivery destinations.</p>
+                  <h1 className="text-4xl font-display font-medium text-zinc-950 tracking-tight">
+                    {language === 'fr' ? 'Adresses enregistrées' : 'Saved Addresses'}
+                  </h1>
+                  <p className="text-zinc-500">
+                    {language === 'fr' ? 'Gérez vos adresses de livraison.' : 'Manage your global delivery destinations.'}
+                  </p>
                 </div>
                 <button 
                   onClick={() => setIsAddingAddress(true)}
-                  className="px-6 py-3 bg-zinc-950 text-white rounded-2xl text-sm font-bold flex items-center gap-2 hover:bg-zinc-800 transition-all"
+                  className="px-6 py-3 bg-zinc-950 text-white rounded-2xl text-sm font-bold flex items-center gap-2 hover:bg-zinc-800 transition-all cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add New Destination</span>
+                  <span>{language === 'fr' ? 'Ajouter une adresse' : 'Add New Destination'}</span>
                 </button>
               </header>
 
@@ -596,18 +672,22 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <h4 className="text-lg font-display font-medium text-zinc-950">{address.label || 'Destination'}</h4>
+                            <h4 className="text-lg font-display font-medium text-zinc-950">
+                              {address.label || (language === 'fr' ? 'Adresse' : 'Destination')}
+                            </h4>
                             {address.isDefault && (
-                              <span className="px-2 py-0.5 bg-zinc-950 text-white text-[9px] font-black uppercase tracking-widest rounded">Default</span>
+                              <span className="px-2 py-0.5 bg-zinc-950 text-white text-[9px] font-black uppercase tracking-widest rounded">
+                                {language === 'fr' ? 'Par défaut' : 'Default'}
+                              </span>
                             )}
                           </div>
                           <p className="text-sm font-semibold text-zinc-900">{address.firstName} {address.lastName}</p>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 hover:bg-zinc-100 rounded-lg transition-colors text-zinc-400 hover:text-zinc-950">
+                          <button className="p-2 hover:bg-zinc-100 rounded-lg transition-colors text-zinc-400 hover:text-zinc-950 cursor-pointer">
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          <button className="p-2 hover:bg-rose-50 rounded-lg transition-colors text-zinc-400 hover:text-rose-600">
+                          <button className="p-2 hover:bg-rose-50 rounded-lg transition-colors text-zinc-400 hover:text-rose-600 cursor-pointer">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -621,8 +701,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       </div>
 
                       {!address.isDefault && (
-                        <button className="text-xs font-bold text-zinc-400 hover:text-zinc-950 transition-colors uppercase tracking-widest">
-                          Set as Default
+                        <button className="text-xs font-bold text-zinc-400 hover:text-zinc-950 transition-colors uppercase tracking-widest cursor-pointer">
+                          {language === 'fr' ? 'Définir par défaut' : 'Set as Default'}
                         </button>
                       )}
                     </div>
@@ -631,8 +711,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <div className="col-span-2 py-20 bg-zinc-50 rounded-[2.5rem] border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center space-y-4">
                     <MapPin className="w-12 h-12 text-zinc-300" />
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-zinc-950">No delivery destinations found.</p>
-                      <p className="text-xs text-zinc-500">Add an address to streamline your future dispatches.</p>
+                      <p className="text-sm font-bold text-zinc-950">
+                        {language === 'fr' ? 'Aucune adresse enregistrée.' : 'No delivery destinations found.'}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {language === 'fr' ? 'Ajoutez une adresse pour faciliter vos prochaines livraisons.' : 'Add an address to streamline your future dispatches.'}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -691,10 +775,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       {/* Floating Action / Support */}
       <div className="fixed bottom-8 right-8 z-50">
-        <button className="w-14 h-14 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl shadow-zinc-950/40 hover:scale-110 transition-transform active:scale-95 group relative">
+        <button className="w-14 h-14 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl shadow-zinc-950/40 hover:scale-110 transition-transform active:scale-95 group relative cursor-pointer">
           <HelpCircle className="w-6 h-6" />
           <span className="absolute right-full mr-4 bg-zinc-950 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-            GLADYNS Support
+            {language === 'fr' ? 'Support GLADYNS' : 'GLADYNS Support'}
           </span>
         </button>
       </div>

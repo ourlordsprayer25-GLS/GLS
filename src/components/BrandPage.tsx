@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface BrandPageProps {
   products: Product[];
@@ -43,6 +44,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
   onOpenCategories,
   onExploreCollection,
 }) => {
+  const { language } = useLanguageCurrency();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isPausedHover, setIsPausedHover] = useState(false);
@@ -56,34 +58,42 @@ export const BrandPage: React.FC<BrandPageProps> = ({
     {
       id: 'brand-slide-1',
       image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Brand Directory',
-      title: 'The Maison & Brand Archive',
-      subtitle: 'Complete alphabetical directory of monitored partner studios and heritage brands, from Adidas Originals to Tuscan leather houses.',
-      ctaText: 'Explore Brands',
+      badge: language === 'fr' ? 'Répertoire des Marques' : 'Brand Directory',
+      title: language === 'fr' ? 'La Maison & Les Grandes Marques' : 'The Maison & Brand Archive',
+      subtitle: language === 'fr'
+        ? 'Répertoire alphabétique complet de nos partenaires d\'exception et marques patrimoniales.'
+        : 'Complete alphabetical directory of monitored partner studios and heritage brands, from Adidas Originals to Tuscan leather houses.',
+      ctaText: language === 'fr' ? 'Explorer les Marques' : 'Explore Brands',
     },
     {
       id: 'brand-slide-2',
       image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop',
-      badge: 'European Studio Guild',
-      title: 'Direct Monitored Craft',
-      subtitle: 'Permanent contracts with independent workshops across Porto, Biella, Kojima, and Tuscany with 100% material traceability.',
-      ctaText: 'Discover Studios',
+      badge: language === 'fr' ? 'Ateliers Européens' : 'European Studio Guild',
+      title: language === 'fr' ? 'Savoir-Faire & Maîtrise' : 'Direct Monitored Craft',
+      subtitle: language === 'fr'
+        ? 'Partenariats directs avec des ateliers indépendants à Porto, Biella, Kojima et en Toscane.'
+        : 'Permanent contracts with independent workshops across Porto, Biella, Kojima, and Tuscany with 100% material traceability.',
+      ctaText: language === 'fr' ? 'Découvrir les Ateliers' : 'Discover Studios',
     },
     {
       id: 'brand-slide-3',
       image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Material Sovereignty',
-      title: 'Zero Synthetic Fillers',
-      subtitle: 'Unlined split-face garments without synthetic fusible linings or microplastics that return harmoniously to the earth.',
-      ctaText: 'Read Manifesto',
+      badge: language === 'fr' ? 'Matières Nobles' : 'Material Sovereignty',
+      title: language === 'fr' ? 'Zéro Matière Synthétique' : 'Zero Synthetic Fillers',
+      subtitle: language === 'fr'
+        ? 'Pièces non doublées conçues sans thermocollant synthétique ni microplastiques polluants.'
+        : 'Unlined split-face garments without synthetic fusible linings or microplastics that return harmoniously to the earth.',
+      ctaText: language === 'fr' ? 'Lire le Manifeste' : 'Read Manifesto',
     },
     {
       id: 'brand-slide-4',
       image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Lifetime Covenant',
-      title: 'Complimentary Product Support',
-      subtitle: 'Every GLADYNS object is backed by dynamic technical support and lifetime product restoration.',
-      ctaText: 'View Product Warranty',
+      badge: language === 'fr' ? 'Engagement Qualité' : 'Lifetime Covenant',
+      title: language === 'fr' ? 'Support & Garantie Étendue' : 'Complimentary Product Support',
+      subtitle: language === 'fr'
+        ? 'Chaque création GLADYNS bénéficie d\'une assistance technique réactive et d\'un suivi durable.'
+        : 'Every GLADYNS object is backed by dynamic technical support and lifetime product restoration.',
+      ctaText: language === 'fr' ? 'Voir la Garantie' : 'View Product Warranty',
     },
   ];
 
@@ -231,15 +241,17 @@ export const BrandPage: React.FC<BrandPageProps> = ({
             className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-950 transition-colors cursor-pointer group"
           >
             <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-            <span>Back to Home</span>
+            <span>{language === 'fr' ? "Retour à l'accueil" : 'Back to Home'}</span>
           </button>
 
           <nav className="flex items-center gap-2 text-xs text-zinc-400 font-medium">
             <button onClick={onBackToHome} className="hover:text-zinc-900 transition-colors cursor-pointer">
-              Home
+              {language === 'fr' ? 'Accueil' : 'Home'}
             </button>
             <span>/</span>
-            <span className="text-zinc-900 font-semibold">The Maison · Brand Directory</span>
+            <span className="text-zinc-900 font-semibold">
+              {language === 'fr' ? 'La Maison · Répertoire des Marques' : 'The Maison · Brand Directory'}
+            </span>
           </nav>
         </div>
       </div>
@@ -313,7 +325,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
                       onClick={onOpenCategories}
                       className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-xs text-white rounded-xl text-xs font-medium border border-white/20 transition-colors cursor-pointer"
                     >
-                      Shop by Category
+                      {language === 'fr' ? 'Toutes les catégories' : 'Shop by Category'}
                     </button>
                   </div>
                 </div>
@@ -400,7 +412,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search brand (e.g. Adidas)..."
+                placeholder={language === 'fr' ? 'Rechercher une marque (ex. Adidas)...' : 'Search brand (e.g. Adidas)...'}
                 className="w-full pl-9 pr-4 py-1.5 text-xs bg-zinc-50 focus:bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium placeholder-zinc-400 transition-all"
               />
               {searchQuery && (
@@ -418,12 +430,14 @@ export const BrandPage: React.FC<BrandPageProps> = ({
         {/* ALPHABETICAL BRANDS WITH SIMPLE CLEAN HEADERS */}
         {alphabetizedBrands.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-zinc-200">
-            <p className="text-sm font-semibold text-zinc-900">No brands matching "{searchQuery}"</p>
+            <p className="text-sm font-semibold text-zinc-900">
+              {language === 'fr' ? `Aucune marque ne correspond à "${searchQuery}"` : `No brands matching "${searchQuery}"`}
+            </p>
             <button
               onClick={() => setSearchQuery('')}
               className="mt-4 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-medium cursor-pointer"
             >
-              Reset Filter
+              {language === 'fr' ? 'Réinitialiser le filtre' : 'Reset Filter'}
             </button>
           </div>
         ) : (
@@ -447,7 +461,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({
                       </span>
                     </div>
                     <span className="text-xs font-medium text-zinc-500">
-                      {brand.products.length} {brand.products.length === 1 ? 'Piece' : 'Pieces'}
+                      {brand.products.length} {language === 'fr' ? (brand.products.length === 1 ? 'Article' : 'Articles') : (brand.products.length === 1 ? 'Piece' : 'Pieces')}
                     </span>
                   </div>
 
@@ -475,11 +489,17 @@ export const BrandPage: React.FC<BrandPageProps> = ({
       <section className="bg-zinc-950 text-white py-14 sm:py-18 border-t border-zinc-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <blockquote className="text-lg sm:text-2xl font-display font-light italic leading-relaxed text-zinc-200">
-            “True quiet luxury is not an emblem or an exorbitant price tag. It is the palpable reassurance of 14.5oz selvage twill sliding across the shoulders, knowing it was crafted by human hands that will repair it for life.”
+            {language === 'fr'
+              ? '« Le véritable luxe discret n’est ni un emblème ni un prix exorbitant. C’est l’assurance palpable d’une matière noble façonnée à la main par des artisans dédiés à la perfection. »'
+              : '“True quiet luxury is not an emblem or an exorbitant price tag. It is the palpable reassurance of 14.5oz selvage twill sliding across the shoulders, knowing it was crafted by human hands that will repair it for life.”'}
           </blockquote>
           <div className="space-y-0.5">
-            <p className="text-xs font-semibold tracking-wider uppercase text-white">Curated Platform</p>
-            <p className="text-[11px] text-zinc-400">GLADYNS Marketplace</p>
+            <p className="text-xs font-semibold tracking-wider uppercase text-white">
+              {language === 'fr' ? 'Plateforme Sélectionnée' : 'Curated Platform'}
+            </p>
+            <p className="text-[11px] text-zinc-400">
+              {language === 'fr' ? 'Place de marché GLADYNS' : 'GLADYNS Marketplace'}
+            </p>
           </div>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -487,14 +507,14 @@ export const BrandPage: React.FC<BrandPageProps> = ({
               onClick={onExploreCollection}
               className="px-5 py-2.5 bg-white text-zinc-950 hover:bg-zinc-100 rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-md"
             >
-              Explore Products
+              {language === 'fr' ? 'Découvrir les Produits' : 'Explore Products'}
             </button>
             <a
               href="mailto:support@gladyns.com"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-medium border border-zinc-700 transition-colors"
             >
               <Mail className="w-3.5 h-3.5 text-zinc-300" />
-              <span>Contact GLADYNS Support</span>
+              <span>{language === 'fr' ? 'Contacter le Support GLADYNS' : 'Contact GLADYNS Support'}</span>
             </a>
           </div>
         </div>

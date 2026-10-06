@@ -46,6 +46,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
   storeSettings,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
+  const isFr = language === 'fr';
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'delivered' | 'cancelled'>('all');
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(orders[0]?.id || null);
@@ -84,35 +85,35 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
             <Truck className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
-            <span>Shipped · In Transit</span>
+            <span>{isFr ? 'Expédié · En transit' : 'Shipped · In Transit'}</span>
           </span>
         );
       case 'processing':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
             <Clock className="w-3.5 h-3.5 text-amber-600" />
-            <span>Product Processing</span>
+            <span>{isFr ? 'Préparation en atelier' : 'Product Processing'}</span>
           </span>
         );
       case 'confirmed':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-800 border border-zinc-300">
             <CheckCircle2 className="w-3.5 h-3.5 text-zinc-600" />
-            <span>Order Confirmed</span>
+            <span>{isFr ? 'Commande confirmée' : 'Order Confirmed'}</span>
           </span>
         );
       case 'delivered':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Delivered & Signed</span>
+            <span>{isFr ? 'Livré et réceptionné' : 'Delivered & Signed'}</span>
           </span>
         );
       case 'cancelled':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200">
             <XCircle className="w-3.5 h-3.5 text-rose-600" />
-            <span>Cancelled & Refunded</span>
+            <span>{isFr ? 'Annulé & Remboursé' : 'Cancelled & Refunded'}</span>
           </span>
         );
     }
@@ -151,14 +152,16 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-display font-medium text-zinc-950">
-              Orders & Archival Dispatches
+              {isFr ? 'Commandes & Expéditions' : 'Orders & Archival Dispatches'}
             </h2>
             <p className="text-xs text-zinc-500 mt-0.5">
-              Review current consignments, track real-time DHL & FedEx air manifests, or manage cancellations.
+              {isFr
+                ? 'Consultez vos commandes en cours, suivez l\'acheminement aérien DHL & FedEx en temps réel ou gérez vos annulations.'
+                : 'Review current consignments, track real-time DHL & FedEx air manifests, or manage cancellations.'}
             </p>
           </div>
           <div className="text-xs text-zinc-500 font-mono">
-            <span>Total records: <strong>{orders.length}</strong></span>
+            <span>{isFr ? 'Total des commandes :' : 'Total records:'} <strong>{orders.length}</strong></span>
           </div>
         </div>
 
@@ -174,7 +177,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              All Orders ({orders.length})
+              {isFr ? `Toutes (${orders.length})` : `All Orders (${orders.length})`}
             </button>
             <button
               onClick={() => setStatusFilter('active')}
@@ -184,7 +187,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              In Transit & Active ({orders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length})
+              {isFr 
+                ? `En cours & En transit (${orders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length})`
+                : `In Transit & Active (${orders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length})`}
             </button>
             <button
               onClick={() => setStatusFilter('delivered')}
@@ -194,7 +199,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              Delivered ({orders.filter((o) => o.status === 'delivered').length})
+              {isFr
+                ? `Livrées (${orders.filter((o) => o.status === 'delivered').length})`
+                : `Delivered (${orders.filter((o) => o.status === 'delivered').length})`}
             </button>
             <button
               onClick={() => setStatusFilter('cancelled')}
@@ -204,7 +211,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              Cancelled ({orders.filter((o) => o.status === 'cancelled').length})
+              {isFr
+                ? `Annulées (${orders.filter((o) => o.status === 'cancelled').length})`
+                : `Cancelled (${orders.filter((o) => o.status === 'cancelled').length})`}
             </button>
           </div>
 
@@ -215,7 +224,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by order #, tracking, item..."
+              placeholder={isFr ? 'Rechercher par n° de commande, suivi, article...' : 'Search by order #, tracking, item...'}
               className="w-full pl-8 pr-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs text-zinc-900 placeholder-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950"
             />
           </div>
@@ -229,18 +238,20 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
             <Package className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-zinc-900">No orders found</h3>
+            <h3 className="text-base font-semibold text-zinc-900">
+              {isFr ? 'Aucune commande trouvée' : 'No orders found'}
+            </h3>
             <p className="text-xs text-zinc-500 mt-1">
               {searchQuery
-                ? `No orders matching "${searchQuery}". Try clearing search.`
-                : 'You have no archived orders under this filter.'}
+                ? (isFr ? `Aucune commande ne correspond à « ${searchQuery} ».` : `No orders matching "${searchQuery}". Try clearing search.`)
+                : (isFr ? 'Vous n\'avez aucune commande dans cette sélection.' : 'You have no archived orders under this filter.')}
             </p>
           </div>
           <button
             onClick={onExploreCatalog}
             className="px-4 py-2 bg-zinc-950 text-white text-xs font-semibold rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
           >
-            Explore Seasonal Collection
+            {isFr ? 'Découvrir la collection saisonnière' : 'Explore Seasonal Collection'}
           </button>
         </div>
       ) : (
@@ -274,9 +285,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                         <span className="text-xs text-zinc-500">{order.date}</span>
                       </div>
                       <div className="text-xs text-zinc-600 mt-0.5">
-                        <span>{order.items.length} {order.items.length === 1 ? 'piece' : 'pieces'}</span>
+                        <span>{order.items.length} {isFr ? (order.items.length === 1 ? 'article' : 'articles') : (order.items.length === 1 ? 'piece' : 'pieces')}</span>
                         <span className="mx-1.5">·</span>
-                        <span className="font-semibold text-zinc-900 font-mono">${order.total.toFixed(2)}</span>
+                        <span className="font-semibold text-zinc-900 font-mono">{formatPrice(order.total)}</span>
                       </div>
                     </div>
                   </div>
@@ -298,14 +309,14 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold uppercase text-zinc-500 tracking-wider">
-                            Estimated Delivery
+                            {isFr ? 'Livraison estimée' : 'Estimated Delivery'}
                           </span>
                           <span className="text-xs font-bold text-zinc-950 font-mono">
                             {order.estimatedDelivery}
                           </span>
                         </div>
                         <p className="text-xs text-zinc-600">
-                          Carrier: <strong>{order.carrier || 'GLADYNS Standard Logistics'}</strong> · Tracking: <span className="font-mono text-zinc-900">{order.trackingNumber}</span>
+                          {isFr ? 'Transporteur :' : 'Carrier:'} <strong>{order.carrier || (isFr ? 'Logistique Standard GLADYNS' : 'GLADYNS Standard Logistics')}</strong> · {isFr ? 'N° de suivi :' : 'Tracking:'} <span className="font-mono text-zinc-900">{order.trackingNumber}</span>
                         </p>
                       </div>
 
@@ -315,14 +326,14 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                           className="px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                         >
                           <Truck className="w-3.5 h-3.5" />
-                          <span>Track Package</span>
+                          <span>{isFr ? 'Suivre le colis' : 'Track Package'}</span>
                         </button>
                         <button
                           onClick={() => setInvoiceModalOrder(order)}
                           className="px-3 py-1.5 bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
                         >
                           <FileText className="w-3.5 h-3.5" />
-                          <span>View GLADYNS Invoice</span>
+                          <span>{isFr ? 'Facture GLADYNS' : 'View GLADYNS Invoice'}</span>
                         </button>
                       </div>
                     </div>
@@ -330,7 +341,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                     {/* Items Grid */}
                     <div className="space-y-3">
                       <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                        Consignment Items
+                        {isFr ? 'Articles commandés' : 'Consignment Items'}
                       </h4>
                       <div className="space-y-2">
                         {order.items.map((item, idx) => (
@@ -352,18 +363,18 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                                   {item.product.name}
                                 </h5>
                                 <div className="flex items-center gap-2 text-[11px] text-zinc-500 mt-0.5">
-                                  <span>Color: <strong>{item.selectedColor?.name || 'Standard'}</strong></span>
+                                  <span>{isFr ? 'Couleur :' : 'Color:'} <strong>{item.selectedColor?.name || (isFr ? 'Standard' : 'Standard')}</strong></span>
                                   <span>·</span>
-                                  <span>Size: <strong>{item.selectedSize?.name || 'One Size'}</strong></span>
+                                  <span>{isFr ? 'Taille :' : 'Size:'} <strong>{item.selectedSize?.name || (isFr ? 'Taille Unique' : 'One Size')}</strong></span>
                                   <span>·</span>
-                                  <span>Qty: {item.quantity}</span>
+                                  <span>{isFr ? 'Qté :' : 'Qty:'} {item.quantity}</span>
                                 </div>
                               </div>
                             </div>
 
                             <div className="text-right">
                               <span className="text-xs sm:text-sm font-semibold font-mono text-zinc-900">
-                                ${(item.product.price * item.quantity).toFixed(2)}
+                                {formatPrice(item.product.price * item.quantity)}
                               </span>
                             </div>
                           </div>
@@ -375,7 +386,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                       {/* Shipping Address */}
                       <div className="p-4 bg-white rounded-xl border border-zinc-200/70 space-y-1">
-                        <span className="font-semibold text-zinc-900 block">Shipping Destination</span>
+                        <span className="font-semibold text-zinc-900 block">{isFr ? 'Adresse de livraison' : 'Shipping Destination'}</span>
                         <p className="text-zinc-600">
                           {order.shippingAddress.firstName} {order.shippingAddress.lastName}
                         </p>
@@ -392,26 +403,26 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       {/* Financial Breakdown */}
                       <div className="p-4 bg-white rounded-xl border border-zinc-200/70 space-y-1.5 font-mono">
                         <div className="flex justify-between text-zinc-600">
-                          <span>Subtotal</span>
-                          <span>${order.subtotal.toFixed(2)}</span>
+                          <span>{isFr ? 'Sous-total' : 'Subtotal'}</span>
+                          <span>{formatPrice(order.subtotal)}</span>
                         </div>
                         {order.discount > 0 && (
                           <div className="flex justify-between text-emerald-700">
-                            <span>Promotional Savings</span>
-                            <span>-${order.discount.toFixed(2)}</span>
+                            <span>{isFr ? 'Économie promotionnelle' : 'Promotional Savings'}</span>
+                            <span>-{formatPrice(order.discount)}</span>
                           </div>
                         )}
                         <div className="flex justify-between text-zinc-600">
-                          <span>Shipping ({order.shippingMethod === 'express' ? 'DHL Express' : 'Standard Carbon-Neutral'})</span>
-                          <span>{order.shippingCost === 0 ? 'Free' : `$${order.shippingCost.toFixed(2)}`}</span>
+                          <span>{isFr ? 'Livraison' : 'Shipping'} ({order.shippingMethod === 'express' ? 'DHL Express' : (isFr ? 'Standard Neutre en Carbone' : 'Standard Carbon-Neutral')})</span>
+                          <span>{order.shippingCost === 0 ? (isFr ? 'Offerte' : 'Free') : formatPrice(order.shippingCost)}</span>
                         </div>
                         <div className="flex justify-between text-zinc-600">
-                          <span>Estimated Tax</span>
-                          <span>${order.tax.toFixed(2)}</span>
+                          <span>{isFr ? 'Taxe estimée' : 'Estimated Tax'}</span>
+                          <span>{formatPrice(order.tax)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-bold text-zinc-950 pt-2 border-t border-zinc-200 font-sans">
-                          <span>Total Paid</span>
-                          <span className="font-mono">${order.total.toFixed(2)}</span>
+                          <span>{isFr ? 'Total payé' : 'Total Paid'}</span>
+                          <span className="font-mono">{formatPrice(order.total)}</span>
                         </div>
                       </div>
                     </div>
@@ -424,7 +435,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                           className="px-3 py-1.5 text-xs font-semibold text-zinc-900 hover:text-zinc-600 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 flex items-center gap-1.5 cursor-pointer transition-colors"
                         >
                           <ShoppingBag className="w-3.5 h-3.5" />
-                          <span>Buy Items Again</span>
+                          <span>{isFr ? 'Commander à nouveau' : 'Buy Items Again'}</span>
                         </button>
 
                         {canReturn && (
@@ -433,7 +444,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                             className="px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:text-zinc-950 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 flex items-center gap-1.5 cursor-pointer transition-colors"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
-                            <span>{order.returnRequested ? 'Return Pending' : 'Request Return / Exchange'}</span>
+                            <span>{order.returnRequested ? (isFr ? 'Retour en attente' : 'Return Pending') : (isFr ? 'Demander un retour / échange' : 'Request Return / Exchange')}</span>
                           </button>
                         )}
                       </div>
@@ -444,13 +455,15 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                           className="px-3 py-1.5 text-xs font-semibold text-rose-700 hover:text-rose-900 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 flex items-center gap-1.5 cursor-pointer transition-colors"
                         >
                           <AlertTriangle className="w-3.5 h-3.5" />
-                          <span>Cancel This Order</span>
+                          <span>{isFr ? 'Annuler cette commande' : 'Cancel This Order'}</span>
                         </button>
                       )}
 
                       {order.status === 'cancelled' && (
                         <div className="text-xs text-rose-600 font-medium">
-                          Cancelled on {order.cancelledAt || 'recently'} · Reason: {order.cancelReason || 'Customer Request'}
+                          {isFr
+                            ? `Annulée le ${order.cancelledAt || 'récemment'} · Raison : ${order.cancelReason || 'Demande client'}`
+                            : `Cancelled on ${order.cancelledAt || 'recently'} · Reason: ${order.cancelReason || 'Customer Request'}`}
                         </div>
                       )}
                     </div>
@@ -473,7 +486,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-4">
-                <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-950">Order Invoice Details</h3>
+                <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-950">
+                  {isFr ? 'Suivi & Détails de la Commande' : 'Order Invoice Details'}
+                </h3>
                 <button
                   onClick={() => setTrackingModalOrder(null)}
                   className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full cursor-pointer transition-colors"
@@ -484,7 +499,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
 
               {/* Order ID Section */}
               <div className="mt-2">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 block">ORDER ID</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 block">
+                  {isFr ? 'N° DE COMMANDE' : 'ORDER ID'}
+                </span>
                 <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mt-1 select-all font-mono">
                   {trackingModalOrder.orderNumber}
                 </p>
@@ -492,14 +509,16 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
 
               {/* Timeline & Status Section */}
               <div className="mt-5">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 block">TIMELINE & STATUS</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 block">
+                  {isFr ? 'ÉTAPES & STATUT' : 'TIMELINE & STATUS'}
+                </span>
                 
                 {/* Localized Status Label with Blue Bullet */}
                 <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-900 mt-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block shrink-0 animate-pulse" />
                   <span>
-                    {language === 'fr' 
-                      ? (trackingModalOrder.status === 'placed' ? 'En cours (Commandé)' : trackingModalOrder.status === 'confirmed' ? 'Confirmé' : trackingModalOrder.status === 'processing' ? 'En cours' : trackingModalOrder.status === 'shipping' || trackingModalOrder.status === 'shipped' ? 'Expédié' : trackingModalOrder.status === 'delivered' ? 'Livré' : 'Annulé')
+                    {isFr 
+                      ? (trackingModalOrder.status === 'placed' ? 'Enregistrée (Commandé)' : trackingModalOrder.status === 'confirmed' ? 'Confirmée' : trackingModalOrder.status === 'processing' ? 'En cours de préparation' : trackingModalOrder.status === 'shipping' || trackingModalOrder.status === 'shipped' ? 'Expédiée' : trackingModalOrder.status === 'delivered' ? 'Livrée' : 'Annulée')
                       : (trackingModalOrder.status === 'placed' ? 'Placed' : trackingModalOrder.status === 'confirmed' ? 'Confirmed' : trackingModalOrder.status === 'processing' ? 'Processing' : trackingModalOrder.status === 'shipping' || trackingModalOrder.status === 'shipped' ? 'Shipping' : trackingModalOrder.status === 'delivered' ? 'Done' : 'Cancelled')}
                   </span>
                 </div>
@@ -515,11 +534,11 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   />
 
                   {[
-                    { label: 'PLACED', stepNum: 1 },
-                    { label: 'CONFIRM', stepNum: 2 },
-                    { label: 'PROCESSING', stepNum: 3 },
-                    { label: 'SHIPPING', stepNum: 4 },
-                    { label: 'DONE', stepNum: 5 },
+                    { label: isFr ? 'COMMANDÉ' : 'PLACED', stepNum: 1 },
+                    { label: isFr ? 'CONFIRMÉ' : 'CONFIRM', stepNum: 2 },
+                    { label: isFr ? 'EN COURS' : 'PROCESSING', stepNum: 3 },
+                    { label: isFr ? 'EXPÉDIÉ' : 'SHIPPING', stepNum: 4 },
+                    { label: isFr ? 'LIVRÉ' : 'DONE', stepNum: 5 },
                   ].map((step, idx) => {
                     const isPassed = idx < orderStageIdx;
                     const isCurrent = idx === orderStageIdx;
@@ -556,7 +575,9 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
 
               {/* Shipping Address Section */}
               <div className="mt-5">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 block">SHIPPING ADDRESS</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 block">
+                  {isFr ? 'ADRESSE DE LIVRAISON' : 'SHIPPING ADDRESS'}
+                </span>
                 <div className="rounded-2xl border border-slate-100 p-4 mt-2 bg-slate-50/40 flex items-start gap-3">
                   <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
                     <MapPin className="w-5 h-5" />
@@ -578,7 +599,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
               {/* Interactive Footer */}
               <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                 <span className="text-xs font-mono font-bold text-slate-500">
-                  Code: <strong className="text-slate-800">#{trackingModalOrder.orderNumber}</strong>
+                  {isFr ? 'Code :' : 'Code:'} <strong className="text-slate-800">#{trackingModalOrder.orderNumber}</strong>
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
                   <button 
@@ -586,13 +607,13 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                     className="flex items-center gap-1.5 px-3.5 h-10 border-2 border-slate-900 rounded-xl text-xs font-black uppercase text-slate-900 hover:bg-slate-100 cursor-pointer bg-white transition-colors"
                   >
                     <Printer className="w-3.5 h-3.5 stroke-[2.2]" />
-                    <span>Print</span>
+                    <span>{isFr ? 'Imprimer' : 'Print'}</span>
                   </button>
                   <button 
-                    onClick={() => alert(language === 'fr' ? 'Veuillez contacter le support pour modifier l\'adresse de livraison.' : 'Please contact GLADYNS concierge to update your shipping address.')} 
+                    onClick={() => alert(isFr ? 'Veuillez contacter le support pour modifier l\'adresse de livraison.' : 'Please contact GLADYNS concierge to update your shipping address.')} 
                     className="px-3.5 h-10 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer bg-white transition-colors"
                   >
-                    Change Address
+                    {isFr ? 'Modifier l\'adresse' : 'Change Address'}
                   </button>
                   {!['delivered', 'cancelled'].includes(trackingModalOrder.status) && (
                     <button 
@@ -600,14 +621,14 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       className="flex items-center gap-1.5 px-3.5 h-10 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold cursor-pointer transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>Cancel</span>
+                      <span>{isFr ? 'Annuler' : 'Cancel'}</span>
                     </button>
                   )}
                   <button 
                     onClick={() => setTrackingModalOrder(null)} 
                     className="px-3.5 h-10 border border-rose-200 hover:border-rose-300 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 cursor-pointer bg-white transition-colors"
                   >
-                    Remove
+                    {isFr ? 'Fermer' : 'Remove'}
                   </button>
                 </div>
               </div>
@@ -631,7 +652,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
               className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Premium Header with Connected 4-Stage Stepper (On top of modal!) */}
+              {/* Premium Header with Connected 4-Stage Stepper */}
               <div className="bg-slate-50 border-b border-slate-100 p-5 sm:p-6 flex flex-col gap-4 relative">
                 {/* Status Badge & Close Button */}
                 <div className="flex items-center justify-between">
@@ -640,15 +661,15 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       invoiceModalOrder.status === 'cancelled' ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse'
                     }`} />
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-800">
-                      STATUS: {invoiceModalOrder.status === 'placed' 
-                        ? '⏳ Pending' 
+                      {isFr ? 'STATUT :' : 'STATUS:'} {invoiceModalOrder.status === 'placed' 
+                        ? (isFr ? '⏳ Enregistrée' : '⏳ Pending')
                         : invoiceModalOrder.status === 'confirmed' 
-                        ? '✅ Confirmed' 
+                        ? (isFr ? '✅ Confirmée' : '✅ Confirmed')
                         : invoiceModalOrder.status === 'processing' 
-                        ? '⚙️ Processing' 
+                        ? (isFr ? '⚙️ En préparation' : '⚙️ Processing')
                         : invoiceModalOrder.status === 'delivered' 
-                        ? '📦 Delivered' 
-                        : '❌ Cancelled'}
+                        ? (isFr ? '📦 Livrée' : '📦 Delivered')
+                        : (isFr ? '❌ Annulée' : '❌ Cancelled')}
                     </span>
                   </div>
                   {/* Close Button */}
@@ -671,10 +692,10 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   />
 
                   {[
-                    { label: 'PLACED' },
-                    { label: 'CONFIRMED' },
-                    { label: 'PROCESSING' },
-                    { label: 'DONE' },
+                    { label: isFr ? 'COMMANDÉ' : 'PLACED' },
+                    { label: isFr ? 'CONFIRMÉ' : 'CONFIRMED' },
+                    { label: isFr ? 'EN COURS' : 'PROCESSING' },
+                    { label: isFr ? 'LIVRÉ' : 'DONE' },
                   ].map((step, idx) => {
                     const normalizedStageIdx = orderStageIdx >= 4 ? 3 : orderStageIdx >= 2 ? 2 : orderStageIdx;
                     const isStepDone = idx < normalizedStageIdx;
@@ -732,7 +753,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                     </div>
                     <div className="sm:text-right">
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">
-                        INVOICE NUMBER
+                        {isFr ? 'NUMÉRO DE FACTURE' : 'INVOICE NUMBER'}
                       </span>
                       <p className="font-mono text-xs font-black text-slate-950 mt-0.5 select-all">
                         {invoiceModalOrder.orderNumber}
@@ -747,7 +768,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   <div className="grid grid-cols-2 gap-4 text-xs pt-1">
                     <div>
                       <span className="text-[9px] font-black text-amber-900/70 tracking-wider block uppercase mb-1">
-                        CUSTOMER / CLIENT
+                        {isFr ? 'CLIENT' : 'CUSTOMER / CLIENT'}
                       </span>
                       <div className="space-y-0.5 text-slate-800">
                         <p className="font-bold text-slate-950">
@@ -764,14 +785,14 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
 
                     <div>
                       <span className="text-[9px] font-black text-amber-900/70 tracking-wider block uppercase mb-1">
-                        PREPARED BY (ADMIN)
+                        {isFr ? 'ÉMIS PAR' : 'PREPARED BY (ADMIN)'}
                       </span>
                       <div className="space-y-0.5 text-slate-800">
                         <p className="font-bold text-slate-950">
                           Admin: Eléonore de Laurent
                         </p>
                         <p className="text-[11px] text-emerald-600 font-mono font-semibold">
-                          Authorized Signatory
+                          {isFr ? 'Signataire Autorisé' : 'Authorized Signatory'}
                         </p>
                         <p className="text-[10px] text-slate-400 leading-tight mt-1 uppercase">
                           GLADYNS Paris HQ Office <br />
@@ -784,7 +805,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   {/* Order Pieces Grid */}
                   <div className="pt-4 border-t border-dashed border-slate-200">
                     <span className="text-[9px] font-black text-slate-400 tracking-wider block uppercase mb-3">
-                      ORDERED PIECES ({invoiceModalOrder.items.length})
+                      {isFr ? `ARTICLES COMMANDÉS (${invoiceModalOrder.items.length})` : `ORDERED PIECES (${invoiceModalOrder.items.length})`}
                     </span>
                     <div className="space-y-3.5">
                       {invoiceModalOrder.items.map((item, idx) => (
@@ -798,7 +819,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                             <div>
                               <p className="font-bold text-slate-950">{item.product.name}</p>
                               <p className="text-[10px] text-slate-400 mt-0.5">
-                                Qty {item.quantity}x · {item.selectedColor?.name || 'Standard'} · Size {item.selectedSize?.name || 'One Size'}
+                                {isFr ? 'Qté' : 'Qty'} {item.quantity}x · {item.selectedColor?.name || (isFr ? 'Standard' : 'Standard')} · {isFr ? 'Taille' : 'Size'} {item.selectedSize?.name || (isFr ? 'Taille Unique' : 'One Size')}
                               </p>
                             </div>
                           </div>
@@ -813,25 +834,29 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                   {/* Total Value Banner with custom luxury look */}
                   <div className="pt-4 border-t border-dashed border-slate-200 flex flex-col justify-center items-center text-center py-2 bg-slate-50 rounded-xl border border-slate-100">
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                      TOTAL TRANSACTION VALUE
+                      {isFr ? 'VALEUR TOTALE DE LA TRANSACTION' : 'TOTAL TRANSACTION VALUE'}
                     </span>
                     <p className="text-2xl sm:text-3xl font-display font-black text-blue-600 tracking-tight mt-1 font-mono">
                       {formatPrice(invoiceModalOrder.total)}
                     </p>
                     <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold mt-0.5">
-                      PAID IN FULL via {invoiceModalOrder.paymentMethod ? invoiceModalOrder.paymentMethod.toUpperCase() : 'SECURE TRANSFER'}
+                      {isFr 
+                        ? `RÉGLÉ EN TOTALITÉ via ${invoiceModalOrder.paymentMethod ? invoiceModalOrder.paymentMethod.toUpperCase() : 'PAIEMENT SÉCURISÉ'}`
+                        : `PAID IN FULL via ${invoiceModalOrder.paymentMethod ? invoiceModalOrder.paymentMethod.toUpperCase() : 'SECURE TRANSFER'}`}
                     </p>
                   </div>
 
                   {/* Certified Seal / Stamp footer */}
                   <div className="pt-1 text-center space-y-1">
                     <p className="text-[10px] text-slate-400 font-serif italic">
-                      "Thank you for your patronage. GLADYNS guarantees 100% authenticity on all artisanal releases."
+                      {isFr
+                        ? '« Merci pour votre confiance. GLADYNS garantit 100% d\'authenticité sur toutes ses créations artisanales. »'
+                        : '"Thank you for your patronage. GLADYNS guarantees 100% authenticity on all artisanal releases."'}
                     </p>
                     <div className="flex items-center justify-center gap-1.5 pt-2">
                       <span className="h-px w-8 bg-slate-200" />
                       <span className="text-[8px] font-black tracking-widest text-slate-400 uppercase">
-                        OFFICIAL GLADYNS RECEIPT
+                        {isFr ? 'REÇU OFFICIEL GLADYNS' : 'OFFICIAL GLADYNS RECEIPT'}
                       </span>
                       <span className="h-px w-8 bg-slate-200" />
                     </div>
@@ -845,20 +870,20 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                       onClick={() => setInvoiceModalOrder(null)}
                       className="py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-black uppercase text-center cursor-pointer transition-colors tracking-wider"
                     >
-                      {language === 'fr' ? 'Continuer' : 'Continue shopping'}
+                      {isFr ? 'Continuer' : 'Continue shopping'}
                     </button>
                     <button
                       onClick={() => window.print()}
                       className="py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-colors tracking-wider"
                     >
                       <Printer className="w-3.5 h-3.5" />
-                      <span>{language === 'fr' ? 'Imprimer' : 'Print Order'}</span>
+                      <span>{isFr ? 'Imprimer' : 'Print Order'}</span>
                     </button>
                     <button
-                      onClick={() => window.open(getWhatsAppLink(`Order Inquiry ${invoiceModalOrder.orderNumber}`, storeSettings?.whatsappNumber), '_blank')}
+                      onClick={() => window.open(getWhatsAppLink(`Demande commande ${invoiceModalOrder.orderNumber}`, storeSettings?.whatsappNumber), '_blank')}
                       className="py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase text-center cursor-pointer transition-colors tracking-wider"
                     >
-                      {language === 'fr' ? 'Contactez-nous' : 'Contact us'}
+                      {isFr ? 'Contactez-nous' : 'Contact us'}
                     </button>
                   </div>
                 </div>
@@ -878,26 +903,29 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
             <div className="flex items-center gap-3 text-rose-600">
               <AlertTriangle className="w-6 h-6" />
               <h3 className="text-base font-semibold text-zinc-950">
-                Cancel Order {cancellingOrder.orderNumber}?
+                {isFr ? `Annuler la commande ${cancellingOrder.orderNumber} ?` : `Cancel Order ${cancellingOrder.orderNumber}?`}
               </h3>
             </div>
             <p className="text-xs text-zinc-600 leading-relaxed">
-              Since this piece has not departed our European workshop, you may cancel for an immediate 100% refund of <strong className="font-mono text-zinc-900">${cancellingOrder.total.toFixed(2)}</strong>.
+              {isFr
+                ? `Cette commande n'ayant pas encore quitté notre atelier européen, vous pouvez l'annuler pour un remboursement immédiat à 100% de `
+                : `Since this piece has not departed our European workshop, you may cancel for an immediate 100% refund of `}
+              <strong className="font-mono text-zinc-900">{formatPrice(cancellingOrder.total)}</strong>.
             </p>
 
             <div>
               <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                Reason for cancellation
+                {isFr ? 'Motif de l\'annulation' : 'Reason for cancellation'}
               </label>
               <select
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 className="w-full p-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-900 focus:bg-white focus:outline-none"
               >
-                <option value="Changed my mind">Changed my mind</option>
-                <option value="Need different size or colorway">Need different size or colorway</option>
-                <option value="Ordered by mistake">Ordered by mistake</option>
-                <option value="Shipping time not suitable">Shipping time not suitable</option>
+                <option value="Changed my mind">{isFr ? 'J\'ai changé d\'avis' : 'Changed my mind'}</option>
+                <option value="Need different size or colorway">{isFr ? 'Besoin d\'une taille ou couleur différente' : 'Need different size or colorway'}</option>
+                <option value="Ordered by mistake">{isFr ? 'Commandé par erreur' : 'Ordered by mistake'}</option>
+                <option value="Shipping time not suitable">{isFr ? 'Délai de livraison non adapté' : 'Shipping time not suitable'}</option>
               </select>
             </div>
 
@@ -906,13 +934,13 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                 onClick={() => setCancellingOrder(null)}
                 className="px-3 py-2 text-xs font-medium text-zinc-600 hover:text-zinc-900 rounded-lg cursor-pointer"
               >
-                Keep Order
+                {isFr ? 'Conserver la commande' : 'Keep Order'}
               </button>
               <button
                 onClick={handleConfirmCancel}
                 className="px-4 py-2 bg-rose-600 text-white rounded-lg text-xs font-semibold hover:bg-rose-700 transition-colors cursor-pointer shadow-xs"
               >
-                Confirm Cancellation
+                {isFr ? 'Confirmer l\'annulation' : 'Confirm Cancellation'}
               </button>
             </div>
           </div>

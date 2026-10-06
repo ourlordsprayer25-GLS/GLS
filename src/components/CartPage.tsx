@@ -81,7 +81,8 @@ export const CartPage: React.FC<CartPageProps> = ({
     }
   };
 
-  const shippingCost = qualifiesForFreeShipping ? 0 : 15;
+  const STANDARD_DELIVERY_FEE_USD = 2000 / 605;
+  const shippingCost = qualifiesForFreeShipping ? 0 : STANDARD_DELIVERY_FEE_USD;
   const estimatedTotal = subtotal + shippingCost;
 
   const handleWhatsAppCheckout = () => {
@@ -92,7 +93,9 @@ export const CartPage: React.FC<CartPageProps> = ({
       const spec = [color, size].filter(Boolean).join(', ');
       return `${i.quantity}x ${i.product.name}${spec ? ` (${spec})` : ''}`;
     }).join(', ');
-    const text = `Hello GLADYNS Boutique, I would like to order: ${itemSummary}. Subtotal: ${formatPrice(subtotal)}. Please guide me with payment and dispatch.`;
+    const text = language === 'fr'
+      ? `Bonjour GLADYNS Boutique, je souhaite commander : ${itemSummary}. Sous-total : ${formatPrice(subtotal)}. Merci de m'indiquer les modalités de règlement et d'expédition.`
+      : `Hello GLADYNS Boutique, I would like to order: ${itemSummary}. Subtotal: ${formatPrice(subtotal)}. Please guide me with payment and dispatch.`;
     window.open(getWhatsAppLink(text, storeSettings?.whatsappNumber), '_blank');
   };
 
@@ -114,7 +117,9 @@ export const CartPage: React.FC<CartPageProps> = ({
                 {t('shoppingBag')}
               </h1>
               <p className="text-xs text-zinc-500 mt-0.5">
-                {validItems.length} {validItems.length === 1 ? 'Acquisition' : 'Acquisitions'} reserved in your curation bag
+                {language === 'fr'
+                  ? `${validItems.length} ${validItems.length === 1 ? 'article réservé' : 'articles réservés'} dans votre panier`
+                  : `${validItems.length} ${validItems.length === 1 ? 'Acquisition' : 'Acquisitions'} reserved in your curation bag`}
               </p>
             </div>
           </div>
@@ -225,14 +230,14 @@ export const CartPage: React.FC<CartPageProps> = ({
 
                       <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 font-medium">
                         {item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) && (
-                          <span>Color: <strong className="text-zinc-800">{item.selectedColor.name}</strong></span>
+                          <span>{language === 'fr' ? 'Couleur :' : 'Color:'} <strong className="text-zinc-800">{item.selectedColor.name}</strong></span>
                         )}
                         {item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) &&
                          item.selectedSize && !['standard', 'default', 'one size', 'taille unique'].includes(String(typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize).toLowerCase()) && (
                           <span>•</span>
                         )}
                         {item.selectedSize && !['standard', 'default', 'one size', 'taille unique'].includes(String(typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize).toLowerCase()) && (
-                          <span>Size: <strong className="text-zinc-800 uppercase">{typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize}</strong></span>
+                          <span>{language === 'fr' ? 'Taille / Format :' : 'Size:'} <strong className="text-zinc-800 uppercase">{typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize}</strong></span>
                         )}
                       </div>
 
@@ -284,7 +289,9 @@ export const CartPage: React.FC<CartPageProps> = ({
                     <span>{language === 'fr' ? 'Livraison' : 'Fulfillment & Shipping'}</span>
                     <span className="font-mono text-slate-900">
                       {shippingCost === 0 ? (
-                        <span className="text-emerald-700 font-bold uppercase text-[10px]">FREE</span>
+                        <span className="text-emerald-700 font-bold uppercase text-[10px]">
+                          {language === 'fr' ? 'OFFERTE' : 'FREE'}
+                        </span>
                       ) : (
                         formatPrice(shippingCost)
                       )}

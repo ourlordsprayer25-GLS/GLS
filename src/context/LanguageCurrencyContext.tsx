@@ -94,7 +94,7 @@ export const LanguageCurrencyProvider: React.FC<{ children: ReactNode }> = ({ ch
   };
 
   const activeCurrency = useMemo(() => {
-    return SUPPORTED_CURRENCIES[currencyCode] || SUPPORTED_CURRENCIES['USD'];
+    return SUPPORTED_CURRENCIES[currencyCode] || SUPPORTED_CURRENCIES['XOF'];
   }, [currencyCode]);
 
   const activeCountry = useMemo(() => {

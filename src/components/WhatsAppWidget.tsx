@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageSquare, X, ArrowUpRight, Sparkles, Check, GripVertical } from 'lucide-react';
 
 import { StoreSettings } from '../types/store';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 export const WHATSAPP_NUMBER = '2250500619923';
 export const WHATSAPP_FORMATTED = '+225 05 00 61 99 23';
@@ -72,14 +73,20 @@ export const WhatsAppIcon: React.FC<{ className?: string }> = ({ className = 'w-
 );
 
 export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
-  message = 'Hello GLADYNS Concierge, I would like to inquire about products and studio assistance.',
+  message,
   phone,
   className = '',
   variant = 'primary',
-  label = 'Chat on WhatsApp',
+  label,
   showIcon = true,
 }) => {
-  const url = getWhatsAppLink(message, phone);
+  const { language } = useLanguageCurrency();
+  const defaultMsg = language === 'fr' 
+    ? 'Bonjour Conciergerie GLADYNS, je souhaite des renseignements sur vos produits.' 
+    : 'Hello GLADYNS Concierge, I would like to inquire about products and studio assistance.';
+  const effectiveMsg = message || defaultMsg;
+  const effectiveLabel = label || (language === 'fr' ? 'Discuter sur WhatsApp' : 'Chat on WhatsApp');
+  const url = getWhatsAppLink(effectiveMsg, phone);
 
   let variantStyles = '';
   switch (variant) {
@@ -128,6 +135,7 @@ export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps>
   storeSettings,
   phoneNumber,
 }) => {
+  const { language } = useLanguageCurrency();
   const activePhone = phoneNumber || storeSettings?.whatsappNumber || WHATSAPP_NUMBER;
   const displayPhone = formatWhatsAppDisplay(activePhone);
   const [isOpen, setIsOpen] = useState(false);
@@ -207,19 +215,25 @@ export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps>
 
   const conciergeOptions = [
     {
-      title: 'Product & Technical Specialist',
-      subtitle: 'Specifications, features & tech advice',
-      msg: 'Hello GLADYNS Concierge, I would like personalized specifications and technical guidance for your products.',
+      title: language === 'fr' ? 'Spécialiste Produits & Conseils' : 'Product & Technical Specialist',
+      subtitle: language === 'fr' ? 'Fiches techniques, caractéristiques & conseils' : 'Specifications, features & tech advice',
+      msg: language === 'fr' 
+        ? 'Bonjour Conciergerie GLADYNS, je souhaite des spécifications et conseils techniques sur vos produits.'
+        : 'Hello GLADYNS Concierge, I would like personalized specifications and technical guidance for your products.',
     },
     {
-      title: 'Checkout & Courier Assistance',
-      subtitle: 'Express delivery inquiries & custom invoice support',
-      msg: 'Hello GLADYNS Concierge, I need assistance regarding my checkout, courier dispatch, or payment methods.',
+      title: language === 'fr' ? 'Aide Commande & Livraison' : 'Checkout & Courier Assistance',
+      subtitle: language === 'fr' ? 'Livraison express, facture & options de paiement' : 'Express delivery inquiries & custom invoice support',
+      msg: language === 'fr'
+        ? 'Bonjour Conciergerie GLADYNS, j\'ai besoin d\'assistance pour ma commande, la livraison ou le paiement.'
+        : 'Hello GLADYNS Concierge, I need assistance regarding my checkout, courier dispatch, or payment methods.',
     },
     {
-      title: 'Private Archive & Warranty Inquiries',
-      subtitle: 'Inquire about limited releases, drops & 2-year warranty',
-      msg: 'Hello GLADYNS Studio, I would like to inquire about product availability, batch releases, and warranties.',
+      title: language === 'fr' ? 'Disponibilité & Garantie 2 ans' : 'Private Archive & Warranty Inquiries',
+      subtitle: language === 'fr' ? 'Disponibilité en stock, arrivages & garantie' : 'Inquire about limited releases, drops & 2-year warranty',
+      msg: language === 'fr'
+        ? 'Bonjour Studio GLADYNS, je souhaite me renseigner sur la disponibilité des produits et les garanties.'
+        : 'Hello GLADYNS Studio, I would like to inquire about product availability, batch releases, and warranties.',
     },
   ];
 
@@ -240,10 +254,12 @@ export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps>
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-950 flex items-center gap-1.5">
-                  <span>GLADYNS Concierge</span>
+                  <span>{language === 'fr' ? 'Conciergerie GLADYNS' : 'GLADYNS Concierge'}</span>
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 </h4>
-                <p className="text-[10px] text-slate-500 font-mono">Porto & Florence Studios · Online</p>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  {language === 'fr' ? 'Studios Paris & Abidjan · En ligne' : 'Porto & Florence Studios · Online'}
+                </p>
               </div>
             </div>
             <button
@@ -256,7 +272,9 @@ export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps>
           </div>
 
           <p className="text-[11px] text-slate-600 my-2.5 leading-relaxed">
-            Connect directly with a GLADYNS specialist via WhatsApp for immediate styling, product advice, or order tracking updates.
+            {language === 'fr'
+              ? 'Échangez directement avec un spécialiste GLADYNS sur WhatsApp pour des conseils d\'achat personnalisés ou le suivi de votre commande.'
+              : 'Connect directly with a GLADYNS specialist via WhatsApp for immediate styling, product advice, or order tracking updates.'}
           </p>
 
           <div className="space-y-1.5">
@@ -284,7 +302,7 @@ export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps>
             <span>Direct: {displayPhone}</span>
             <span className="text-emerald-700 font-semibold flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-emerald-600" />
-              <span>Avg. reply: ~5 mins</span>
+              <span>{language === 'fr' ? 'Rép. moy. : ~5 min' : 'Avg. reply: ~5 mins'}</span>
             </span>
           </div>
         </div>
@@ -313,10 +331,12 @@ export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps>
           <WhatsAppIcon className="w-4 h-4 text-slate-950" />
         </div>
         <div className="text-left hidden sm:block">
-          <p className="text-[11px] font-bold text-white leading-tight">GLADYNS Concierge</p>
+          <p className="text-[11px] font-bold text-white leading-tight">
+            {language === 'fr' ? 'Conciergerie GLADYNS' : 'GLADYNS Concierge'}
+          </p>
           <p className="text-[9px] text-emerald-400 font-mono flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>WhatsApp Live</span>
+            <span>{language === 'fr' ? 'En direct WhatsApp' : 'WhatsApp Live'}</span>
           </p>
         </div>
       </div>

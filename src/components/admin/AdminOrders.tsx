@@ -50,7 +50,8 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, setOrders, ini
         read: false,
         type: 'order',
         linkTarget: order.orderNumber,
-        customerId: order.customerId
+        customerId: order.customerId,
+        image: order.items?.[0]?.product?.primaryImage || order.items?.[0]?.product?.images?.[0],
       });
     }
   };

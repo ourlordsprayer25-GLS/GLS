@@ -51,7 +51,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             <Store className="w-5 h-5 stroke-[1.8] transition-transform group-active:scale-90 text-slate-700 group-hover:text-blue-600" />
           </div>
           <span className="text-[10px] sm:text-[11px] font-bold tracking-tight uppercase mt-1">
-            {language === 'fr' ? 'MY STORE' : 'MY STORE'}
+            {language === 'fr' ? 'BOUTIQUE' : 'STORE'}
           </span>
         </button>
 
@@ -70,7 +70,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             )}
           </div>
           <span className="text-[10px] sm:text-[11px] font-bold tracking-tight uppercase mt-1">
-            {language === 'fr' ? 'PANIER' : 'PANIER'}
+            {language === 'fr' ? 'PANIER' : 'CART'}
           </span>
         </button>
 
@@ -92,7 +92,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             />
           </div>
           <span className="text-[10px] sm:text-[11px] font-bold tracking-tight uppercase mt-1">
-            {language === 'fr' ? 'ACCUEIL' : 'ACCUEIL'}
+            {language === 'fr' ? 'ACCUEIL' : 'HOME'}
           </span>
         </button>
 
@@ -117,7 +117,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             )}
           </div>
           <span className="text-[10px] sm:text-[11px] font-bold tracking-tight uppercase mt-1">
-            {language === 'fr' ? 'FAVORIS' : 'FAVORIS'}
+            {language === 'fr' ? 'FAVORIS' : 'WISHLIST'}
           </span>
         </button>
 
@@ -143,7 +143,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             />
           </div>
           <span className="text-[10px] sm:text-[11px] font-bold tracking-tight uppercase mt-1">
-            {language === 'fr' ? 'PROFIL' : 'PROFIL'}
+            {language === 'fr' ? 'PROFIL' : 'ACCOUNT'}
           </span>
         </button>
       </div>

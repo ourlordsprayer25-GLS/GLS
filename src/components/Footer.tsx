@@ -7,6 +7,7 @@ import {
   Youtube,
   Music,
   Facebook,
+  Share2,
 } from 'lucide-react';
 import { WhatsAppIcon, getWhatsAppLink } from './WhatsAppWidget';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
@@ -25,6 +26,7 @@ interface FooterProps {
   onOpenOrders?: () => void;
   onOpenProfile?: (tab?: 'profile' | 'addresses' | 'loyalty') => void;
   onOpenAuth?: () => void;
+  onOpenShareModal?: () => void;
   storeSettings?: StoreSettings;
 }
 
@@ -34,6 +36,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenRefundPolicyPage,
   onOpenStoreLocatorPage,
   onOpenBrandPage,
+  onOpenShareModal,
   storeSettings,
 }) => {
   const { language } = useLanguageCurrency();
@@ -146,8 +149,19 @@ export const Footer: React.FC<FooterProps> = ({
             </button>
           </div>
 
-          {/* Social Icons Bar */}
-          <div className="flex items-center gap-2">
+          {/* Social Icons Bar & Share Boutique */}
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpenShareModal && (
+              <button
+                type="button"
+                onClick={onOpenShareModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-blue-600 text-zinc-300 hover:text-white border border-zinc-800 hover:border-blue-500 transition-all font-semibold text-xs cursor-pointer shadow-xs group"
+                title={language === 'fr' ? 'Partager la boutique GLADYNS' : 'Share GLADYNS Boutique'}
+              >
+                <Share2 className="w-3.5 h-3.5 text-blue-400 group-hover:text-white group-hover:scale-110 transition-transform" />
+                <span>{language === 'fr' ? 'Partager la Maison' : 'Share Boutique'}</span>
+              </button>
+            )}
             {storeSettings?.socialLinks.instagram && (
               <a
                 href={storeSettings.socialLinks.instagram}
@@ -182,7 +196,7 @@ export const Footer: React.FC<FooterProps> = ({
               </a>
             )}
             <a
-              href={getWhatsAppLink('Hello GLADYNS, I have a question.', storeSettings?.whatsappNumber)}
+              href={getWhatsAppLink(language === 'fr' ? 'Bonjour GLADYNS, j\'ai une question.' : 'Hello GLADYNS, I have a question.', storeSettings?.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"

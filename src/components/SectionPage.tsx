@@ -16,6 +16,7 @@ import {
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
 import { HotDealCard } from './HotDealCard';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 
 export type SectionType = 'hot-deals' | 'new-arrivals' | 'bestsellers' | 'categories' | 'collection';
@@ -88,6 +89,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
   onQuickAdd,
   onBackToHome,
 }) => {
+  const { language } = useLanguageCurrency();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
@@ -131,140 +133,174 @@ export const SectionPage: React.FC<SectionPageProps> = ({
     switch (sectionType) {
       case 'hot-deals':
         return {
-          title: 'Hot Deals',
-          breadcrumb: 'Hot Deals',
-          description: 'Archive pricing & seasonal reductions on permanent wardrobe objects.',
+          title: language === 'fr' ? 'Offres Exclusives' : 'Hot Deals',
+          breadcrumb: language === 'fr' ? 'Offres Exclusives' : 'Hot Deals',
+          description: language === 'fr'
+            ? 'Tarifs archives et réductions saisonnières sur nos pièces intemporelles.'
+            : 'Archive pricing & seasonal reductions on permanent wardrobe objects.',
           slides: [
             {
               id: 'deal-slide-1',
               image: LUXURY_FALLBACKS['hot-deals'][0],
-              badge: 'Archive Reductions',
-              title: 'Seasonal Archive Vault',
-              subtitle: 'Limited micro-batch pricing on tailored overcoats, raw selvedge twill, and knitwear.',
-              ctaText: 'Shop Vault',
+              badge: language === 'fr' ? 'Réductions Archives' : 'Archive Reductions',
+              title: language === 'fr' ? 'Sélection Archives Saisonnières' : 'Seasonal Archive Vault',
+              subtitle: language === 'fr'
+                ? 'Tarifs micro-séries limités sur manteaux structurés, sergé selvedge et mailles nobles.'
+                : 'Limited micro-batch pricing on tailored overcoats, raw selvedge twill, and knitwear.',
+              ctaText: language === 'fr' ? 'Explorer la Sélection' : 'Shop Vault',
             },
             {
               id: 'deal-slide-2',
               image: LUXURY_FALLBACKS['hot-deals'][1],
-              badge: 'Italian Double-Faced Wool',
-              title: 'Architectural Trench & Overcoats',
-              subtitle: 'Precision unlined split seams crafted with heritage wool mills in Biella, Italy.',
-              ctaText: 'Explore Outerwear Deals',
+              badge: language === 'fr' ? 'Laine Double Face Italienne' : 'Italian Double-Faced Wool',
+              title: language === 'fr' ? 'Manteaux & Trenchs Architecturaux' : 'Architectural Trench & Overcoats',
+              subtitle: language === 'fr'
+                ? 'Coutures fendues non doublées confectionnées avec les filatures historiques de Biella, Italie.'
+                : 'Precision unlined split seams crafted with heritage wool mills in Biella, Italy.',
+              ctaText: language === 'fr' ? 'Voir les Manteaux' : 'Explore Outerwear Deals',
             },
             {
               id: 'deal-slide-3',
               image: LUXURY_FALLBACKS['hot-deals'][2],
-              badge: 'Tuscan Leather Carry',
-              title: 'Hand-Burnished Cabin Weekenders',
-              subtitle: 'Full-grain certified vegetable-tanned leather designed to patinate with age.',
-              ctaText: 'View Leather Carry',
+              badge: language === 'fr' ? 'Cuir Toscan de Voyage' : 'Tuscan Leather Carry',
+              title: language === 'fr' ? 'Sacs Week-End Brunis à la Main' : 'Hand-Burnished Cabin Weekenders',
+              subtitle: language === 'fr'
+                ? 'Cuir pleine fleur au tannage végétal certifié, conçu pour se patiner avec le temps.'
+                : 'Full-grain certified vegetable-tanned leather designed to patinate with age.',
+              ctaText: language === 'fr' ? 'Voir la Maroquinerie' : 'View Leather Carry',
             },
           ] as Slide[],
         };
 
       case 'new-arrivals':
         return {
-          title: 'New Arrivals',
-          breadcrumb: 'New Arrivals',
-          description: 'Latest capsule drops, new fabrications, and seasonal additions.',
+          title: language === 'fr' ? 'Nouveautés' : 'New Arrivals',
+          breadcrumb: language === 'fr' ? 'Nouveautés' : 'New Arrivals',
+          description: language === 'fr'
+            ? 'Dernières sorties capsules, nouvelles matières et nouveautés saisonnières.'
+            : 'Latest capsule drops, new fabrications, and seasonal additions.',
           slides: [
             {
               id: 'new-slide-1',
               image: LUXURY_FALLBACKS['new-arrivals'][0],
-              badge: 'Autumn / Winter Release',
-              title: 'New Season Additions',
-              subtitle: 'Architectural discipline in virgin wool trousers, heavy twill coats, and cashmere.',
-              ctaText: 'Explore New Drop',
+              badge: language === 'fr' ? 'Collection Automne / Hiver' : 'Autumn / Winter Release',
+              title: language === 'fr' ? 'Nouveautés de Saison' : 'New Season Additions',
+              subtitle: language === 'fr'
+                ? 'Discipline architecturale : pantalons en laine vierge, manteaux en sergé lourd et cachemire.'
+                : 'Architectural discipline in virgin wool trousers, heavy twill coats, and cashmere.',
+              ctaText: language === 'fr' ? 'Découvrir la Sortie' : 'Explore New Drop',
             },
             {
               id: 'new-slide-2',
               image: LUXURY_FALLBACKS['new-arrivals'][1],
-              badge: 'Featured Collection',
-              title: 'Structured Everyday Foundations',
-              subtitle: 'Japanese selvedge twill with clean-finished bound seams and corozo hardware.',
-              ctaText: 'Discover Foundations',
+              badge: language === 'fr' ? 'Collection Vedette' : 'Featured Collection',
+              title: language === 'fr' ? 'Bases Structurées du Quotidien' : 'Structured Everyday Foundations',
+              subtitle: language === 'fr'
+                ? 'Sergé selvedge japonais avec finitions gansées et boutons en corozo naturel.'
+                : 'Japanese selvedge twill with clean-finished bound seams and corozo hardware.',
+              ctaText: language === 'fr' ? 'Explorer les Essentiels' : 'Discover Foundations',
             },
             {
               id: 'new-slide-3',
               image: LUXURY_FALLBACKS['new-arrivals'][2],
-              badge: 'Fine Gauge Knitwear',
-              title: 'Tasmanian Merino Ribbed Knits',
-              subtitle: '7-gauge fisherman rib engineered for thermoregulation and enduring shape.',
-              ctaText: 'Shop Knitwear',
+              badge: language === 'fr' ? 'Maille Fine de Précision' : 'Fine Gauge Knitwear',
+              title: language === 'fr' ? 'Mailles Côtelées en Mérinos' : 'Tasmanian Merino Ribbed Knits',
+              subtitle: language === 'fr'
+                ? 'Côtes anglaises jauge 7 conçues pour la thermorégulation et une silhouette impeccable.'
+                : '7-gauge fisherman rib engineered for thermoregulation and enduring shape.',
+              ctaText: language === 'fr' ? 'Voir la Maille' : 'Shop Knitwear',
             },
           ] as Slide[],
         };
 
       case 'bestsellers':
         return {
-          title: 'Best Sellers',
-          breadcrumb: 'Best Sellers',
-          description: 'The most coveted objects from our archive, as curated by the GLADYNS community.',
+          title: language === 'fr' ? 'Meilleures Ventes' : 'Best Sellers',
+          breadcrumb: language === 'fr' ? 'Meilleures Ventes' : 'Best Sellers',
+          description: language === 'fr'
+            ? 'Les pièces les plus prisées de notre catalogue, plébiscitées par la communauté GLADYNS.'
+            : 'The most coveted objects from our archive, as curated by the GLADYNS community.',
           slides: [
             {
               id: 'best-slide-1',
               image: LUXURY_FALLBACKS['bestsellers'][0],
-              badge: 'Highest Rated',
-              title: 'Community Favorites',
-              subtitle: 'The definitive selection of pieces that have defined the GLADYNS aesthetic.',
-              ctaText: 'Shop Bestsellers',
+              badge: language === 'fr' ? 'Les Mieux Notés' : 'Highest Rated',
+              title: language === 'fr' ? 'Favoris de la Communauté' : 'Community Favorites',
+              subtitle: language === 'fr'
+                ? 'La sélection définitive des créations emblématiques de la signature GLADYNS.'
+                : 'The definitive selection of pieces that have defined the GLADYNS aesthetic.',
+              ctaText: language === 'fr' ? 'Voir les Bestsellers' : 'Shop Bestsellers',
             },
             {
               id: 'best-slide-2',
               image: LUXURY_FALLBACKS['bestsellers'][1],
-              badge: 'Perennial Classic',
-              title: 'The Wool Trench Coat',
-              subtitle: 'Our most sought-after outerwear piece, crafted for longevity and silhouette.',
-              ctaText: 'View Classic',
+              badge: language === 'fr' ? 'Grand Classique' : 'Perennial Classic',
+              title: language === 'fr' ? 'Le Trench en Laine Noble' : 'The Wool Trench Coat',
+              subtitle: language === 'fr'
+                ? 'Notre manteau le plus recherché, taillé pour une longévité absolue et une silhouette pure.'
+                : 'Our most sought-after outerwear piece, crafted for longevity and silhouette.',
+              ctaText: language === 'fr' ? 'Découvrir le Classique' : 'View Classic',
             },
             {
               id: 'best-slide-3',
               image: LUXURY_FALLBACKS['bestsellers'][2],
-              badge: 'Boutique Favorite',
-              title: 'Structured Twill Chore Jacket',
-              subtitle: 'A versatile foundation piece that continues to lead our seasonal requests.',
-              ctaText: 'Shop Now',
+              badge: language === 'fr' ? 'Coup de Cœur Boutique' : 'Boutique Favorite',
+              title: language === 'fr' ? 'Veste de Travail en Sergé Lourd' : 'Structured Twill Chore Jacket',
+              subtitle: language === 'fr'
+                ? 'Une pièce de base polyvalente et durable qui figure au sommet de nos commandes.'
+                : 'A versatile foundation piece that continues to lead our seasonal requests.',
+              ctaText: language === 'fr' ? 'Commander Maintenant' : 'Shop Now',
             },
           ] as Slide[],
         };
 
       case 'categories':
         return {
-          title: 'Shop by Department',
-          breadcrumb: 'Departments',
-          description: 'Explore our collections categorized by department: Musical Instruments, Electronics, Home Appliances, and Apparel.',
+          title: language === 'fr' ? 'Acheter par Rayon' : 'Shop by Department',
+          breadcrumb: language === 'fr' ? 'Rayons' : 'Departments',
+          description: language === 'fr'
+            ? 'Explorez nos univers : Instruments de Musique, Électronique & Audio, Électroménager et Mode.'
+            : 'Explore our collections categorized by department: Musical Instruments, Electronics, Home Appliances, and Apparel.',
           slides: [
             {
               id: 'cat-slide-1',
               image: LUXURY_FALLBACKS['categories'][0],
-              badge: 'Multi-Department Showcase',
-              title: 'All Store Departments',
-              subtitle: 'Independent collections across Musical Instruments, Electronics & Audio, Home Appliances, and Apparel.',
-              ctaText: 'Browse All Departments',
+              badge: language === 'fr' ? 'Vitrine Multi-Rayons' : 'Multi-Department Showcase',
+              title: language === 'fr' ? 'Tous les Rayons du Magasin' : 'All Store Departments',
+              subtitle: language === 'fr'
+                ? 'Collections indépendantes : Instruments de musique, Hi-Fi & Studio, Maison connectée et Mode.'
+                : 'Independent collections across Musical Instruments, Electronics & Audio, Home Appliances, and Apparel.',
+              ctaText: language === 'fr' ? 'Parcourir les Rayons' : 'Browse All Departments',
             },
             {
               id: 'cat-slide-2',
               image: LUXURY_FALLBACKS['categories'][1],
-              badge: 'Musical Instruments & Studio',
-              title: 'Polyphonic Synthesizers & Vinyl Hi-Fi',
-              subtitle: 'Discrete analog oscillators, direct-drive turntables, and ribbon nearfield monitors.',
-              ctaText: 'View Musical Gear',
+              badge: language === 'fr' ? 'Instruments & Studio' : 'Musical Instruments & Studio',
+              title: language === 'fr' ? 'Synthétiseurs & Platines Vinyles Hi-Fi' : 'Polyphonic Synthesizers & Vinyl Hi-Fi',
+              subtitle: language === 'fr'
+                ? 'Oscillateurs analogiques discrets, platines à entraînement direct et écoutes de studio ruban.'
+                : 'Discrete analog oscillators, direct-drive turntables, and ribbon nearfield monitors.',
+              ctaText: language === 'fr' ? 'Voir les Instruments' : 'View Musical Gear',
             },
             {
               id: 'cat-slide-3',
               image: LUXURY_FALLBACKS['categories'][2],
-              badge: 'Home Appliances & Living',
-              title: 'Smart Home Automation & Appliances',
-              subtitle: 'LiDAR auto-empty robot vacuum stations and dual-boiler commercial-grade espresso machines.',
-              ctaText: 'View Appliances',
+              badge: language === 'fr' ? 'Électroménager & Maison' : 'Home Appliances & Living',
+              title: language === 'fr' ? 'Maison Connectée & Art de Vivre' : 'Smart Home Automation & Appliances',
+              subtitle: language === 'fr'
+                ? 'Aspirateurs robots avec guidage LiDAR et machines à espresso professionnelles double chaudière.'
+                : 'LiDAR auto-empty robot vacuum stations and dual-boiler commercial-grade espresso machines.',
+              ctaText: language === 'fr' ? 'Voir l’Électroménager' : 'View Appliances',
             },
             {
               id: 'cat-slide-4',
               image: LUXURY_FALLBACKS['categories'][3],
-              badge: 'Electronics & Audio',
-              title: 'Planar Magnetic & Studio Tech',
-              subtitle: 'Studio headphones, high-resolution audio processing, and acoustic monitors.',
-              ctaText: 'View Electronics',
+              badge: language === 'fr' ? 'Électronique & Son' : 'Electronics & Audio',
+              title: language === 'fr' ? 'Casques Magnétiques & Son Studio' : 'Planar Magnetic & Studio Tech',
+              subtitle: language === 'fr'
+                ? 'Casques de monitoring, convertisseurs audio haute résolution et enceintes acoustiques.'
+                : 'Studio headphones, high-resolution audio processing, and acoustic monitors.',
+              ctaText: language === 'fr' ? 'Voir l’Électronique' : 'View Electronics',
             },
           ] as Slide[],
         };
@@ -272,38 +308,46 @@ export const SectionPage: React.FC<SectionPageProps> = ({
       case 'collection':
       default:
         return {
-          title: 'Curated Collection',
-          breadcrumb: 'All Pieces',
-          description: 'The complete seasonal inventory of architectural garments and travel carry.',
+          title: language === 'fr' ? 'Collection Sélective' : 'Curated Collection',
+          breadcrumb: language === 'fr' ? 'Toutes les Pièces' : 'All Pieces',
+          description: language === 'fr'
+            ? 'L’inventaire complet de pièces d’exception, vestiaire architectural et maroquinerie.'
+            : 'The complete seasonal inventory of architectural garments and travel carry.',
           slides: [
             {
               id: 'col-slide-1',
               image: LUXURY_FALLBACKS['collection'][0],
-              badge: 'The Complete Archive',
-              title: 'Enduring Wardrobe Architecture',
-              subtitle: 'Every object is designed with permanent materials, zero trends, and lifetime repairs.',
-              ctaText: 'Browse Full Collection',
+              badge: language === 'fr' ? 'Les Archives Complètes' : 'The Complete Archive',
+              title: language === 'fr' ? 'Vestiaire Architectural Intemporel' : 'Enduring Wardrobe Architecture',
+              subtitle: language === 'fr'
+                ? 'Chaque création est confectionnée dans des matières pérennes, à l’épreuve du temps.'
+                : 'Every object is designed with permanent materials, zero trends, and lifetime repairs.',
+              ctaText: language === 'fr' ? 'Toute la Collection' : 'Browse Full Collection',
             },
             {
               id: 'col-slide-2',
               image: LUXURY_FALLBACKS['collection'][1],
-              badge: 'Exclusive Network',
-              title: 'Artisanal Portuguese & Italian Craft',
-              subtitle: 'Transparent supply chains and carbon-neutral direct distribution.',
-              ctaText: 'Shop Essentials',
+              badge: language === 'fr' ? 'Réseau d’Ateliers' : 'Exclusive Network',
+              title: language === 'fr' ? 'Savoir-Faire Artisanal Européen' : 'Artisanal Portuguese & Italian Craft',
+              subtitle: language === 'fr'
+                ? 'Chaînes d’approvisionnement transparentes et distribution directe sans intermédiaires.'
+                : 'Transparent supply chains and carbon-neutral direct distribution.',
+              ctaText: language === 'fr' ? 'Voir les Essentiels' : 'Shop Essentials',
             },
             {
               id: 'col-slide-3',
               image: LUXURY_FALLBACKS['collection'][2],
-              badge: 'Iconic Pieces',
-              title: 'Japanese Twill Chore Jacket',
-              subtitle: 'Custom-milled 14.5oz selvedge twill with functional internal pockets.',
-              ctaText: 'View Piece',
+              badge: language === 'fr' ? 'Pièce Iconique' : 'Iconic Pieces',
+              title: language === 'fr' ? 'Veste en Sergé Japonais' : 'Japanese Twill Chore Jacket',
+              subtitle: language === 'fr'
+                ? 'Sergé lourd selvedge 14,5 oz avec poches intérieures fonctionnelles cousues à la main.'
+                : 'Custom-milled 14.5oz selvedge twill with functional internal pockets.',
+              ctaText: language === 'fr' ? 'Découvrir la Pièce' : 'View Piece',
             },
           ] as Slide[],
         };
     }
-  }, [sectionType]);
+  }, [sectionType, language]);
 
   // Dynamically assemble slides prioritizing real new products with valid images
   const slides = useMemo(() => {
@@ -313,10 +357,10 @@ export const SectionPage: React.FC<SectionPageProps> = ({
     const productSlides: Slide[] = validProducts.slice(0, 5).map((prod, idx) => ({
       id: `prod-slide-${prod.id}`,
       image: prod.primaryImage || prod.images?.[0]?.url || fallbacks[idx % fallbacks.length],
-      badge: prod.tag || prod.categoryLabel || (sectionType === 'new-arrivals' ? 'New Arrival' : sectionType === 'hot-deals' ? 'Special Deal' : 'Featured Piece'),
+      badge: prod.tag || prod.categoryLabel || (sectionType === 'new-arrivals' ? (language === 'fr' ? 'Nouveauté' : 'New Arrival') : sectionType === 'hot-deals' ? (language === 'fr' ? 'Offre Spéciale' : 'Special Deal') : (language === 'fr' ? 'Pièce Vedette' : 'Featured Piece')),
       title: prod.name,
       subtitle: prod.subtitle || prod.tagline || (prod.description ? prod.description.slice(0, 120) : ''),
-      ctaText: 'View Product',
+      ctaText: language === 'fr' ? 'Voir le Produit' : 'View Product',
       product: prod,
     }));
 
@@ -329,7 +373,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
     }
 
     return sectionConfig.slides;
-  }, [sectionBaseProducts, sectionConfig.slides, sectionType]);
+  }, [sectionBaseProducts, sectionConfig.slides, sectionType, language]);
 
   // Auto-slide effect
   useEffect(() => {
@@ -402,7 +446,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer group"
           >
             <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-            <span>Back to Home</span>
+            <span>{language === 'fr' ? "Retour à l'accueil" : 'Back to Home'}</span>
           </button>
 
           <nav className="flex items-center gap-2 text-xs text-slate-400 font-medium">
@@ -410,7 +454,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
               onClick={onBackToHome}
               className="hover:text-blue-600 transition-colors cursor-pointer"
             >
-              Home
+              {language === 'fr' ? 'Accueil' : 'Home'}
             </button>
             <span>/</span>
             <span className="text-slate-900 font-semibold">{sectionConfig.breadcrumb}</span>
@@ -496,13 +540,13 @@ export const SectionPage: React.FC<SectionPageProps> = ({
                       }}
                       className="px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
                     >
-                      {slide.ctaText || 'Shop Pieces'}
+                      {slide.ctaText || (language === 'fr' ? 'Découvrir' : 'Shop Pieces')}
                     </button>
                     <button
                       onClick={onBackToHome}
                       className="px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-xs text-white rounded-xl text-xs font-medium border border-white/25 transition-colors cursor-pointer"
                     >
-                      Back to Home
+                      {language === 'fr' ? "Retour à l'accueil" : 'Back to Home'}
                     </button>
                   </div>
                 </div>
@@ -513,7 +557,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           {/* Previous / Next Slide Buttons */}
           <button
             onClick={handlePrevSlide}
-            aria-label="Previous Slide"
+            aria-label={language === 'fr' ? 'Diapositive précédente' : 'Previous Slide'}
             className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/40 hover:bg-slate-950/80 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all opacity-80 group-hover:opacity-100 cursor-pointer shadow-sm"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -521,7 +565,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
 
           <button
             onClick={handleNextSlide}
-            aria-label="Next Slide"
+            aria-label={language === 'fr' ? 'Diapositive suivante' : 'Next Slide'}
             className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/40 hover:bg-slate-950/80 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all opacity-80 group-hover:opacity-100 cursor-pointer shadow-sm"
           >
             <ChevronRight className="w-5 h-5" />
@@ -532,7 +576,7 @@ export const SectionPage: React.FC<SectionPageProps> = ({
             {/* Play/Pause Toggle */}
             <button
               onClick={() => setIsAutoPlaying((prev) => !prev)}
-              aria-label={isAutoPlaying ? 'Pause Slideshow' : 'Play Slideshow'}
+              aria-label={isAutoPlaying ? (language === 'fr' ? 'Mettre en pause' : 'Pause Slideshow') : (language === 'fr' ? 'Lancer le diaporama' : 'Play Slideshow')}
               className="text-white/80 hover:text-white transition-colors cursor-pointer mr-1"
             >
               {isAutoPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3 fill-current" />}
@@ -566,13 +610,13 @@ export const SectionPage: React.FC<SectionPageProps> = ({
               {sectionType === 'hot-deals' && (
                 <span className="bg-blue-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 shadow-2xs">
                   <Flame className="w-3 h-3 fill-current" />
-                  <span>Flash Deals Active</span>
+                  <span>{language === 'fr' ? 'Vente Flash Active' : 'Flash Deals Active'}</span>
                 </span>
               )}
             </div>
             <span className="text-xs text-slate-500 font-medium">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'piece' : 'pieces'} curated
-              {sectionType === 'hot-deals' && ' · Up to 35% seasonal reduction'}
+              {filteredProducts.length} {language === 'fr' ? (filteredProducts.length === 1 ? 'pièce sélectionnée' : 'pièces sélectionnées') : (filteredProducts.length === 1 ? 'piece curated' : 'pieces curated')}
+              {sectionType === 'hot-deals' && (language === 'fr' ? ' · Jusqu’à 35% de réduction saisonnière' : ' · Up to 35% seasonal reduction')}
             </span>
           </div>
 
@@ -602,10 +646,10 @@ export const SectionPage: React.FC<SectionPageProps> = ({
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="bg-transparent focus:outline-none font-medium cursor-pointer"
               >
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
+                <option value="featured">{language === 'fr' ? 'En vedette' : 'Featured'}</option>
+                <option value="price-asc">{language === 'fr' ? 'Prix : Croissant' : 'Price: Low to High'}</option>
+                <option value="price-desc">{language === 'fr' ? 'Prix : Décroissant' : 'Price: High to Low'}</option>
+                <option value="rating">{language === 'fr' ? 'Mieux notés' : 'Highest Rated'}</option>
               </select>
             </div>
           </div>
@@ -614,13 +658,19 @@ export const SectionPage: React.FC<SectionPageProps> = ({
         {/* PRODUCTS GRID */}
         {filteredProducts.length === 0 ? (
           <div className="py-20 text-center space-y-3">
-            <p className="text-sm font-semibold text-slate-900">No pieces found in this category</p>
-            <p className="text-xs text-slate-500">Try choosing "All Collections" to see every piece in {sectionConfig.title}.</p>
+            <p className="text-sm font-semibold text-slate-900">
+              {language === 'fr' ? 'Aucune pièce trouvée dans cette catégorie' : 'No pieces found in this category'}
+            </p>
+            <p className="text-xs text-slate-500">
+              {language === 'fr'
+                ? `Essayez de choisir "Toutes les Collections" pour voir chaque article de ${sectionConfig.title}.`
+                : `Try choosing "All Collections" to see every piece in ${sectionConfig.title}.`}
+            </p>
             <button
               onClick={() => setSelectedCategory('all')}
               className="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition-colors cursor-pointer"
             >
-              Reset Filters
+              {language === 'fr' ? 'Réinitialiser les filtres' : 'Reset Filters'}
             </button>
           </div>
         ) : sectionType === 'hot-deals' ? (

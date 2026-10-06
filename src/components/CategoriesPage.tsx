@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface CategoriesPageProps {
   products: Product[];
@@ -40,6 +41,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
   onBackToHome,
   onOpenBrand,
 }) => {
+  const { language } = useLanguageCurrency();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isPausedHover, setIsPausedHover] = useState(false);
@@ -53,50 +55,62 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     {
       id: 'cat-slide-1',
       image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Multi-Department Catalog',
-      title: 'Shop All Store Departments',
-      subtitle: 'Browse all curated disciplines across Musical Instruments, Precision Electronics, Home Appliances, Apparel, and Tuscan Leather Carry.',
-      ctaText: 'Explore Departments',
+      badge: language === 'fr' ? 'Catalogue Multi-Rayons' : 'Multi-Department Catalog',
+      title: language === 'fr' ? 'Tous les Rayons de la Boutique' : 'Shop All Store Departments',
+      subtitle: language === 'fr'
+        ? 'Découvrez nos sélections d\'instruments de musique, électronique de pointe, électroménager et maroquinerie.'
+        : 'Browse all curated disciplines across Musical Instruments, Precision Electronics, Home Appliances, Apparel, and Tuscan Leather Carry.',
+      ctaText: language === 'fr' ? 'Explorer les Rayons' : 'Explore Departments',
     },
     {
       id: 'cat-slide-musical',
       image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Musical Instruments & Studio',
-      title: 'Polyphonic Synthesizers & Vinyl Hi-Fi',
-      subtitle: 'Discrete 8-voice analog synthesizers, direct-drive turntables with carbon tonearms, and ribbon studio monitors.',
-      ctaText: 'View Musical Gear',
+      badge: language === 'fr' ? 'Instruments & Studio' : 'Musical Instruments & Studio',
+      title: language === 'fr' ? 'Synthétiseurs & Hi-Fi Vinyle' : 'Polyphonic Synthesizers & Vinyl Hi-Fi',
+      subtitle: language === 'fr'
+        ? 'Synthétiseurs analogiques 8 voix, platines direct-drive et enceintes de monitoring studio.'
+        : 'Discrete 8-voice analog synthesizers, direct-drive turntables with carbon tonearms, and ribbon studio monitors.',
+      ctaText: language === 'fr' ? 'Matériel Musical' : 'View Musical Gear',
     },
     {
       id: 'cat-slide-appliances',
       image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Home Appliances & Living',
-      title: 'Autonomous Living & Barista Craft',
-      subtitle: 'LiDAR auto-empty robot vacuums, Italian dual-boiler espresso systems, and medical-grade HEPA 13 air purifiers.',
-      ctaText: 'View Appliances',
+      badge: language === 'fr' ? 'Électroménager & Maison' : 'Home Appliances & Living',
+      title: language === 'fr' ? 'Art de Vivre & Espace Barista' : 'Autonomous Living & Barista Craft',
+      subtitle: language === 'fr'
+        ? 'Aspirateurs robots LiDAR, machines à expresso italiennes et purificateurs d\'air HEPA 13.'
+        : 'LiDAR auto-empty robot vacuums, Italian dual-boiler espresso systems, and medical-grade HEPA 13 air purifiers.',
+      ctaText: language === 'fr' ? 'Voir l\'Électroménager' : 'View Appliances',
     },
     {
       id: 'cat-slide-electronics',
       image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Electronics & Audio',
-      title: 'Planar Magnetic & Studio Tech',
-      subtitle: 'High-res planar acoustic headphones, audiophile hi-fi components, and tactile machined studio gear.',
-      ctaText: 'View Electronics',
+      badge: language === 'fr' ? 'Électronique & Audio' : 'Electronics & Audio',
+      title: language === 'fr' ? 'Casques Planar & Tech Studio' : 'Planar Magnetic & Studio Tech',
+      subtitle: language === 'fr'
+        ? 'Casques acoustiques planar haute résolution, composants audiophiles et périphériques studio usinés.'
+        : 'High-res planar acoustic headphones, audiophile hi-fi components, and tactile machined studio gear.',
+      ctaText: language === 'fr' ? 'Voir l\'Électronique' : 'View Electronics',
     },
     {
       id: 'cat-slide-2',
       image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Fashion & Tailoring',
-      title: 'Architectural Cuts & Twill',
-      subtitle: 'Double-faced Biella virgin wool overcoats and Japanese selvedge twill workwear jackets.',
-      ctaText: 'View Apparel',
+      badge: language === 'fr' ? 'Mode & Confection' : 'Fashion & Tailoring',
+      title: language === 'fr' ? 'Coupes Architecturales & Sergé' : 'Architectural Cuts & Twill',
+      subtitle: language === 'fr'
+        ? 'Manteaux en laine vierge de Biella double face et vestes d\'atelier en sergé selvedge japonais.'
+        : 'Double-faced Biella virgin wool overcoats and Japanese selvedge twill workwear jackets.',
+      ctaText: language === 'fr' ? 'Voir la Mode' : 'View Apparel',
     },
     {
       id: 'cat-slide-4',
       image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Tuscan Leather Carry',
-      title: 'Vegetable-Tanned Travel Bags',
-      subtitle: 'Consortium-certified full-grain cowhide burnished with organic beeswax to develop rich patina.',
-      ctaText: 'View Leather Goods',
+      badge: language === 'fr' ? 'Maroquinerie Toscane' : 'Tuscan Leather Carry',
+      title: language === 'fr' ? 'Sacs de Voyage en Cuir Végétal' : 'Vegetable-Tanned Travel Bags',
+      subtitle: language === 'fr'
+        ? 'Cuir pleine fleur certifié lustré à la cire d\'abeille biologique pour une patine noble.'
+        : 'Consortium-certified full-grain cowhide burnished with organic beeswax to develop rich patina.',
+      ctaText: language === 'fr' ? 'Voir la Maroquinerie' : 'View Leather Goods',
     },
   ];
 
@@ -227,15 +241,17 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
             className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-950 transition-colors cursor-pointer group"
           >
             <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-            <span>Back to Home</span>
+            <span>{language === 'fr' ? 'Retour à l\'accueil' : 'Back to Home'}</span>
           </button>
 
           <nav className="flex items-center gap-2 text-xs text-zinc-400 font-medium">
             <button onClick={onBackToHome} className="hover:text-zinc-900 transition-colors cursor-pointer">
-              Home
+              {language === 'fr' ? 'Accueil' : 'Home'}
             </button>
             <span>/</span>
-            <span className="text-zinc-900 font-semibold">Shop by Category</span>
+            <span className="text-zinc-900 font-semibold">
+              {language === 'fr' ? 'Toutes les catégories' : 'Shop by Category'}
+            </span>
           </nav>
         </div>
       </div>
@@ -309,7 +325,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
                       onClick={onOpenBrand}
                       className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-xs text-white rounded-xl text-xs font-medium border border-white/20 transition-colors cursor-pointer"
                     >
-                      View Brands
+                      {language === 'fr' ? 'Voir les marques' : 'View Brands'}
                     </button>
                   </div>
                 </div>
@@ -396,7 +412,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Filter categories or pieces..."
+                placeholder={language === 'fr' ? 'Rechercher une catégorie ou un article...' : 'Filter categories or pieces...'}
                 className="w-full pl-9 pr-4 py-1.5 text-xs bg-zinc-50 focus:bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium placeholder-zinc-400 transition-all"
               />
               {searchQuery && (
@@ -414,12 +430,14 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
         {/* ALPHABETICAL CATEGORIES WITH NO VERBOSE EXPLANATION */}
         {alphabetizedCategories.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-zinc-200">
-            <p className="text-sm font-semibold text-zinc-900">No categories matching "{searchQuery}"</p>
+            <p className="text-sm font-semibold text-zinc-900">
+              {language === 'fr' ? `Aucune catégorie ne correspond à « ${searchQuery} »` : `No categories matching "${searchQuery}"`}
+            </p>
             <button
               onClick={() => setSearchQuery('')}
               className="mt-4 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-medium cursor-pointer"
             >
-              Reset Filter
+              {language === 'fr' ? 'Réinitialiser le filtre' : 'Reset Filter'}
             </button>
           </div>
         ) : (
@@ -438,7 +456,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
                       {cat.categoryName}
                     </h2>
                     <span className="text-xs font-medium text-zinc-500">
-                      {cat.products.length} {cat.products.length === 1 ? 'Piece' : 'Pieces'}
+                      {cat.products.length} {language === 'fr' ? (cat.products.length === 1 ? 'Article' : 'Articles') : (cat.products.length === 1 ? 'Piece' : 'Pieces')}
                     </span>
                   </div>
 

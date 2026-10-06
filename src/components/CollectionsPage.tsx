@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface CollectionsPageProps {
   products: Product[];
@@ -112,6 +113,7 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
   onOpenCategories,
   onOpenBrand,
 }) => {
+  const { language } = useLanguageCurrency();
   const [selectedCapsuleId, setSelectedCapsuleId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -163,15 +165,17 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
             className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-950 transition-colors cursor-pointer group"
           >
             <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-            <span>Back to Home</span>
+            <span>{language === 'fr' ? 'Retour à l\'accueil' : 'Back to Home'}</span>
           </button>
 
           <nav className="flex items-center gap-2 text-xs text-zinc-400 font-medium">
             <button onClick={onBackToHome} className="hover:text-zinc-900 transition-colors cursor-pointer">
-              Home
+              {language === 'fr' ? 'Accueil' : 'Home'}
             </button>
             <span>/</span>
-            <span className="text-zinc-900 font-semibold">Curated Collections & Capsules</span>
+            <span className="text-zinc-900 font-semibold">
+              {language === 'fr' ? 'Collections & Capsules Thématiques' : 'Curated Collections & Capsules'}
+            </span>
           </nav>
         </div>
       </div>
@@ -191,15 +195,17 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
           <div className="relative z-20 max-w-2xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Curated GLADYNS Archive</span>
+              <span>{language === 'fr' ? 'Archive Thématique GLADYNS' : 'Curated GLADYNS Archive'}</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium tracking-tight text-white leading-tight">
-              Curated Collections & Seasonal Capsules
+              {language === 'fr' ? 'Collections & Capsules Saisonnières' : 'Curated Collections & Seasonal Capsules'}
             </h1>
 
             <p className="text-xs sm:text-sm text-zinc-300/90 leading-relaxed font-light">
-              Explore thematic capsules curated by our category experts. Each collection pairs functional aesthetics, heritage craftsmanship, and premium electronics into cohesive, enduring lifestyle aesthetics.
+              {language === 'fr'
+                ? 'Découvrez nos capsules thématiques sélectionnées par nos experts. Chaque collection associe esthétique fonctionnelle, savoir-faire d\'exception et technologies de pointe.'
+                : 'Explore thematic capsules curated by our category experts. Each collection pairs functional aesthetics, heritage craftsmanship, and premium electronics into cohesive, enduring lifestyle aesthetics.'}
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -210,19 +216,19 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
                 }}
                 className="px-5 py-2.5 bg-white text-zinc-950 hover:bg-zinc-100 rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-sm"
               >
-                Browse All Capsules
+                {language === 'fr' ? 'Parcourir les Capsules' : 'Browse All Capsules'}
               </button>
               <button
                 onClick={onOpenCategories}
                 className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-medium border border-white/20 transition-colors cursor-pointer"
               >
-                Shop by Category
+                {language === 'fr' ? 'Toutes les catégories' : 'Shop by Category'}
               </button>
               <button
                 onClick={onOpenBrand}
                 className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-medium border border-white/20 transition-colors cursor-pointer"
               >
-                Brand Archive
+                {language === 'fr' ? 'Nos Marques' : 'Brand Archive'}
               </button>
             </div>
           </div>
@@ -243,7 +249,7 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
                     : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                 }`}
               >
-                All Capsules ({capsuleData.length})
+                {language === 'fr' ? `Toutes les capsules (${capsuleData.length})` : `All Capsules (${capsuleData.length})`}
               </button>
               {capsuleData.map((capsule) => {
                 const isSelected = selectedCapsuleId === capsule.id;
@@ -270,7 +276,7 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search collection pieces..."
+                placeholder={language === 'fr' ? 'Rechercher une pièce de collection...' : 'Search collection pieces...'}
                 className="w-full pl-9 pr-4 py-2 text-xs bg-zinc-50 focus:bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-950 font-medium placeholder-zinc-400 transition-all"
               />
               {searchQuery && (
@@ -288,7 +294,9 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
         {/* CAPSULES LISTING */}
         {activeCapsules.length === 0 || totalCuratedPieces === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-zinc-200">
-            <p className="text-sm font-semibold text-zinc-900">No collection pieces found for "{searchQuery}"</p>
+            <p className="text-sm font-semibold text-zinc-900">
+              {language === 'fr' ? `Aucune pièce trouvée pour « ${searchQuery} »` : `No collection pieces found for "${searchQuery}"`}
+            </p>
             <button
               onClick={() => {
                 setSearchQuery('');
@@ -296,7 +304,7 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
               }}
               className="mt-4 px-4 py-2 bg-zinc-950 text-white rounded-xl text-xs font-medium cursor-pointer"
             >
-              Reset Filters
+              {language === 'fr' ? 'Réinitialiser les filtres' : 'Reset Filters'}
             </button>
           </div>
         ) : (
@@ -331,7 +339,9 @@ export const CollectionsPage: React.FC<CollectionsPageProps> = ({
                         <p className="text-lg font-mono font-bold text-white tabular-nums">
                           {capsule.products.length}
                         </p>
-                        <p className="text-[11px] text-zinc-400">Curated Pieces</p>
+                        <p className="text-[11px] text-zinc-400">
+                          {language === 'fr' ? 'Pièces sélectionnées' : 'Curated Pieces'}
+                        </p>
                       </div>
                     </div>
                   </div>

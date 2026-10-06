@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Bell, Package, Sparkles, RefreshCw, CheckCheck, Trash2, ArrowUpRight, Heart } from 'lucide-react';
-import { StoreNotification } from '../types/store';
+import { StoreNotification, Product } from '../types/store';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface NotificationDrawerProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface NotificationDrawerProps {
   onNavigateToProduct: (productId: string) => void;
   onOpenOrders?: (orderNumber?: string) => void;
   topClass?: string;
+  products?: Product[];
 }
 
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
@@ -26,8 +28,30 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   onNavigateToProduct,
   onOpenOrders,
   topClass,
+  products,
 }) => {
   const [filter, setFilter] = useState<'all' | 'drop' | 'restock' | 'order'>('all');
+  const { formatPrice, language } = useLanguageCurrency();
+  const isFr = language === 'fr';
+
+  // Dynamically converts any embedded $xxx.xx or $xxx into active currency (CFA)
+  const formatNotificationText = (text?: string): string => {
+    if (!text) return '';
+    return text.replace(/\$(\d+(?:\.\d+)?)/g, (_, val) => {
+      const num = parseFloat(val);
+      return isNaN(num) ? _ : formatPrice(num);
+    });
+  };
+
+  const resolveNotificationImage = (notif: StoreNotification): string | null => {
+    if (notif.image) return notif.image;
+    if (notif.linkTarget && products) {
+      const p = products.find(prod => prod.id === notif.linkTarget || prod.slug === notif.linkTarget);
+      if (p?.primaryImage) return p.primaryImage;
+      if (p?.images?.[0]) return p.images[0];
+    }
+    return null;
+  };
 
   if (!isOpen) return null;
 
@@ -46,18 +70,26 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMinutes < 1) return 'Just now';
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffMinutes < 1) return isFr ? "À l'instant" : 'Just now';
+    if (diffMinutes < 60) return isFr ? `il y a ${diffMinutes} min` : `${diffMinutes}m ago`;
     if (diffHours < 24 && date.getDate() === now.getDate()) {
-      return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      return isFr
+        ? `Aujourd'hui à ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        : `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
     if (diffDays === 1 || (diffDays < 2 && date.getDate() === now.getDate() - 1)) {
-      return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      return isFr
+        ? `Hier à ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        : `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
     if (diffDays < 7) {
-      return `${diffDays}d ago · ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      return isFr
+        ? `il y a ${diffDays} j · ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        : `${diffDays}d ago · ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
-    return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    return isFr
+      ? `${date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })} à ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+      : `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const getIcon = (type: StoreNotification['type']) => {
@@ -107,7 +139,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
               </h2>
               {unreadCount > 0 && (
                 <span className="text-[11px] font-semibold text-white bg-zinc-950 px-2 py-0.5 rounded-full">
-                  {unreadCount} unread
+                  {unreadCount} {isFr ? 'non lues' : 'unread'}
                 </span>
               )}
             </div>
@@ -123,10 +155,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
           <div className="px-6 py-3 border-b border-zinc-100 bg-[#FAF9F6] flex items-center justify-between">
             <div className="flex items-center gap-1">
               {[
-                { id: 'all', label: 'All' },
-                { id: 'drop', label: 'Drops' },
-                { id: 'restock', label: 'Restocks' },
-                { id: 'order', label: 'Orders' },
+                { id: 'all', label: isFr ? 'Tout' : 'All' },
+                { id: 'drop', label: isFr ? 'Nouveautés' : 'Drops' },
+                { id: 'restock', label: isFr ? 'Réassorts' : 'Restocks' },
+                { id: 'order', label: isFr ? 'Commandes' : 'Orders' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -145,11 +177,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
             {unreadCount > 0 && (
               <button
                 onClick={onMarkAllAsRead}
-                title="Mark all as read"
+                title={isFr ? 'Tout marquer comme lu' : 'Mark all as read'}
                 className="text-xs text-zinc-600 hover:text-zinc-950 flex items-center gap-1 cursor-pointer"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Mark all read</span>
+                <span className="hidden sm:inline">{isFr ? 'Tout marquer comme lu' : 'Mark all read'}</span>
               </button>
             )}
           </div>
@@ -161,9 +193,13 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400">
                   <Bell className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-medium text-zinc-900">No notifications found</p>
+                <p className="text-sm font-medium text-zinc-900">
+                  {isFr ? 'Aucune notification' : 'No notifications found'}
+                </p>
                 <p className="text-xs text-zinc-500">
-                  You are all caught up with GLADYNS product updates and shipments.
+                  {isFr
+                    ? 'Vous êtes à jour avec toutes les actualités et livraisons GLADYNS.'
+                    : 'You are all caught up with GLADYNS product updates and shipments.'}
                 </p>
               </div>
             ) : (
@@ -176,19 +212,19 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 const groups = [
                   {
                     id: 'orders',
-                    title: 'Orders & Shipments',
+                    title: isFr ? 'Commandes & Expéditions' : 'Orders & Shipments',
                     items: ordersGroup,
                     badgeStyle: 'bg-blue-50 text-blue-700 border border-blue-100',
                   },
                   {
                     id: 'promos',
-                    title: 'Promotions & Drops',
+                    title: isFr ? 'Promotions & Nouveautés' : 'Promotions & Drops',
                     items: promosGroup,
                     badgeStyle: 'bg-amber-50 text-amber-700 border border-amber-100',
                   },
                   {
                     id: 'account',
-                    title: 'Account & Wishlist',
+                    title: isFr ? 'Compte & Favoris' : 'Account & Wishlist',
                     items: accountGroup,
                     badgeStyle: 'bg-blue-50 text-blue-700 border border-blue-100',
                   },
@@ -216,7 +252,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                             {unreadInGroup > 0 && (
                               <span className="text-[9px] font-black tracking-wider uppercase text-zinc-950 bg-zinc-100 px-2 py-0.5 rounded-full flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-950 animate-pulse" />
-                                {unreadInGroup} NEW
+                                {unreadInGroup} {isFr ? 'NOUVEAU' : 'NEW'}
                               </span>
                             )}
                           </div>
@@ -226,7 +262,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                             {group.items.map((notif) => (
                               <div
                                 key={notif.id}
-                                onClick={() => handleItemClick(notif)}
+                                onClick={(e) => {
+                                  if ((e.target as HTMLElement).closest('button')) return;
+                                  handleItemClick(notif);
+                                }}
                                 className={`p-4 rounded-xl border transition-all cursor-pointer relative ${
                                   notif.read
                                     ? 'bg-white border-zinc-200/70 hover:border-zinc-300'
@@ -234,14 +273,33 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                 }`}
                               >
                                 <div className="flex items-start gap-3">
-                                  <div className="p-2 rounded-lg bg-white border border-zinc-200 shadow-xs shrink-0 mt-0.5">
-                                    {getIcon(notif.type)}
-                                  </div>
+                                  {(() => {
+                                    const notifImg = resolveNotificationImage(notif);
+                                    return (
+                                      <div className="w-12 h-12 rounded-xl bg-white border border-zinc-200/80 shadow-xs shrink-0 mt-0.5 overflow-hidden flex items-center justify-center relative p-0.5">
+                                        {notifImg ? (
+                                          <img
+                                            src={notifImg}
+                                            alt=""
+                                            className="w-full h-full object-cover rounded-lg"
+                                            loading="lazy"
+                                            onError={(e) => {
+                                              (e.currentTarget as HTMLElement).style.display = 'none';
+                                            }}
+                                          />
+                                        ) : (
+                                          <div className="p-1.5 flex items-center justify-center">
+                                            {getIcon(notif.type)}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
 
                                   <div className="flex-1 min-w-0 pr-2">
                                     <div className="flex items-start justify-between gap-2">
                                       <h4 className="text-xs font-semibold text-zinc-900 leading-snug">
-                                        {notif.title}
+                                        {formatNotificationText(notif.title)}
                                       </h4>
                                       <div className="flex items-center gap-1 shrink-0 -mt-0.5">
                                         {!notif.read && (
@@ -251,10 +309,13 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                           <button
                                             type="button"
                                             onClick={(e) => {
+                                              e.preventDefault();
                                               e.stopPropagation();
                                               onDeleteNotification(notif.id);
                                             }}
-                                            title="Delete notification"
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onTouchStart={(e) => e.stopPropagation()}
+                                            title={isFr ? 'Supprimer la notification' : 'Delete notification'}
                                             className="p-1 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
@@ -264,7 +325,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                     </div>
 
                                     <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
-                                      {notif.message}
+                                      {formatNotificationText(notif.message)}
                                     </p>
 
                                     <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-zinc-100">
@@ -274,7 +335,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
                                       {notif.linkTarget && (
                                         <span className="text-[11px] font-medium text-zinc-900 flex items-center gap-0.5 hover:underline">
-                                          <span>View item</span>
+                                          <span>{isFr ? "Voir l'article" : 'View item'}</span>
                                           <ArrowUpRight className="w-3 h-3" />
                                         </span>
                                       )}
@@ -296,13 +357,18 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
           {/* Footer */}
           {notifications.length > 0 && (
             <div className="p-4 border-t border-zinc-200 bg-zinc-50 flex items-center justify-between text-xs text-zinc-500">
-              <span>Real-time drop alerts</span>
+              <span>{isFr ? 'Alertes de nouveautés en direct' : 'Real-time drop alerts'}</span>
               <button
-                onClick={onClearAll}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClearAll?.();
+                }}
                 className="text-xs text-zinc-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear history</span>
+                <span>{isFr ? "Effacer l'historique" : 'Clear history'}</span>
               </button>
             </div>
           )}

@@ -141,8 +141,8 @@ export function detectDeviceLanguage(): Language {
  */
 export function detectCountryAndCurrency(): { countryCode: string; currencyCode: string; detectedLanguage: Language } {
   const detectedLanguage = detectDeviceLanguage();
-  let countryCode = 'US';
-  let currencyCode = 'USD';
+  let countryCode = 'CI';
+  let currencyCode = 'XOF';
 
   if (typeof window !== 'undefined') {
     // Check saved in local storage first
@@ -151,7 +151,7 @@ export function detectCountryAndCurrency(): { countryCode: string; currencyCode:
       const savedCurrency = localStorage.getItem('gladyns_currency');
       if (savedCurrency && SUPPORTED_CURRENCIES[savedCurrency]) {
         return {
-          countryCode: savedCountry || 'US',
+          countryCode: savedCountry || 'CI',
           currencyCode: savedCurrency,
           detectedLanguage,
         };

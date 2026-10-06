@@ -77,7 +77,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="flex flex-col gap-1.5 pointer-events-auto">
             {product.tag && (
               <span className="bg-white/95 backdrop-blur-xs text-slate-900 text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-full tracking-wide border border-slate-200 shadow-2xs max-w-[110px] truncate">
-                {product.tag}
+                {language === 'fr'
+                  ? (product.tag.toLowerCase().includes('new') ? 'Nouveauté'
+                    : product.tag.toLowerCase().includes('hot') ? 'Offre Chaude'
+                    : product.tag.toLowerCase().includes('best') ? 'Meilleure Vente'
+                    : product.tag.toLowerCase().includes('sale') ? 'Solde'
+                    : product.tag)
+                  : product.tag}
               </span>
             )}
             {discountSavings > 0 && (
@@ -91,8 +97,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <button
             type="button"
             onClick={handleHeartClick}
-            aria-label={isWishlisted ? `Remove ${product.name} from favorites` : `Save ${product.name} to favorites`}
-            title={isWishlisted ? 'Saved in favorites' : 'Add to favorites'}
+            aria-label={isWishlisted ? (language === 'fr' ? `Retirer ${product.name} des favoris` : `Remove ${product.name} from favorites`) : (language === 'fr' ? `Ajouter ${product.name} aux favoris` : `Save ${product.name} to favorites`)}
+            title={isWishlisted ? (language === 'fr' ? 'Enregistré dans les favoris' : 'Saved in favorites') : (language === 'fr' ? 'Ajouter aux favoris' : 'Add to favorites')}
             className={`p-1.5 sm:p-2 rounded-full backdrop-blur-md shadow-xs transition-all pointer-events-auto cursor-pointer ${
               isWishlisted
                 ? 'bg-white text-rose-600 ring-2 ring-rose-200 scale-105'

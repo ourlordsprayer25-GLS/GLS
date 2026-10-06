@@ -1044,10 +1044,24 @@ export async function deleteRealtimeNotification(notificationId: string) {
 
   if (isSupabaseConfigured) {
     try {
-      await supabase.from('notifications').delete().eq('id', notificationId);
+      await supabase.from('notifications').delete().or(`id.eq.${notificationId},linkTarget.eq.${notificationId}`);
     } catch (err) {
       console.error('Supabase delete notification error:', err);
     }
+  }
+}
+
+export async function clearAllRealtimeNotifications() {
+  try {
+    await localFetch('/api/sync/notifications', {
+      method: 'DELETE',
+    });
+  } catch (err) {}
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('notifications').delete().neq('id', '');
+    } catch (err) {}
   }
 }
 

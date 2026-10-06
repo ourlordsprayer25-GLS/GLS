@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Product, 
   UserProfile, 
@@ -8,6 +8,7 @@ import {
   StoreSettings 
 } from '../types/store';
 import { SectionType } from './SectionPage';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 import { Header } from './Header';
 import { HeroSection } from './HeroSection';
@@ -34,6 +35,7 @@ import { WishlistPage } from './WishlistPage';
 import { NotificationDrawer } from './NotificationDrawer';
 import { CheckoutModal } from './CheckoutModal';
 import { LanguageCurrencyModal } from './LanguageCurrencyModal';
+import { ShareModal } from './ShareModal';
 import { Footer } from './Footer';
 import { FloatingWhatsAppConcierge } from './WhatsAppWidget';
 import { FloatingCartWidget } from './FloatingCartWidget';
@@ -73,7 +75,7 @@ interface StorefrontViewProps {
   authModalMode: 'login' | 'register';
   isMobileSidebarOpen: boolean;
   initialInvoiceNumber: string | null;
-  activeToast: { id: string; title: string; message: string; orderNumber?: string } | null;
+  activeToast: { id: string; title: string; message: string; orderNumber?: string; image?: string } | null;
   unreadNotificationCount: number;
   cartItemCount: number;
   wishlistCount: number;
@@ -157,6 +159,32 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
     handleMarkNotificationRead, handleDeleteNotification, handleClearAllNotifications,
     handleNavigateToProductFromNotification, handleOrderSuccess, handleLoginSuccess
   } = props;
+
+  const { formatPrice, language } = useLanguageCurrency();
+
+  const formatCurrencyInText = (text?: string): string => {
+    if (!text) return '';
+    return text.replace(/\$(\d+(?:\.\d+)?)/g, (_, val) => {
+      const num = parseFloat(val);
+      return isNaN(num) ? _ : formatPrice(num);
+    });
+  };
+
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareProduct, setShareProduct] = useState<Product | null>(null);
+  const [shareInitialMode, setShareInitialMode] = useState<'store' | 'product'>('store');
+
+  const handleOpenShareStore = () => {
+    setShareProduct(selectedProduct || null);
+    setShareInitialMode('store');
+    setIsShareModalOpen(true);
+  };
+
+  const handleOpenShareProduct = (prod: Product) => {
+    setShareProduct(prod);
+    setShareInitialMode('product');
+    setIsShareModalOpen(true);
+  };
 
   const lastViewKeyRef = useRef<string>('');
 
@@ -274,6 +302,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
             setIsNotificationsOpen(false);
             handleBackToShop();
           }}
+          onOpenShareModal={handleOpenShareStore}
           onOpenSidebar={() => setIsMobileSidebarOpen(true)}
           onOpenCart={handleOpenCartPage}
           onOpenNotifications={() => setIsNotificationsOpen(true)}
@@ -321,6 +350,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
                 handleProceedToCheckout();
               }}
               onOpenCollections={handleOpenCollectionsPage}
+              onOpenShare={handleOpenShareProduct}
               storeSettings={storeSettings}
             />
           ) : isCategoriesPageOpen ? (
@@ -507,13 +537,13 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200">
                   <div className="flex items-center gap-3">
                     <h2 className="text-xl sm:text-2xl font-display font-medium text-zinc-950 tracking-tight">
-                      Curated Departments & Catalog
+                      {language === 'fr' ? 'Rayons Sélectionnés & Catalogue' : 'Curated Departments & Catalog'}
                     </h2>
                     <button
                       onClick={() => handleOpenSectionPage('collection')}
                       className="text-xs font-semibold text-zinc-950 hover:text-zinc-600 transition-colors flex items-center gap-1 cursor-pointer group"
                     >
-                      <span>View All</span>
+                      <span>{language === 'fr' ? 'Tout voir' : 'View All'}</span>
                       <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
                     </button>
                   </div>
@@ -542,10 +572,10 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
                         onChange={(e) => setSortBy(e.target.value as any)}
                         className="bg-transparent focus:outline-none font-medium cursor-pointer"
                       >
-                        <option value="featured">Featured First</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="rating">Highest Rated</option>
+                        <option value="featured">{language === 'fr' ? 'En vedette' : 'Featured First'}</option>
+                        <option value="price-asc">{language === 'fr' ? 'Prix : Croissant' : 'Price: Low to High'}</option>
+                        <option value="price-desc">{language === 'fr' ? 'Prix : Décroissant' : 'Price: High to Low'}</option>
+                        <option value="rating">{language === 'fr' ? 'Mieux notés' : 'Highest Rated'}</option>
                       </select>
                     </div>
                   </div>
@@ -553,20 +583,26 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
 
                 {searchQuery && (
                   <div className="flex items-center gap-2 py-4 text-xs text-zinc-600">
-                    <span>Searching for <strong>"{searchQuery}"</strong></span>
+                    <span>{language === 'fr' ? 'Recherche de' : 'Searching for'} <strong>"{searchQuery}"</strong></span>
                     <button
                       onClick={() => setSearchQuery('')}
                       className="text-zinc-900 underline hover:text-zinc-600 cursor-pointer"
                     >
-                      Clear filter
+                      {language === 'fr' ? 'Effacer le filtre' : 'Clear filter'}
                     </button>
                   </div>
                 )}
 
                 {filteredProducts.length === 0 ? (
                   <div className="py-24 text-center space-y-3">
-                    <p className="text-base font-semibold text-zinc-900">No pieces match your search</p>
-                    <p className="text-xs text-zinc-500">Try browsing all collections or checking your search terms.</p>
+                    <p className="text-base font-semibold text-zinc-900">
+                      {language === 'fr' ? 'Aucun article ne correspond à votre recherche' : 'No pieces match your search'}
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      {language === 'fr'
+                        ? 'Essayez de parcourir toutes les collections ou de modifier vos termes de recherche.'
+                        : 'Try browsing all collections or checking your search terms.'}
+                    </p>
                     <button
                       onClick={() => {
                         setSelectedCategory('all');
@@ -574,7 +610,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
                       }}
                       className="px-4 py-2 bg-zinc-950 text-white text-xs font-semibold rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
                     >
-                      View All Pieces
+                      {language === 'fr' ? 'Voir tous les articles' : 'View All Pieces'}
                     </button>
                   </div>
                 ) : (
@@ -606,6 +642,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onClearAll={handleClearAllNotifications}
           onNavigateToProduct={handleNavigateToProductFromNotification}
           onOpenOrders={handleOpenOrders}
+          products={products}
         />
 
         <CheckoutModal
@@ -627,6 +664,14 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
 
         <LanguageCurrencyModal />
 
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          product={shareProduct}
+          storeSettings={storeSettings}
+          initialMode={shareInitialMode}
+        />
+
         <Footer
           onOpenSection={handleOpenSectionPage}
           onOpenCategoriesPage={handleOpenCategoriesPage}
@@ -640,6 +685,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onOpenOrders={handleOpenOrders}
           onOpenProfile={handleOpenProfile}
           onOpenAuth={() => handleOpenAuth('login')}
+          onOpenShareModal={handleOpenShareStore}
           storeSettings={storeSettings}
         />
 
@@ -711,13 +757,23 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
             className="fixed top-20 sm:top-24 right-4 md:right-8 z-[250] max-w-sm w-full bg-slate-900 text-white rounded-2xl shadow-2xl border border-slate-700/60 p-4 overflow-hidden animate-in slide-in-from-top-6 duration-300 cursor-pointer hover:border-emerald-400 transition-all group pointer-events-auto"
           >
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-emerald-500/20">
-                <span className="text-sm font-bold">✓</span>
+              <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/80 overflow-hidden flex items-center justify-center text-white shrink-0 shadow-lg shadow-emerald-500/10">
+                {activeToast.image ? (
+                  <img
+                    src={activeToast.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-emerald-600 flex items-center justify-center">
+                    <span className="text-sm font-bold">✓</span>
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-                    New Order Placed
+                    {language === 'fr' ? 'Nouvelle Commande Enregistrée' : 'New Order Placed'}
                   </p>
                   <button
                     onClick={(e) => {
@@ -730,13 +786,13 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
                   </button>
                 </div>
                 <p className="text-xs font-semibold text-white mt-1">
-                  {activeToast.title}
+                  {formatCurrencyInText(activeToast.title)}
                 </p>
                 <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
-                  {activeToast.message}
+                  {formatCurrencyInText(activeToast.message)}
                 </p>
                 <div className="flex items-center gap-1 mt-2 text-[10px] font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">
-                  <span>View Live 5-Stage Tracking</span>
+                  <span>{language === 'fr' ? 'Suivre en Direct (5 étapes)' : 'View Live 5-Stage Tracking'}</span>
                   <span>➔</span>
                 </div>
               </div>

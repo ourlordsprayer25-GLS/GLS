@@ -163,7 +163,7 @@ export const HotDealCard: React.FC<HotDealCardProps> = ({
           <div className="flex items-center justify-between pt-2 border-t border-white/10">
             {product.colors && product.colors.length > 1 ? (
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                <span className="text-[11px] text-slate-400">Finish:</span>
+                <span className="text-[11px] text-slate-400">{language === 'fr' ? 'Finition :' : 'Finish:'}</span>
                 {product.colors.map((c) => (
                   <button
                     key={c.id || c.name}

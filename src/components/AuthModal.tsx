@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,6 +17,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   initialMode = 'login',
 }) => {
   const { login, signInWithEmail, signUpWithEmail, user, providerErrorNotice, clearProviderError } = useAuth();
+  const { language } = useLanguageCurrency();
+  const isFr = language === 'fr';
+
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +51,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       await login('google');
     } catch (e: any) {
-      setErrorMsg(e?.message || 'Google authentication failed.');
+      setErrorMsg(e?.message || (isFr ? 'Échec de l\'authentification Google.' : 'Google authentication failed.'));
     } finally {
       setIsProcessing(false);
     }
@@ -56,11 +60,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setErrorMsg('Please provide both email and password.');
+      setErrorMsg(isFr ? 'Veuillez renseigner votre e-mail et votre mot de passe.' : 'Please provide both email and password.');
       return;
     }
     if (mode === 'register' && !name) {
-      setErrorMsg('Please enter your full name.');
+      setErrorMsg(isFr ? 'Veuillez saisir votre nom complet.' : 'Please enter your full name.');
       return;
     }
 
@@ -78,9 +82,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } catch (e: any) {
       const rawMsg = e?.message || '';
       if (rawMsg.toLowerCase().includes('invalid login credentials') || rawMsg.toLowerCase().includes('invalid_grant')) {
-        setErrorMsg('Invalid email or password. If you are new, click "Create Account" above to register.');
+        setErrorMsg(isFr ? 'E-mail ou mot de passe incorrect. Si vous êtes nouveau, cliquez sur « Créer un compte » ci-dessus.' : 'Invalid email or password. If you are new, click "Create Account" above to register.');
       } else {
-        setErrorMsg(rawMsg || `${mode === 'login' ? 'Sign in' : 'Account creation'} failed.`);
+        setErrorMsg(rawMsg || (isFr ? `${mode === 'login' ? 'Échec de la connexion' : 'Échec de la création du compte'}.` : `${mode === 'login' ? 'Sign in' : 'Account creation'} failed.`));
       }
     } finally {
       setIsProcessing(false);
@@ -97,7 +101,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <button
           onClick={onClose}
           className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-950 hover:bg-zinc-100 rounded-full transition-all cursor-pointer z-10"
-          aria-label="Close modal"
+          aria-label={isFr ? 'Fermer la boîte de dialogue' : 'Close modal'}
         >
           <X className="w-5 h-5" />
         </button>
@@ -126,7 +130,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : 'text-zinc-600 hover:text-zinc-950'
               }`}
             >
-              Sign In
+              {isFr ? 'Connexion' : 'Sign In'}
             </button>
             <button
               type="button"
@@ -137,25 +141,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : 'text-zinc-600 hover:text-zinc-950'
               }`}
             >
-              Create Account
+              {isFr ? 'Créer un compte' : 'Create Account'}
             </button>
           </div>
 
           <div className="space-y-1">
             <h2 className="text-xl font-display font-medium text-zinc-900">
-              {mode === 'login' ? 'Sign In to Your Account' : 'Create Prestige Account'}
+              {mode === 'login' 
+                ? (isFr ? 'Connexion à votre compte' : 'Sign In to Your Account') 
+                : (isFr ? 'Créer un compte Privilège' : 'Create Prestige Account')}
             </h2>
             <p className="text-xs text-zinc-500 leading-relaxed max-w-xs mx-auto">
               {mode === 'login'
-                ? 'Access your orders, wishlist, and boutique preferences.'
-                : 'Join GLADYNS for global express shipping and VIP privileges.'}
+                ? (isFr ? 'Accédez à vos commandes, vos favoris et vos préférences de boutique.' : 'Access your orders, wishlist, and boutique preferences.')
+                : (isFr ? 'Rejoignez GLADYNS pour la livraison express mondiale et des privilèges VIP.' : 'Join GLADYNS for global express shipping and VIP privileges.')}
             </p>
           </div>
 
           {/* Error Notice */}
           {(errorMsg || providerErrorNotice) && (
             <div className="p-3.5 bg-rose-50 border border-rose-100 rounded-2xl text-[11px] text-rose-600 text-left animate-in fade-in duration-200">
-              <p className="font-bold mb-0.5">Authentication Notice:</p>
+              <p className="font-bold mb-0.5">{isFr ? 'Avis d\'authentification :' : 'Authentication Notice:'}</p>
               <p>{errorMsg || providerErrorNotice}</p>
             </div>
           )}
@@ -186,7 +192,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>Continue with Google</span>
+              <span>{isFr ? 'Continuer avec Google' : 'Continue with Google'}</span>
             </button>
           </div>
 
@@ -194,7 +200,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="relative flex items-center justify-center my-2">
             <div className="border-t border-zinc-200 w-full" />
             <span className="bg-white px-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400 shrink-0">
-              Or {mode === 'login' ? 'sign in' : 'register'} with email
+              {isFr
+                ? (mode === 'login' ? 'Ou connectez-vous par e-mail' : 'Ou inscrivez-vous par e-mail')
+                : `Or ${mode === 'login' ? 'sign in' : 'register'} with email`}
             </span>
             <div className="border-t border-zinc-200 w-full" />
           </div>
@@ -203,13 +211,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-3.5 text-left">
             {mode === 'register' && (
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-zinc-700 block">Full Name</label>
+                <label className="text-[11px] font-bold text-zinc-700 block">
+                  {isFr ? 'Nom complet' : 'Full Name'}
+                </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     required
-                    placeholder="Jane Doe"
+                    placeholder={isFr ? 'Marie Dubois' : 'Jane Doe'}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-zinc-50 border border-zinc-200 focus:border-zinc-950 focus:bg-white rounded-xl text-xs text-zinc-900 transition-all outline-none"
@@ -219,7 +229,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
 
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-zinc-700 block">Email Address</label>
+              <label className="text-[11px] font-bold text-zinc-700 block">
+                {isFr ? 'Adresse e-mail' : 'Email Address'}
+              </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -234,7 +246,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-zinc-700 block">Password</label>
+              <label className="text-[11px] font-bold text-zinc-700 block">
+                {isFr ? 'Mot de passe' : 'Password'}
+              </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -258,7 +272,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
+                  <span>
+                    {mode === 'login'
+                      ? (isFr ? 'Connexion' : 'Sign In')
+                      : (isFr ? 'Créer un compte' : 'Create Account')}
+                  </span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -269,24 +287,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="pt-2 text-center text-xs text-zinc-500">
             {mode === 'login' ? (
               <p>
-                Don't have an account?{' '}
+                {isFr ? 'Vous n\'avez pas encore de compte ? ' : 'Don\'t have an account? '}
                 <button
                   type="button"
                   onClick={() => { setMode('register'); setErrorMsg(null); }}
                   className="font-bold text-zinc-950 hover:underline cursor-pointer"
                 >
-                  Create Account
+                  {isFr ? 'Créer un compte' : 'Create Account'}
                 </button>
               </p>
             ) : (
               <p>
-                Already have an account?{' '}
+                {isFr ? 'Vous possédez déjà un compte ? ' : 'Already have an account? '}
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setErrorMsg(null); }}
                   className="font-bold text-zinc-950 hover:underline cursor-pointer"
                 >
-                  Sign In
+                  {isFr ? 'Connexion' : 'Sign In'}
                 </button>
               </p>
             )}
@@ -295,7 +313,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Security Footer */}
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-zinc-400 font-medium pt-1">
             <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-            <span>256-bit SSL Encrypted Connection</span>
+            <span>{isFr ? 'Connexion chiffrée SSL 256 bits' : '256-bit SSL Encrypted Connection'}</span>
           </div>
 
         </div>

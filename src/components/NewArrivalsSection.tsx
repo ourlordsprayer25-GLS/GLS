@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Product, ProductVariant } from '../types/store';
 import { ProductCard } from './ProductCard';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface NewArrivalsSectionProps {
   products: Product[];
@@ -20,6 +21,8 @@ export const NewArrivalsSection: React.FC<NewArrivalsSectionProps> = ({
   onQuickAdd,
   onViewAllNew,
 }) => {
+  const { language } = useLanguageCurrency();
+  const isFr = language === 'fr';
   const getProductTimestamp = (p: Product): number => {
     if ((p as any).created_at) {
       const parsed = Date.parse((p as any).created_at);
@@ -56,14 +59,14 @@ export const NewArrivalsSection: React.FC<NewArrivalsSectionProps> = ({
       {/* Streamlined Section Header: Title + View All */}
       <div className="flex items-center justify-between pb-4 border-b border-zinc-200">
         <h2 className="text-xl sm:text-2xl font-display font-medium text-zinc-950 tracking-tight">
-          New Arrivals
+          {isFr ? 'Nouveautés' : 'New Arrivals'}
         </h2>
 
         <button
           onClick={onViewAllNew}
           className="text-xs font-semibold text-zinc-950 hover:text-zinc-600 transition-colors flex items-center gap-1 cursor-pointer group"
         >
-          <span>View All</span>
+          <span>{isFr ? 'Voir tout' : 'View All'}</span>
           <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
         </button>
       </div>

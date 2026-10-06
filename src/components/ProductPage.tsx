@@ -42,6 +42,7 @@ interface ProductPageProps {
   onAddToCart: (product: Product, variant: ProductVariant, size: ProductSize, quantity: number) => void;
   onBuyItNow?: (product: Product, variant: ProductVariant, size: ProductSize, quantity: number) => void;
   onOpenCollections?: () => void;
+  onOpenShare?: (product: Product) => void;
   storeSettings?: StoreSettings;
 }
 
@@ -55,6 +56,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   onAddToCart,
   onBuyItNow,
   onOpenCollections,
+  onOpenShare,
   storeSettings,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
@@ -722,7 +724,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                         <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
                         <span>{product.warranty}</span>
                       </span>
-                      <span className="text-[10px] text-blue-700 font-mono">100% Genuine Studio Certification</span>
+                      <span className="text-[10px] text-blue-700 font-mono">
+                        {language === 'fr' ? 'Certification 100% Authentique' : '100% Genuine Studio Certification'}
+                      </span>
                     </div>
                   )}
                 </>
@@ -808,7 +812,13 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   {/* Share Circle */}
                   <button
                     type="button"
-                    onClick={handleShare}
+                    onClick={() => {
+                      if (onOpenShare) {
+                        onOpenShare(product);
+                      } else {
+                        handleShare();
+                      }
+                    }}
                     className="w-[52px] h-[52px] rounded-full border border-slate-900 hover:border-blue-600 text-slate-900 hover:text-blue-600 flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer bg-white"
                     title="Share product link"
                   >
@@ -881,10 +891,12 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                     (() => {
                       const hasColor = selectedColor?.name && !['standard', 'default'].includes(selectedColor.name.toLowerCase());
                       const hasSize = selectedSize?.name && !['standard', 'default', 'one size', 'taille unique'].includes(selectedSize.name.toLowerCase());
-                      const colorPart = hasColor ? `Color: ${selectedColor.name}` : '';
-                      const sizePart = hasSize ? `Size: ${selectedSize.name}` : '';
+                      const colorPart = hasColor ? (language === 'fr' ? `Couleur: ${selectedColor.name}` : `Color: ${selectedColor.name}`) : '';
+                      const sizePart = hasSize ? (language === 'fr' ? `Taille: ${selectedSize.name}` : `Size: ${selectedSize.name}`) : '';
                       const specInfo = [colorPart, sizePart].filter(Boolean).join(', ');
-                      return `Hello GLADYNS Studio, I would like to inquire about the ${product.name}${specInfo ? ` (${specInfo})` : ''} - Price: ${formatPrice(product.price)}.\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`;
+                      return language === 'fr'
+                        ? `Bonjour GLADYNS Studio, je souhaite me renseigner sur le produit ${product.name}${specInfo ? ` (${specInfo})` : ''} - Prix: ${formatPrice(product.price)}.\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`
+                        : `Hello GLADYNS Studio, I would like to inquire about the ${product.name}${specInfo ? ` (${specInfo})` : ''} - Price: ${formatPrice(product.price)}.\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://gladyns.store'}/product/${product.id}`;
                     })()
                   )}
                   target="_blank"
@@ -896,7 +908,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                     <span>{language === 'fr' ? 'Conseiller VIP via WhatsApp' : 'Inquire via WhatsApp Support'}</span>
                   </span>
                   <span className="text-[10px] text-slate-400 group-hover:text-emerald-800 font-mono">
-                    GLADYNS Desk · Online →
+                    {language === 'fr' ? 'Desk GLADYNS · En ligne →' : 'GLADYNS Desk · Online →'}
                   </span>
                 </a>
               </div>
@@ -905,7 +917,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
                 <span className="flex items-center gap-1">
                   <Truck className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{language === 'fr' ? 'Livraison gratuite dès 150$' : 'Free delivery over $150'}</span>
+                  <span>{language === 'fr' ? 'Livraison standard 2 000 CFA' : 'Standard delivery 2,000 CFA'}</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
@@ -1045,8 +1057,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   </h4>
                   <p className="text-xs text-slate-600">
                     {language === 'fr'
-                      ? 'Livraison standard offerte pour toutes les commandes supérieures à 150$. Acheminement en 3 à 5 jours ouvrés avec suivi complet.'
-                      : 'Complimentary standard worldwide shipping on orders exceeding $150. Delivery takes 3–5 business days via tracked carbon-neutral couriers.'}
+                      ? 'Livraison standard à 2 000 CFA (offerte dès 150 $ d\'achats). Acheminement sécurisé avec suivi complet en temps réel.'
+                      : 'Standard delivery at 2,000 CFA (complimentary on orders exceeding $150). Tracked secure courier service.'}
                   </p>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/60 space-y-2">

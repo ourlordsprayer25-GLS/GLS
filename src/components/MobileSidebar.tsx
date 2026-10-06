@@ -220,7 +220,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
             {searchQuery.trim() && (
               <div className="bg-white rounded-2xl p-2.5 border border-slate-200 shadow-xs space-y-2">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1 pt-0.5">
-                  Matching Pieces ({matchingProducts.length})
+                  {language === 'fr' ? 'Articles correspondants' : 'Matching Pieces'} ({matchingProducts.length})
                 </p>
                 {matchingProducts.length > 0 ? (
                   <div className="space-y-1.5">
@@ -255,7 +255,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   </div>
                 ) : (
                   <p className="text-[11px] text-slate-500 px-2 py-1">
-                    No matching pieces found.
+                    {language === 'fr' ? 'Aucun article correspondant.' : 'No matching pieces found.'}
                   </p>
                 )}
               </div>
@@ -451,7 +451,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                 }}
                 className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-extrabold uppercase text-xs rounded-full shadow-md hover:shadow-lg transition-all cursor-pointer text-center tracking-wider"
               >
-                SPECIAL OFFER
+                {language === 'fr' ? 'OFFRES SPÉCIALES' : 'SPECIAL OFFER'}
               </button>
             </div>
 
@@ -555,7 +555,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
                 {user ? user.firstName : (language === 'fr' ? 'Se Connecter' : 'Sign In')}
               </span>
               <span className="text-[10px] text-slate-400 font-medium">
-                {user ? (user.tier || 'Member') : (language === 'fr' ? 'Mon Compte' : 'Profile')}
+                {user ? (user.tier || (language === 'fr' ? 'Membre' : 'Member')) : (language === 'fr' ? 'Mon Compte' : 'Profile')}
               </span>
             </div>
 

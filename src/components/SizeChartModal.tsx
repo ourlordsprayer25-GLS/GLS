@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, Ruler, Sliders, Cpu } from 'lucide-react';
+import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
 interface SizeChartModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
   productName,
   category = 'apparel',
 }) => {
+  const { language } = useLanguageCurrency();
   const [unit, setUnit] = useState<'in' | 'cm'>('in');
 
   if (!isOpen) return null;
@@ -60,7 +62,9 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
         <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200">
           <div>
             <h3 className="text-xl font-display font-medium text-zinc-900">
-              {isEquipment ? 'Dimensions & Technical Specifications Guide' : 'Sizing & Fit Guide'}
+              {isEquipment 
+                ? (language === 'fr' ? 'Guide des Dimensions & Spécifications Techniques' : 'Dimensions & Technical Specifications Guide') 
+                : (language === 'fr' ? 'Guide des Tailles & Coupes' : 'Sizing & Fit Guide')}
             </h3>
             <p className="text-xs text-zinc-500 mt-0.5">{productName}</p>
           </div>
@@ -77,7 +81,9 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
           {/* Unit Toggle */}
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-700 uppercase tracking-wider">
-              {isEquipment ? 'Physical Dimensions' : 'Garment Dimensions'}
+              {isEquipment 
+                ? (language === 'fr' ? 'Dimensions physiques' : 'Physical Dimensions') 
+                : (language === 'fr' ? 'Dimensions du vêtement' : 'Garment Dimensions')}
             </span>
             <div className="flex items-center bg-zinc-100 p-1 rounded-lg">
               <button
@@ -88,7 +94,7 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
                     : 'text-zinc-600 hover:text-zinc-950'
                 }`}
               >
-                {isEquipment ? 'Inches (in)' : 'Inches (in)'}
+                {language === 'fr' ? 'Pouces (in)' : 'Inches (in)'}
               </button>
               <button
                 onClick={() => setUnit('cm')}
@@ -98,7 +104,7 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
                     : 'text-zinc-600 hover:text-zinc-950'
                 }`}
               >
-                {isEquipment ? 'Centimeters (cm)' : 'Centimeters (cm)'}
+                {language === 'fr' ? 'Centimètres (cm)' : 'Centimeters (cm)'}
               </button>
             </div>
           </div>
@@ -109,11 +115,11 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200 text-zinc-600 font-semibold uppercase tracking-wider">
-                    <th className="py-3 px-4">Edition / Configuration</th>
-                    <th className="py-3 px-4">Width (W)</th>
-                    <th className="py-3 px-4">Depth (D)</th>
-                    <th className="py-3 px-4">Height (H)</th>
-                    <th className="py-3 px-4">Weight</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Édition / Modèle' : 'Edition / Configuration'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Largeur (L)' : 'Width (W)'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Profondeur (P)' : 'Depth (D)'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Hauteur (H)' : 'Height (H)'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Poids' : 'Weight'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200 font-mono tabular-nums text-zinc-800">
@@ -132,11 +138,11 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200 text-zinc-600 font-semibold uppercase tracking-wider">
-                    <th className="py-3 px-4">Size</th>
-                    <th className="py-3 px-4">Chest</th>
-                    <th className="py-3 px-4">Shoulder</th>
-                    <th className="py-3 px-4">Sleeve</th>
-                    <th className="py-3 px-4">Body Length</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Taille' : 'Size'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Poitrine' : 'Chest'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Épaules' : 'Shoulder'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Manches' : 'Sleeve'}</th>
+                    <th className="py-3 px-4">{language === 'fr' ? 'Longueur' : 'Body Length'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200 font-mono tabular-nums text-zinc-800">
@@ -157,37 +163,69 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
           {/* Recommendations & Tips */}
           <div className="bg-[#FAF9F6] p-4 rounded-xl border border-zinc-200/80 space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-900">
-              {isEquipment ? 'Equipment Setup & Compatibility Notes' : 'Product Fit Recommendation'}
+              {isEquipment 
+                ? (language === 'fr' ? 'Installation & Notes de Compatibilité' : 'Equipment Setup & Compatibility Notes') 
+                : (language === 'fr' ? 'Conseils de Taille & Coupe' : 'Product Fit Recommendation')}
             </h4>
             <ul className="text-xs text-zinc-600 space-y-2">
               {isEquipment ? (
                 <>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
-                    <span><strong>Power & Voltage:</strong> Universal 100V–240V auto-switching power supply included with region-specific IEC cable.</span>
+                    <span>
+                      <strong>{language === 'fr' ? 'Alimentation & Tension : ' : 'Power & Voltage: '}</strong>
+                      {language === 'fr' 
+                        ? 'Bloc universel 100V–240V à commutation automatique inclus avec câble IEC adapté.' 
+                        : 'Universal 100V–240V auto-switching power supply included with region-specific IEC cable.'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
-                    <span><strong>Studio Integration:</strong> Designed for standard studio rack and desk footprints with vibration-damped silicone feet.</span>
+                    <span>
+                      <strong>{language === 'fr' ? 'Intégration Studio : ' : 'Studio Integration: '}</strong>
+                      {language === 'fr' 
+                        ? 'Conçu pour les racks et bureaux standards avec patins amortisseurs en silicone.' 
+                        : 'Designed for standard studio rack and desk footprints with vibration-damped silicone feet.'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
-                    <span><strong>Warranty & Support:</strong> Backed by a 3-year global manufacturer warranty and direct concierge setup assistance.</span>
+                    <span>
+                      <strong>{language === 'fr' ? 'Garantie & Support : ' : 'Warranty & Support: '}</strong>
+                      {language === 'fr' 
+                        ? 'Garanti 3 ans constructeur avec assistance d\'installation personnalisée.' 
+                        : 'Backed by a 3-year global manufacturer warranty and direct concierge setup assistance.'}
+                    </span>
                   </li>
                 </>
               ) : (
                 <>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
-                    <span><strong>Relaxed Modern Silhouette:</strong> This garment is cut with a relaxed drape and slightly dropped shoulders. Take your true size for the intended archival boxy fit.</span>
+                    <span>
+                      <strong>{language === 'fr' ? 'Silhouette Moderne : ' : 'Relaxed Modern Silhouette: '}</strong>
+                      {language === 'fr' 
+                        ? 'Coupe ample et décontractée avec épaules légèrement tombantes. Choisissez votre taille habituelle.' 
+                        : 'This garment is cut with a relaxed drape and slightly dropped shoulders. Take your true size for the intended archival boxy fit.'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
-                    <span><strong>Layering Fit:</strong> If you plan to wear thick fisherman knitwear beneath, your normal size provides ample room without bunching.</span>
+                    <span>
+                      <strong>{language === 'fr' ? 'Superposition : ' : 'Layering Fit: '}</strong>
+                      {language === 'fr' 
+                        ? 'Si vous prévoyez de porter un pull épais en dessous, votre taille habituelle laisse une aisance parfaite.' 
+                        : 'If you plan to wear thick fisherman knitwear beneath, your normal size provides ample room without bunching.'}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
-                    <span><strong>Free Size Exchanges:</strong> Need a different size? We offer complimentary prepaid exchanges within 30 days.</span>
+                    <span>
+                      <strong>{language === 'fr' ? 'Échanges Gratuits : ' : 'Free Size Exchanges: '}</strong>
+                      {language === 'fr' 
+                        ? 'Besoin d\'une autre taille ? Les échanges sont offerts et prépayés sous 30 jours.' 
+                        : 'Need a different size? We offer complimentary prepaid exchanges within 30 days.'}
+                    </span>
                   </li>
                 </>
               )}
@@ -201,7 +239,7 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 text-xs font-semibold bg-zinc-950 text-white hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
           >
-            Got it
+            {language === 'fr' ? 'Compris' : 'Got it'}
           </button>
         </div>
       </div>

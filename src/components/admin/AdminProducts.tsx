@@ -726,15 +726,23 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
           return;
         }
         setProducts(prev => [product, ...prev]);
-        playNotificationSound();
+        // Record this product as alerted so it never triggers duplicate notifications
+        try {
+          const alerted = new Set(JSON.parse(localStorage.getItem('gls_alerted_product_ids') || '[]'));
+          alerted.add(product.id);
+          localStorage.setItem('gls_alerted_product_ids', JSON.stringify(Array.from(alerted)));
+        } catch (e) {}
+
+        const formattedPriceStr = `${Math.round(product.price < 500 ? product.price * 605 : product.price).toLocaleString()} CFA`;
         addRealtimeNotification({
-          id: `notif-new-product-${product.id}-${Date.now()}`,
+          id: `notif-new-product-${product.id}`,
           title: `✨ New Arrival: ${product.name}`,
-          message: `Discover our newest addition: "${product.name}" is now available in store for $${product.price.toFixed(2)}.`,
+          message: `Discover our newest addition: "${product.name}" is now available in store for ${formattedPriceStr}.`,
           timestamp: Date.now(),
           read: false,
           type: 'product',
           linkTarget: product.id,
+          image: product.primaryImage || product.images?.[0],
         });
         if (onNewProductAdded) {
           onNewProductAdded(product);

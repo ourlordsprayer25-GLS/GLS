@@ -5,14 +5,49 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* ==========================================================================
+   Cross-Browser Mobile Stabilization (Xiaomi / MIUI / Android WebKit / Safari)
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: #FAF9F6;
   color: #18181B;
+  min-width: 320px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Prevent Xiaomi browser automatic night mode / invert filter distortion */
+img, svg, video, canvas {
+  color-scheme: light;
+  max-width: 100%;
 }
 
 h1, h2, h3, .font-display {
   font-family: var(--font-serif);
+}
+
+/* Ensure flex/grid children don't burst layouts on older WebKit engines */
+.flex, [class*="flex"] {
+  min-width: 0;
+}
+
+.grid, [class*="grid"] {
+  min-width: 0;
 }
 
 /* Custom subtle scrollbar */

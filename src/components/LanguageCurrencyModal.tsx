@@ -52,7 +52,7 @@ export const LanguageCurrencyModal: React.FC = () => {
                       {t('autoDetected')}
                     </span>
                   ) : (
-                    <span>Customized preferences</span>
+                    <span>{language === 'fr' ? 'Préférences personnalisées' : 'Customized preferences'}</span>
                   )}
                 </p>
               </div>
@@ -111,13 +111,15 @@ export const LanguageCurrencyModal: React.FC = () => {
             {activeTab === 'language' && (
               <div className="space-y-4">
                 <p className="text-xs text-slate-500">
-                  Select your preferred shopping language. Device language is automatically detected.
+                  {language === 'fr' 
+                    ? 'Choisissez votre langue préférée. La langue de votre appareil est détectée automatiquement.' 
+                    : 'Select your preferred shopping language. Device language is automatically detected.'}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
-                    { code: 'en' as Language, title: 'English', sub: 'Default / International', flag: '🇺🇸' },
-                    { code: 'fr' as Language, title: 'Français', sub: 'French / France & International', flag: '🇫🇷' },
+                    { code: 'en' as Language, title: 'English', sub: language === 'fr' ? 'Par défaut / International' : 'Default / International', flag: '🇺🇸' },
+                    { code: 'fr' as Language, title: 'Français', sub: language === 'fr' ? 'France & International' : 'French / France & International', flag: '🇫🇷' },
                   ].map((langItem) => {
                     const isSelected = language === langItem.code;
                     return (
@@ -154,7 +156,9 @@ export const LanguageCurrencyModal: React.FC = () => {
             {activeTab === 'currency' && (
               <div className="space-y-4">
                 <p className="text-xs text-slate-500">
-                  Prices are converted in real-time based on current international exchange benchmarks.
+                  {language === 'fr'
+                    ? 'Les prix sont convertis en temps réel selon les taux de change internationaux de référence.'
+                    : 'Prices are converted in real-time based on current international exchange benchmarks.'}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -197,7 +201,9 @@ export const LanguageCurrencyModal: React.FC = () => {
             {activeTab === 'country' && (
               <div className="space-y-4">
                 <p className="text-xs text-slate-500">
-                  Select your country to auto-configure appropriate regional shipping estimates and local currency.
+                  {language === 'fr'
+                    ? 'Sélectionnez votre pays pour adapter les estimations de livraison et la devise locale.'
+                    : 'Select your country to auto-configure appropriate regional shipping estimates and local currency.'}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -218,7 +224,9 @@ export const LanguageCurrencyModal: React.FC = () => {
                           <span className="text-xl">{c.flag}</span>
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-slate-900 truncate">{cName}</p>
-                            <p className="text-[11px] text-slate-500 font-mono">Currency: {c.defaultCurrency}</p>
+                            <p className="text-[11px] text-slate-500 font-mono">
+                              {language === 'fr' ? 'Devise : ' : 'Currency: '}{c.defaultCurrency}
+                            </p>
                           </div>
                         </div>
 
@@ -238,7 +246,9 @@ export const LanguageCurrencyModal: React.FC = () => {
           {/* Live Preview & Apply Footer */}
           <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-left w-full sm:w-auto">
-              <span className="text-[11px] text-slate-500 block">Sample price preview:</span>
+              <span className="text-[11px] text-slate-500 block">
+                {language === 'fr' ? 'Aperçu du prix indicatif :' : 'Sample price preview:'}
+              </span>
               <span className="text-sm font-bold font-mono text-slate-950">
                 $100.00 USD → <strong className="text-blue-600 font-bold">{formatPrice(100)}</strong>
               </span>
@@ -248,7 +258,7 @@ export const LanguageCurrencyModal: React.FC = () => {
               onClick={() => setIsSelectorModalOpen(false)}
               className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <span>Save & Continue</span>
+              <span>{language === 'fr' ? 'Enregistrer & Continuer' : 'Save & Continue'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
