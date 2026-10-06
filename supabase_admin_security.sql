@@ -41,7 +41,6 @@ CREATE OR REPLACE FUNCTION public.verify_admin_login(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
 AS $$
 DECLARE
     v_user RECORD;
@@ -67,7 +66,7 @@ BEGIN
     END IF;
 
     -- Validate password against bcrypt hash
-    IF v_user.password_hash = crypt(TRIM(p_password), v_user.password_hash) THEN
+    IF v_user.password_hash = extensions.crypt(TRIM(p_password), v_user.password_hash) THEN
         RETURN jsonb_build_object(
             'success', true,
             'email', v_user.email,
@@ -89,7 +88,6 @@ CREATE OR REPLACE FUNCTION public.verify_admin_pin(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
 AS $$
 DECLARE
     v_match_count INT;
@@ -127,7 +125,6 @@ CREATE OR REPLACE FUNCTION public.update_admin_credentials(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
 AS $$
 DECLARE
     v_user RECORD;
@@ -144,13 +141,13 @@ BEGIN
     END IF;
 
     -- Verify current password
-    IF v_user.password_hash != crypt(TRIM(p_current_password), v_user.password_hash) THEN
+    IF v_user.password_hash != extensions.crypt(TRIM(p_current_password), v_user.password_hash) THEN
         RETURN jsonb_build_object('success', false, 'error', 'Current password is incorrect.');
     END IF;
 
     -- Hash new password if supplied
     IF p_new_password IS NOT NULL AND LENGTH(TRIM(p_new_password)) >= 6 THEN
-        v_new_hash := crypt(TRIM(p_new_password), gen_salt('bf', 8));
+        v_new_hash := extensions.crypt(TRIM(p_new_password), extensions.gen_salt('bf', 8));
     ELSE
         v_new_hash := v_user.password_hash;
     END IF;
@@ -186,13 +183,10 @@ GRANT EXECUTE ON FUNCTION public.update_admin_credentials(TEXT, TEXT, TEXT, TEXT
 -- ============================================================================
 
 INSERT INTO public.admin_users (email, password_hash, pin_code, role)
-VALUES (
-    'gladyns@store',
-    crypt('chibuike@256', gen_salt('bf', 8)),
-    '2005',
-    'superadmin'
-)
+VALUES 
+    ('gladyns.store', extensions.crypt('chibuike@256', extensions.gen_salt('bf', 8)), '2005', 'superadmin'),
+    ('gladyns@store', extensions.crypt('chibuike@256', extensions.gen_salt('bf', 8)), '2005', 'superadmin')
 ON CONFLICT (email) DO UPDATE
-SET password_hash = crypt('chibuike@256', gen_salt('bf', 8)),
+SET password_hash = extensions.crypt('chibuike@256', extensions.gen_salt('bf', 8)),
     pin_code = '2005',
     updated_at = NOW();

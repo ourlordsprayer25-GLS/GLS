@@ -545,7 +545,12 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
     let usersDebounceTimer: any = null;
     const fetchSupabaseUsers = async () => {
       try {
-        const { data, error } = await supabase.from('users').select('*');
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, firstName, lastName, email, phone, memberSince, tier, loyaltyPoints, lifetimePoints, addresses, preferences, sessionStatus, lastSeen, updated_at')
+          .order('updated_at', { ascending: false })
+          .limit(100);
+
         if (!error && Array.isArray(data)) {
           wrappedOnUpdate(data as UserProfile[]);
           try {
@@ -555,6 +560,15 @@ export function subscribeToUsers(onUpdate: (users: UserProfile[]) => void) {
               body: JSON.stringify(data),
             });
           } catch (e) {}
+        } else {
+          // Graceful fallback to local sync if Supabase returns 500 or timeout
+          try {
+            const res = await localFetch('/api/sync/users');
+            const serverUsers = await res.json();
+            if (Array.isArray(serverUsers) && serverUsers.length > 0) {
+              wrappedOnUpdate(serverUsers);
+            }
+          } catch (_) {}
         }
       } catch (err) {
         try {
