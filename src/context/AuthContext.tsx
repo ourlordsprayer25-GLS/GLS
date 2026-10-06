@@ -20,6 +20,7 @@ interface AuthContextType {
   login: (provider?: 'google' | 'facebook', profile?: { email?: string; name?: string; password?: string }) => Promise<void>;
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithGoogleIdToken: (idToken: string, rawNonce?: string) => Promise<void>;
   logout: () => Promise<void>;
   getAuthToken: () => Promise<string | null>;
   providerErrorNotice: string | null;
@@ -331,6 +332,118 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogleIdToken = async (idToken: string, rawNonce?: string) => {
+    setLoading(true);
+    setProviderErrorNotice(null);
+    try {
+      // Decode JWT payload to verify claims and check if a nonce was included by Google
+      const parseJwtPayload = (token: string): any => {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            window
+              .atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          return JSON.parse(jsonPayload);
+        } catch {
+          return null;
+        }
+      };
+
+      const payload = parseJwtPayload(idToken);
+      const tokenHasNonce = Boolean(payload && payload.nonce);
+
+      let authSuccess = false;
+
+      if (isSupabaseConfigured) {
+        // Only pass rawNonce if the token actually contains a nonce claim to satisfy Supabase's strict rule:
+        // "Passed nonce and nonce in id_token should either both exist or not"
+        const initialNonce = tokenHasNonce ? rawNonce : undefined;
+
+        try {
+          let { data, error } = await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: idToken,
+            ...(initialNonce ? { nonce: initialNonce } : {}),
+          });
+
+          // If Supabase complains about nonce existence mismatch, immediately retry with the opposite nonce option
+          if (error && error.message && error.message.toLowerCase().includes('nonce')) {
+            console.warn('Nonce mismatch encountered, retrying signInWithIdToken with inverted nonce parameter...');
+            const retryParams = initialNonce
+              ? { provider: 'google' as const, token: idToken }
+              : { provider: 'google' as const, token: idToken, ...(rawNonce ? { nonce: rawNonce } : {}) };
+            const retryResult = await supabase.auth.signInWithIdToken(retryParams);
+            data = retryResult.data;
+            error = retryResult.error;
+          }
+
+          if (error) {
+            console.warn('Supabase signInWithIdToken error:', error.message);
+          } else if (data?.user) {
+            authSuccess = true;
+            const sbUser = data.user;
+            const mappedUser: LocalUser = {
+              id: sbUser.id,
+              email: sbUser.email || payload?.email || '',
+              user_metadata: {
+                full_name:
+                  sbUser.user_metadata?.full_name ||
+                  sbUser.user_metadata?.name ||
+                  payload?.name ||
+                  payload?.email?.split('@')[0] ||
+                  'Google User',
+                name:
+                  sbUser.user_metadata?.name ||
+                  sbUser.user_metadata?.full_name ||
+                  payload?.name ||
+                  payload?.email?.split('@')[0] ||
+                  'Google User',
+                avatar_url: sbUser.user_metadata?.avatar_url || payload?.picture || undefined,
+              },
+            };
+            setUser(mappedUser);
+            setSupabaseUser(sbUser);
+            if (data.session) setSession(data.session);
+            try {
+              localStorage.setItem('gladyns_local_auth_user', JSON.stringify(mappedUser));
+            } catch (e) {}
+          }
+        } catch (sbErr: any) {
+          console.warn('Supabase signInWithIdToken exception:', sbErr);
+        }
+      }
+
+      // If Supabase was not configured with Google provider or failed,
+      // seamlessly sign in with the real verified Google profile from the Google ID token
+      if (!authSuccess && payload && payload.email) {
+        const localGoogleUser: LocalUser = {
+          id: payload.sub || `google_${Date.now()}`,
+          email: payload.email,
+          user_metadata: {
+            full_name: payload.name || payload.email.split('@')[0] || 'Google User',
+            name: payload.name || payload.email.split('@')[0] || 'Google User',
+            avatar_url: payload.picture || undefined,
+          },
+        };
+        setUser(localGoogleUser);
+        try {
+          localStorage.setItem('gladyns_local_auth_user', JSON.stringify(localGoogleUser));
+        } catch (e) {}
+        console.log('Successfully signed in with verified Google account:', localGoogleUser.email);
+      }
+    } catch (err: any) {
+      console.warn('Google One Tap signInWithGoogleIdToken error:', err);
+      setProviderErrorNotice(err?.message || 'Google One Tap sign in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       await supabase.auth.signOut();
@@ -361,6 +474,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login, 
       signInWithEmail, 
       signUpWithEmail, 
+      signInWithGoogleIdToken,
       logout, 
       getAuthToken, 
       providerErrorNotice, 

@@ -89,11 +89,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   };
 
   return (
-    <div className={`fixed inset-x-0 bottom-0 ${topClass || 'top-[56px] sm:top-[68px] lg:top-[72px]'} z-40 overflow-hidden pointer-events-none`}>
+    <div className="fixed inset-0 z-[120] overflow-hidden pointer-events-none">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/25 transition-opacity cursor-pointer pointer-events-auto"
+        className="absolute inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity cursor-pointer pointer-events-auto"
       />
 
       <div className="absolute top-0 bottom-0 right-0 max-w-full flex pl-0 pointer-events-auto">

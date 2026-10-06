@@ -745,28 +745,30 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
         )}
       </div>
 
-      {/* More to Love Section */}
+      {/* More to Discover Section */}
       <div className="mt-20 pt-16 border-t border-zinc-200">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-blue-600 animate-pulse" />
               <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">
-                {language === 'fr' ? 'POUR LES PATRONS LES PLUS EXIGEANTS' : 'ARCHIVAL DISCOVERIES'}
+                {language === 'fr' ? 'RECOMMANDATIONS DU CATALOGUE' : 'CATALOG DISCOVERIES'}
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-display font-medium text-zinc-950">
-              {language === 'fr' ? 'Plus de modèles à aimer' : 'More to Love'}
+              {language === 'fr' ? 'Équipements Recommandés' : 'Recommended Equipment'}
             </h2>
             <p className="text-xs text-zinc-500 max-w-xl">
-              {language === 'fr' ? 'Détails impeccables et lignes contemporaines à explorer sans attendre.' : 'Explore curated alternatives featuring pristine cuts and high-fashion engineering from our global archive.'}
+              {language === 'fr' 
+                ? 'Découvrez d\'autres modèles récents, mises à niveau et accessoires pour accompagner vos commandes.' 
+                : 'Explore top-rated hardware models, upgrades, and accessories from our active catalog.'}
             </p>
           </div>
           <button 
             onClick={onBackToShop}
             className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest flex items-center gap-1.5 mt-4 md:mt-0 cursor-pointer"
           >
-            <span>{language === 'fr' ? 'Voir toute la collection' : 'Explore All Pieces'}</span>
+            <span>{language === 'fr' ? 'Voir tout le catalogue' : 'Explore All Equipment'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

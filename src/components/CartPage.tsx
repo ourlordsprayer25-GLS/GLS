@@ -336,7 +336,7 @@ export const CartPage: React.FC<CartPageProps> = ({
           </div>
         )}
 
-        {/* More to Love Section (Always visible on Cart page) */}
+        {/* More to Discover Section (Always visible on Cart page) */}
         {recommendations.length > 0 && (
           <div className="space-y-8 pt-16 border-t border-zinc-200/80">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -344,22 +344,22 @@ export const CartPage: React.FC<CartPageProps> = ({
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">
-                    {language === 'fr' ? 'POUR LES PATRONS LES PLUS EXIGEANTS' : 'CURATED FOR YOU'}
+                    {language === 'fr' ? 'RECOMMANDATIONS' : 'RECOMMENDED ADDITIONS'}
                   </span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-display font-medium text-slate-950">
-                  {language === 'fr' ? 'Plus de modèles à aimer' : 'More to Love'}
+                  {language === 'fr' ? 'Complétez votre commande' : 'Complete Your Setup & Order'}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 max-w-xl">
                   {language === 'fr'
-                    ? 'Découvrez nos pièces d’exception, coupes contemporaines et matières nobles à explorer sans attendre.'
-                    : 'Explore curated alternatives featuring pristine cuts, premium tailoring, and high-fashion engineering.'}
+                    ? 'Découvrez des périphériques, accessoires et équipements complémentaires à ajouter à votre panier.'
+                    : 'Explore compatible peripherals, upgrades, and complementary hardware to pair with your order.'}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {recommendations.map((prod) => (
+              {recommendations.slice(0, 4).map((prod) => (
                 <ProductCard
                   key={prod.id}
                   product={prod}

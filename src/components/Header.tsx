@@ -12,6 +12,7 @@ import {
   Menu,
   TrendingUp,
   ArrowUpRight,
+  ArrowLeft,
   Compass,
   Globe,
   DollarSign,
@@ -28,6 +29,7 @@ import {
 import { Product, UserProfile, StoreSettings } from '../types/store';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 import { PWAInstallButton } from './PWAInstallButton';
 
@@ -222,6 +224,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if ((event.target as HTMLElement)?.closest?.('[data-mobile-search]')) {
+        return;
+      }
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
       }
@@ -246,6 +251,16 @@ export const Header: React.FC<HeaderProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (isSearchOpen && typeof window !== 'undefined' && window.innerWidth < 640) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isSearchOpen]);
 
   const handleNavClick = (cat: string) => {
     onSelectProduct(null);
@@ -471,9 +486,9 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
-            {/* LIVE AUTOCOMPLETE DROPDOWN ATTACHED DIRECTLY UNDER SEARCH BAR */}
+            {/* LIVE AUTOCOMPLETE DROPDOWN ATTACHED DIRECTLY UNDER SEARCH BAR (Desktop & Tablet) */}
             {isSearchOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 z-[70] max-h-[75vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="hidden sm:block absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 z-[70] max-h-[75vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
                 {!searchQuery.trim() ? (
                   /* Empty query: Popular searches & Quick department shortcuts */
                   <div className="space-y-4">
@@ -639,6 +654,356 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 )}
               </div>
+            )}
+
+            {/* FULL-SCREEN DEDICATED SEARCH VIEW FOR MOBILE */}
+            {isSearchOpen && typeof document !== 'undefined' && createPortal(
+              <div
+                data-mobile-search="true"
+                className="sm:hidden fixed inset-0 z-[120] bg-[#FAF9F6] flex flex-col animate-in fade-in duration-200 overflow-hidden"
+              >
+                {/* 1. Mobile Top Search Bar */}
+                <div className="bg-white px-3 py-2.5 border-b border-slate-200/90 flex items-center gap-2 shrink-0 shadow-2xs">
+                  {/* Back Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchOpen(false)}
+                    className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 active:scale-95 flex items-center justify-center text-slate-700 cursor-pointer shrink-0 transition-transform"
+                    aria-label="Back to store"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+
+                  {/* Search Input Box */}
+                  <div className="flex-1 min-w-0 flex items-center bg-slate-100 rounded-full border border-slate-200/80 px-3 py-1.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent transition-all">
+                    <Search className="w-4 h-4 text-blue-600 shrink-0 mr-2" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => onSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          setIsSearchOpen(false);
+                          onSearch(searchQuery);
+                          const el = document.getElementById('catalog-section');
+                          el?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                      placeholder={language === 'fr' ? 'Rechercher marque, modèle, specs...' : 'Search laptops, brands, specs...'}
+                      className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-sans"
+                      autoFocus
+                    />
+
+                    {/* Clear Button */}
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => onSearch('')}
+                        aria-label="Clear query"
+                        className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer shrink-0 mr-1"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    {/* Voice Search Button */}
+                    <button
+                      type="button"
+                      onClick={startVoiceSearch}
+                      className={`p-1 text-slate-500 hover:text-blue-600 cursor-pointer shrink-0 ${isListening ? 'text-red-600 animate-pulse' : ''}`}
+                      aria-label="Voice search"
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Go / Submit Pill Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      if (searchQuery.trim()) {
+                        onSearch(searchQuery);
+                      }
+                      const el = document.getElementById('catalog-section');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold rounded-full transition-transform cursor-pointer shrink-0 shadow-xs"
+                  >
+                    {language === 'fr' ? 'OK' : 'Go'}
+                  </button>
+                </div>
+
+                {/* 2. Department Quick Filter Chips Bar */}
+                <div className="bg-white border-b border-slate-100 px-3 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectCategory('all');
+                      setIsSearchOpen(false);
+                      const el = document.getElementById('catalog-section');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-slate-100 hover:bg-blue-50 text-slate-800 hover:text-blue-600 transition-colors shrink-0"
+                  >
+                    {language === 'fr' ? 'Tout le catalogue' : 'All Departments'}
+                  </button>
+                  {categories && categories.filter((c) => c.id !== 'all').map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        onSelectCategory(cat.id);
+                        setIsSearchOpen(false);
+                        const el = document.getElementById('catalog-section');
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-600 border border-slate-200/60 transition-colors shrink-0"
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 3. Main Scrollable Results & Suggestions Body */}
+                <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-24">
+                  {!searchQuery.trim() ? (
+                    /* Empty Query State: Popular searches, Departments & Highlights */
+                    <>
+                      {/* Popular Searches */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-2.5">
+                          <TrendingUp className="w-4 h-4 text-blue-600" />
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            {language === 'fr' ? 'Recherches populaires' : 'Popular Searches'}
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {trendingSearches.map((term) => (
+                            <button
+                              key={term}
+                              type="button"
+                              onClick={() => {
+                                onSearch(term);
+                              }}
+                              className="px-3.5 py-2 rounded-xl bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 border border-slate-200 text-xs font-medium text-slate-800 shadow-2xs transition-all active:scale-95"
+                            >
+                              {term}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Browse by Department */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-2.5">
+                          <Compass className="w-4 h-4 text-blue-600" />
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            {language === 'fr' ? 'Rayons et Catégories' : 'Browse by Department'}
+                          </h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {categories && categories.filter((c) => c.id !== 'all').map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => {
+                                onSelectCategory(cat.id);
+                                setIsSearchOpen(false);
+                                const el = document.getElementById('catalog-section');
+                                el?.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                              className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-2xs text-left hover:border-blue-500 hover:bg-blue-50/50 transition-all active:scale-98 group flex flex-col justify-between"
+                            >
+                              <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600 truncate">
+                                {cat.label}
+                              </span>
+                              <span className="text-[10px] text-blue-600 font-semibold mt-1 flex items-center gap-1">
+                                {language === 'fr' ? 'Explorer' : 'Explore'} →
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Featured Highlights Preview */}
+                      {featuredPreview.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2.5">
+                            <Sparkles className="w-4 h-4 text-amber-500" />
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                              {language === 'fr' ? 'Coups de cœur recommandés' : 'Featured Highlights'}
+                            </h3>
+                          </div>
+                          <div className="space-y-2">
+                            {featuredPreview.map((p) => (
+                              <div
+                                key={p.id}
+                                onClick={() => {
+                                  onSelectProduct(p);
+                                  setIsSearchOpen(false);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="flex items-center gap-3 p-2.5 bg-white rounded-2xl border border-slate-200/80 shadow-2xs active:scale-98 transition-all cursor-pointer"
+                              >
+                                <img
+                                  src={p.primaryImage}
+                                  alt={p.name}
+                                  className="w-14 h-14 object-cover rounded-xl bg-slate-100 shrink-0"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 block truncate">
+                                    {p.brand || p.categoryLabel}
+                                  </span>
+                                  <p className="text-xs font-bold text-slate-900 truncate">
+                                    {p.name}
+                                  </p>
+                                  <p className="text-xs font-mono font-bold text-blue-600 mt-0.5">
+                                    {formatPrice(p.price)}
+                                  </p>
+                                </div>
+                                <ArrowUpRight className="w-4 h-4 text-slate-400 shrink-0 mr-1" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* Active Query State: Matching Categories & Matching Items */
+                    <>
+                      {/* Matching Categories Pill Row */}
+                      {matchingCategories.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-200">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                            {language === 'fr' ? 'Catégories :' : 'Departments:'}
+                          </span>
+                          {matchingCategories.map((c) => (
+                            <button
+                              key={c.id}
+                              onClick={() => {
+                                onSelectCategory(c.id);
+                                setIsSearchOpen(false);
+                                const el = document.getElementById('catalog-section');
+                                el?.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold hover:bg-blue-100 cursor-pointer"
+                            >
+                              {c.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Matching Products Cards */}
+                      {matchingProducts.length > 0 ? (
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                              {language === 'fr' ? 'Articles correspondants' : 'Matching Items'} ({matchingProducts.length})
+                            </p>
+                            <span className="text-[11px] text-blue-600 font-bold">
+                              {language === 'fr' ? 'Appuyez pour ouvrir' : 'Tap item to view'}
+                            </span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {matchingProducts.map((p) => (
+                              <div
+                                key={p.id}
+                                onClick={() => {
+                                  onSelectProduct(p);
+                                  setIsSearchOpen(false);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:border-blue-500 active:scale-98 transition-all cursor-pointer text-left"
+                              >
+                                <img
+                                  src={p.primaryImage}
+                                  alt={p.name}
+                                  className="w-16 h-16 object-cover rounded-xl bg-slate-100 shrink-0 border border-slate-100"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 truncate">
+                                      {p.brand || p.categoryLabel}
+                                    </span>
+                                    {p.condition && (
+                                      <span className="text-[9px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md shrink-0">
+                                        {p.condition}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs font-bold text-slate-900 truncate mt-0.5">
+                                    {p.name}
+                                  </p>
+                                  {p.specs && p.specs.length > 0 && (
+                                    <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                                      {p.specs.slice(0, 3).map(s => `${s.value}`).join(' • ')}
+                                    </p>
+                                  )}
+                                  <p className="text-xs font-mono font-bold text-blue-600 mt-1">
+                                    {formatPrice(p.price)}
+                                  </p>
+                                </div>
+                                <ArrowUpRight className="w-4 h-4 text-slate-400 shrink-0 mr-1" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center bg-white rounded-3xl border border-slate-200 p-6 space-y-3 shadow-2xs">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                            <Search className="w-6 h-6" />
+                          </div>
+                          <h4 className="text-sm font-bold text-slate-900">
+                            {language === 'fr'
+                              ? `Aucun résultat pour "${searchQuery}"`
+                              : `No results found for "${searchQuery}"`}
+                          </h4>
+                          <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                            {language === 'fr'
+                              ? 'Vérifiez l\'orthographe ou essayez un mot-clé plus général comme une marque (HP, Dell) ou une catégorie.'
+                              : 'Check the spelling or try broader keywords like a brand (HP, Dell) or department.'}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* 4. Bottom Sticky Action Footer */}
+                <div className="bg-white border-t border-slate-200 px-4 py-3 shrink-0 flex items-center gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      onSearch(searchQuery);
+                      const el = document.getElementById('catalog-section');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                  >
+                    <span>
+                      {language === 'fr'
+                        ? `Voir tous les résultats (${matchingProducts.length})`
+                        : `View all results in catalog (${matchingProducts.length})`}
+                    </span>
+                    <ArrowUpRight className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                    }}
+                    className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-colors cursor-pointer shrink-0"
+                  >
+                    {language === 'fr' ? 'Fermer' : 'Close'}
+                  </button>
+                </div>
+              </div>,
+              document.body
             )}
           </div>
 

@@ -7,19 +7,18 @@ import {
   ShieldCheck, 
   ArrowLeft, 
   AlertCircle, 
-  Sparkles,
-  KeyRound,
-  CheckCircle2
+  KeyRound, 
+  Loader2 
 } from 'lucide-react';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { verifyAdminCredentials, setAdminActiveSession, ADMIN_SESSION_KEY } from '../../services/adminAuthService';
+
+export { ADMIN_SESSION_KEY };
 
 interface AdminLoginProps {
   onLoginSuccess: (adminEmail: string) => void;
   onBackToStore: () => void;
   storeName?: string;
 }
-
-export const ADMIN_SESSION_KEY = 'gladyns_admin_session';
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({
   onLoginSuccess,
@@ -29,15 +28,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleAutoFillDefaultAdmin = () => {
-    setIdentifier('admin@gladyns.store');
-    setPassword('gladyns2025');
-    setErrorMessage(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,66 +39,21 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
     const cleanPass = password.trim();
 
     if (!cleanId || !cleanPass) {
-      setErrorMessage('Please provide both administrative username/email and password.');
+      setErrorMessage('Please provide both administrator email/username and password.');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      let isAuthenticated = false;
-      let authenticatedEmail = cleanId;
+      // Validate credentials securely against Supabase SQL RPC (verify_admin_login)
+      const result = await verifyAdminCredentials(cleanId, cleanPass);
 
-      // 1. Check Master Admin Credentials (immediate access)
-      const isMasterAdmin = (
-        (cleanId.toLowerCase() === 'admin' || 
-         cleanId.toLowerCase() === 'admin@gladyns.store' || 
-         cleanId.toLowerCase() === 'admin@gladyns.com' ||
-         cleanId.toLowerCase() === 'concierge@gladyns.com') &&
-        (cleanPass === 'gladyns2025' || cleanPass === 'admin1234' || cleanPass === 'admin12345' || cleanPass === 'admin')
-      );
-
-      // Also allow master password for any entered email
-      const isMasterPass = (cleanPass === 'gladyns2025' || cleanPass === 'admin12345' || cleanPass === 'admin');
-
-      if (isMasterAdmin || isMasterPass) {
-        isAuthenticated = true;
-        authenticatedEmail = cleanId.includes('@') ? cleanId : 'admin@gladyns.store';
-      }
-
-      // 2. If not matched with master, try Supabase Authentication (if configured and looks like an email)
-      if (!isAuthenticated && isSupabaseConfigured && cleanId.includes('@')) {
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: cleanId,
-            password: cleanPass,
-          });
-
-          if (!error && data.user) {
-            isAuthenticated = true;
-            authenticatedEmail = data.user.email || cleanId;
-          }
-        } catch (_) {
-          // Network or auth error handled gracefully
-        }
-      }
-
-      if (isAuthenticated) {
-        const sessionData = {
-          email: authenticatedEmail,
-          authenticatedAt: Date.now(),
-          token: `adm-token-${Math.random().toString(36).substring(2, 10)}-${Date.now()}`,
-        };
-
-        if (rememberMe) {
-          localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(sessionData));
-        } else {
-          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(sessionData));
-        }
-
-        onLoginSuccess(authenticatedEmail);
+      if (result.success && result.email) {
+        setAdminActiveSession(result.email);
+        onLoginSuccess(result.email);
       } else {
-        setErrorMessage('Invalid administrative credentials. You can click below to autofill the default credentials.');
+        setErrorMessage(result.error || 'Invalid administrator email or password.');
       }
     } catch (err: any) {
       setErrorMessage(err?.message || 'Authentication error. Please try again.');
@@ -166,14 +113,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
                 <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-rose-200 leading-snug">{errorMessage}</p>
               </div>
-              <button
-                type="button"
-                onClick={handleAutoFillDefaultAdmin}
-                className="ml-7 inline-flex items-center gap-1.5 text-xs text-blue-300 hover:text-white underline font-medium cursor-pointer transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                <span>Fill Default Admin Credentials (admin@gladyns.store)</span>
-              </button>
             </div>
           )}
 
@@ -192,7 +131,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
                   autoComplete="username"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="admin@gladyns.store"
+                  placeholder="Enter administrator email"
                   className="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-white/10 rounded-xl text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-mono"
                   required
                 />
@@ -228,17 +167,13 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
               </div>
             </div>
 
-            {/* Remember Me & Help */}
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <label className="flex items-center gap-2 cursor-pointer hover:text-slate-200 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500/40 cursor-pointer"
-                />
-                <span>Remember this terminal</span>
-              </label>
+            {/* Security Session Note */}
+            <div className="flex items-center justify-between text-[11px] text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                <span>Single-Tab Secured Session</span>
+              </span>
+              <span className="text-slate-500 font-mono">SQL pgcrypto Protected</span>
             </div>
 
             {/* Submit Button */}
@@ -250,7 +185,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Verifying Credentials...</span>
+                  <span>Verifying via Supabase SQL...</span>
                 </>
               ) : (
                 <>
@@ -260,28 +195,12 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
               )}
             </button>
           </form>
-
-          {/* Quick Credential Hint Box (for initial setup convenience) */}
-          <div className="mt-6 pt-5 border-t border-white/10 text-center">
-            <button
-              type="button"
-              onClick={handleAutoFillDefaultAdmin}
-              className="inline-flex items-center gap-2 text-xs font-mono text-slate-300 bg-white/5 hover:bg-white/10 hover:border-blue-400/40 px-4 py-2 rounded-xl border border-white/10 transition-all cursor-pointer group"
-              title="Click to automatically fill default admin credentials"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
-              <span>Autofill Default Admin:</span>
-              <strong className="text-blue-300 font-bold group-hover:text-blue-200">admin@gladyns.store</strong>
-              <span className="text-slate-500">·</span>
-              <strong className="text-blue-300 font-bold group-hover:text-blue-200">gladyns2025</strong>
-            </button>
-          </div>
         </div>
 
         {/* Security Footer Notice */}
         <div className="text-center mt-6 text-[11px] text-slate-400 flex items-center justify-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>256-Bit SSL Encrypted & Protected Session</span>
+          <span>Server-Side SQL Hash Verification Active</span>
         </div>
       </div>
     </div>

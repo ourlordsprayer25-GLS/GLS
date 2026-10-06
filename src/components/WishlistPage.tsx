@@ -183,27 +183,29 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
           </div>
         )}
 
-        {/* More to Love Section (Common for both states) */}
+        {/* More to Discover Section (Common for both states) */}
         <div className="space-y-12 pt-16 border-t border-zinc-100">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-blue-600 animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">
-                  {language === 'fr' ? 'POUR LES PATRONS LES PLUS EXIGEANTS' : 'ARCHIVAL DISCOVERIES'}
+                  {language === 'fr' ? 'RECOMMANDATIONS DU CATALOGUE' : 'CATALOG DISCOVERIES'}
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-display font-medium text-slate-950">
-                {language === 'fr' ? 'Plus de modèles à aimer' : 'More to Love'}
+                {language === 'fr' ? 'D\'autres modèles à découvrir' : 'More to Discover'}
               </h2>
               <p className="text-sm text-slate-500 max-w-xl">
-                {language === 'fr' ? 'Détails impeccables et lignes contemporaines à explorer sans attendre.' : 'Explore curated alternatives featuring pristine cuts and high-fashion engineering from our global archive.'}
+                {language === 'fr' 
+                  ? 'Explorez d\'autres modèles et composants à ajouter à vos favoris.' 
+                  : 'Explore alternative models, top-rated hardware, and accessories to add to your wishlist.'}
               </p>
             </div>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {recommendations.map((prod) => (
+            {recommendations.slice(0, 4).map((prod) => (
               <ProductCard
                 key={prod.id}
                 product={prod}

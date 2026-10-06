@@ -642,7 +642,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         </main>
       </div>
 
-      {/* More to Love section (Full width of standard max-w-7xl) */}
+      {/* More to Discover section (Full width of standard max-w-7xl) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="space-y-10 pt-16 border-t border-zinc-100">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -650,21 +650,23 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-blue-600 animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">
-                  {language === 'fr' ? 'POUR LES PATRONS LES PLUS EXIGEANTS' : 'ARCHIVAL DISCOVERIES'}
+                  {language === 'fr' ? 'SÉLECTION PERSONNALISÉE' : 'RECOMMENDED FOR YOU'}
                 </span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-display font-medium text-slate-950">
-                {language === 'fr' ? 'Plus de modèles à aimer' : 'More to Love'}
+                {language === 'fr' ? 'Équipements à Découvrir' : 'More to Discover'}
               </h3>
               <p className="text-xs text-slate-500 max-w-xl">
-                {language === 'fr' ? 'Détails impeccables et lignes contemporaines à explorer sans attendre.' : 'Explore curated alternatives featuring pristine cuts and high-fashion engineering from our global archive.'}
+                {language === 'fr' 
+                  ? 'Découvrez d\'autres modèles et composants sélectionnés pour compléter votre profil.' 
+                  : 'Explore curated models, hardware configurations, and accessories tailored to your preferences.'}
               </p>
             </div>
             <button 
               onClick={onBackToShop}
               className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest flex items-center gap-1.5 mt-4 md:mt-0 cursor-pointer"
             >
-              <span>{language === 'fr' ? 'Voir toute la collection' : 'Explore All Pieces'}</span>
+              <span>{language === 'fr' ? 'Voir tout le catalogue' : 'Explore All Equipment'}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

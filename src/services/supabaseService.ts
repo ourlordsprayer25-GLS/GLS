@@ -33,6 +33,38 @@ function createUniqueChannel(prefix: string) {
 }
 
 /**
+ * Local Sandbox Mode Controller:
+ * When developing locally, prevents mutations (saving products, updating orders,
+ * sending notifications) from touching the live Supabase cloud database, protecting
+ * the live customer store from any accidental bugs or test records.
+ */
+export function isLiveSyncEnabled(): boolean {
+  if (import.meta.env.PROD) return true;
+  try {
+    const mode = localStorage.getItem('gls_live_sync_mode');
+    return mode === 'live';
+  } catch (e) {
+    return false;
+  }
+}
+
+export function getLiveSyncMode(): 'isolated' | 'live' {
+  if (import.meta.env.PROD) return 'live';
+  try {
+    const mode = localStorage.getItem('gls_live_sync_mode');
+    return mode === 'live' ? 'live' : 'isolated';
+  } catch (e) {
+    return 'isolated';
+  }
+}
+
+export function setLiveSyncMode(mode: 'isolated' | 'live') {
+  try {
+    localStorage.setItem('gls_live_sync_mode', mode);
+  } catch (e) {}
+}
+
+/**
  * Universal Multi-Device Real-Time Sync Service
  * Seamlessly coordinates between Supabase and Centralized Server Sync Engine
  */
@@ -59,7 +91,12 @@ function initSSE() {
     eventSource.addEventListener('init', (e) => {
       try {
         const data = JSON.parse(e.data);
-        if (data.products?.length) listeners.products.forEach(cb => cb(data.products));
+        if (data.products?.length) {
+          const currentCache = getCache('gls_cache_products') || [];
+          if (!isSupabaseConfigured || data.products.length >= currentCache.length) {
+            listeners.products.forEach(cb => cb(data.products));
+          }
+        }
         if (data.orders?.length) listeners.orders.forEach(cb => cb(data.orders));
         if (data.users?.length) listeners.users.forEach(cb => cb(data.users));
         if (data.notifications?.length) listeners.notifications.forEach(cb => cb(data.notifications));
@@ -72,7 +109,10 @@ function initSSE() {
     eventSource.addEventListener('products', (e) => {
       try {
         const data = JSON.parse(e.data);
-        listeners.products.forEach(cb => cb(data));
+        const currentCache = getCache('gls_cache_products') || [];
+        if (!isSupabaseConfigured || (Array.isArray(data) && data.length >= currentCache.length)) {
+          listeners.products.forEach(cb => cb(data));
+        }
       } catch (err) {}
     });
 
@@ -147,7 +187,59 @@ export async function initServerSync(defaults: {
 }
 
 /**
+ * Ultra-Fast Product Fetcher using PostgreSQL RPC or standard select
+ */
+let isRpcAvailable = true;
+
+export async function fetchProductsFast(): Promise<Product[] | null> {
+  if (!isSupabaseConfigured) return null;
+
+  // 1. Try PostgreSQL RPC procedure if available
+  if (isRpcAvailable) {
+    try {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_store_products');
+      if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
+        return rpcData as Product[];
+      }
+      if (rpcError) {
+        // If RPC failed (e.g. 500 type mismatch or not created), gracefully disable RPC for session
+        isRpcAvailable = false;
+      }
+    } catch (_) {
+      isRpcAvailable = false;
+    }
+  }
+
+  // 2. Standard select fallback (always reliable)
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return data as Product[];
+    }
+  } catch (err) {
+    console.warn('Supabase products fetch fallback error:', err);
+  }
+
+  // 3. Centralized server endpoint fallback
+  try {
+    const res = await localFetch('/api/sync/products');
+    if (res.ok) {
+      const localData = await res.json();
+      if (Array.isArray(localData) && localData.length > 0) {
+        return localData as Product[];
+      }
+    }
+  } catch (_) {}
+
+  return null;
+}
+
+/**
  * Real-time Subscription to Products across all devices & Supabase
+ * Uses 0ms Instant Cache + Background PostgreSQL RPC Sync (Stale-While-Revalidate)
  */
 export function subscribeToProducts(onUpdate: (products: Product[]) => void, onReady?: () => void) {
   initSSE();
@@ -160,9 +252,6 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
       onReady();
     }
   };
-
-  // Snappy maximum boot timeout for loading screen (under 1s)
-  const hardTimeout = setTimeout(() => callReady(), 800);
 
   const isMockProduct = (p: any) => {
     if (!p) return false;
@@ -210,91 +299,70 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
     return { ...p, sizes, colors, specs, condition };
   };
 
-  let hasLoaded = false;
-  const rawCached = getCache('gls_cache_products');
-  const cached = Array.isArray(rawCached) ? rawCached.filter(p => !isMockProduct(p)).map(sanitizeProductVariants) : null;
-  if (cached && cached.length > 0) {
-    onUpdate(cached);
-    setCache('gls_cache_products', cached);
-    hasLoaded = true;
-    clearTimeout(hardTimeout);
-    callReady(); // Instant dismiss if valid local cache already exists
-  } else if (rawCached) {
-    localStorage.removeItem('gls_cache_products');
-  }
-  
   const wrappedOnUpdate = (data: Product[]) => {
     const cleanData = (Array.isArray(data) ? data : []).filter(p => !isMockProduct(p)).map(sanitizeProductVariants);
     setCache('gls_cache_products', cleanData);
     onUpdate(cleanData);
   };
-  
-  localFetch('/api/sync/products')
-    .then(r => r.json())
-    .then(serverProducts => {
-      if (Array.isArray(serverProducts) && serverProducts.length > 0) {
-        wrappedOnUpdate(serverProducts);
-        hasLoaded = true;
-        clearTimeout(hardTimeout);
-        callReady();
-      }
-    })
-    .catch(() => {});
 
+  // 1. Instant 0ms Cache Hydration: Never make the user wait on network to see products!
+  const rawCached = getCache('gls_cache_products');
+  const cached = Array.isArray(rawCached) ? rawCached.filter(p => !isMockProduct(p)).map(sanitizeProductVariants) : null;
+  if (cached && cached.length > 0) {
+    onUpdate(cached);
+    callReady();
+  } else {
+    // Seed with INITIAL_PRODUCTS immediately so the UI is 100% instant even for new visitors
+    const seed = INITIAL_PRODUCTS.filter(p => !isMockProduct(p)).map(sanitizeProductVariants);
+    wrappedOnUpdate(seed);
+    callReady();
+  }
+
+  // 2. Background Revalidation (Stale-While-Revalidate via Supabase RPC or select)
+  const syncFromDatabase = async () => {
+    try {
+      const remoteProducts = await fetchProductsFast();
+      if (remoteProducts && remoteProducts.length > 0) {
+        wrappedOnUpdate(remoteProducts);
+        // Bulk sync to local server so data-store.json & SSE stay in sync with Supabase
+        try {
+          await localFetch('/api/sync/products/bulk-sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(remoteProducts),
+          });
+        } catch (_) {}
+      }
+    } catch (err) {
+      console.warn('Sync products error:', err);
+    } finally {
+      callReady();
+    }
+  };
+
+  // Run initial background sync without blocking page render
+  syncFromDatabase();
+
+  // 3. Real-Time Postgres changes subscription
   let supabaseChannel: any = null;
   if (isSupabaseConfigured) {
-    supabase
-      .from('products')
-      .select('*')
-      .then(async ({ data, error }) => {
-        if (!error && data && data.length > 0) {
-          wrappedOnUpdate(data as Product[]);
-          hasLoaded = true;
-        } else if (!error && data && data.length === 0) {
-          // Products table in Supabase is empty: preserve current active catalog!
-          hasLoaded = true;
-        } else if (error && !hasLoaded) {
-          console.warn('Supabase products fetch failed:', error.message);
-          const fallback = getCache('gls_cache_products') || [];
-          if (fallback.length > 0) onUpdate(fallback);
-        }
-        clearTimeout(hardTimeout);
-        callReady();
-      });
-
+    let debounceTimer: any = null;
     supabaseChannel = createUniqueChannel('products_realtime')
+      .on('broadcast', { event: 'product_saved' }, () => {
+        syncFromDatabase();
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
-        const { data } = await supabase.from('products').select('*');
-        if (data && data.length > 0) {
-          wrappedOnUpdate(data as Product[]);
-        }
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(syncFromDatabase, 100);
       })
       .subscribe();
 
-    // Auto re-sync when tab becomes visible or focused (throttled to at most once per 60s)
-    let lastProductFetchTime = Date.now();
-    const fetchLatestProducts = async () => {
-      if (Date.now() - lastProductFetchTime < 60000) return;
-      lastProductFetchTime = Date.now();
-      try {
-        const { data, error } = await supabase.from('products').select('*');
-        if (!error && data && data.length > 0) {
-          wrappedOnUpdate(data as Product[]);
-        }
-      } catch (e) {
-        try {
-          const res = await localFetch('/api/sync/products');
-          const serverProducts = await res.json();
-          if (Array.isArray(serverProducts) && serverProducts.length > 0) {
-            wrappedOnUpdate(serverProducts);
-          }
-        } catch (_) {}
-      }
-    };
-
+    // Re-check when window/tab is refocused (throttled to at most once per 60s)
+    let lastFetchTime = Date.now();
     const handleFocusOrVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        fetchLatestProducts();
+      if (document.visibilityState === 'visible' && Date.now() - lastFetchTime > 60000) {
+        lastFetchTime = Date.now();
+        syncFromDatabase();
       }
     };
 
@@ -304,7 +372,6 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
     }
 
     return () => {
-      clearTimeout(hardTimeout);
       if (typeof window !== 'undefined') {
         window.removeEventListener('focus', handleFocusOrVisibility);
         document.removeEventListener('visibilitychange', handleFocusOrVisibility);
@@ -315,7 +382,6 @@ export function subscribeToProducts(onUpdate: (products: Product[]) => void, onR
   }
 
   return () => {
-    clearTimeout(hardTimeout);
     listeners.products.delete(onUpdate);
   };
 }
@@ -536,6 +602,8 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
     .catch(() => onUpdate(INITIAL_NOTIFICATIONS));
 
   let supabaseChannel: any = null;
+  let pollInterval: any = null;
+
   if (isSupabaseConfigured) {
     let notifDebounceTimer: any = null;
     const fetchNotifs = async () => {
@@ -559,14 +627,23 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
     fetchNotifs();
 
     supabaseChannel = createUniqueChannel('notifications_realtime')
+      .on('broadcast', { event: 'new_notification' }, (eventPayload: any) => {
+        if (eventPayload?.payload) {
+          fetchNotifs();
+        }
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
         if (notifDebounceTimer) clearTimeout(notifDebounceTimer);
-        notifDebounceTimer = setTimeout(fetchNotifs, 3000);
+        notifDebounceTimer = setTimeout(fetchNotifs, 100);
       })
       .subscribe();
+
+    // Fast 4-second background heartbeat to ensure notifications arrive without delay
+    pollInterval = setInterval(fetchNotifs, 4000);
   }
 
   return () => {
+    if (pollInterval) clearInterval(pollInterval);
     listeners.notifications.delete(onUpdate);
     if (supabaseChannel) supabase.removeChannel(supabaseChannel);
   };
@@ -634,7 +711,7 @@ export async function addRealtimeOrder(order: Order) {
   }
 
   // Sync to Supabase
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
       const { error } = await supabase.from('orders').upsert(order);
       if (error) {
@@ -657,7 +734,7 @@ export async function updateRealtimeOrderStatus(orderId: string, status: Order['
     console.warn('Server order status sync error:', err);
   }
 
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
       await supabase.from('orders').update({ status }).eq('id', orderId);
     } catch (err) {
@@ -675,7 +752,7 @@ export async function deleteRealtimeOrder(orderId: string) {
     console.warn('Server delete order sync error:', err);
   }
 
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
       await supabase.from('orders').delete().eq('id', orderId);
     } catch (err) {
@@ -685,6 +762,21 @@ export async function deleteRealtimeOrder(orderId: string) {
 }
 
 export async function saveRealtimeProduct(product: Product): Promise<{ success: boolean; error?: string }> {
+  // Optimistically update local cache and listeners immediately
+  try {
+    const raw = getCache('gls_cache_products') || [];
+    const idx = raw.findIndex((p: Product) => p.id === product.id);
+    let updated;
+    if (idx >= 0) {
+      updated = [...raw];
+      updated[idx] = product;
+    } else {
+      updated = [product, ...raw];
+    }
+    setCache('gls_cache_products', updated);
+    listeners.products.forEach(cb => cb(updated));
+  } catch (e) {}
+
   try {
     await localFetch('/api/sync/products', {
       method: 'POST',
@@ -695,8 +787,16 @@ export async function saveRealtimeProduct(product: Product): Promise<{ success: 
     console.warn('Server save product sync error:', err);
   }
 
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
+      // Instant broadcast to all clients connected to Supabase Realtime channel
+      const channel = createUniqueChannel('products_realtime');
+      channel.send({
+        type: 'broadcast',
+        event: 'product_saved',
+        payload: product,
+      }).catch(() => {});
+
       const { error } = await supabase.from('products').upsert(product);
       if (error) {
         console.error('Supabase save product error:', error.message);
@@ -712,6 +812,14 @@ export async function saveRealtimeProduct(product: Product): Promise<{ success: 
 }
 
 export async function deleteRealtimeProduct(productId: string) {
+  // Optimistically update local cache and listeners immediately
+  try {
+    const raw = getCache('gls_cache_products') || [];
+    const updated = raw.filter((p: Product) => p.id !== productId);
+    setCache('gls_cache_products', updated);
+    listeners.products.forEach(cb => cb(updated));
+  } catch (e) {}
+
   try {
     await localFetch(`/api/sync/products/${productId}`, {
       method: 'DELETE',
@@ -720,12 +828,69 @@ export async function deleteRealtimeProduct(productId: string) {
     console.warn('Server delete product sync error:', err);
   }
 
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
       await supabase.from('products').delete().eq('id', productId);
     } catch (err) {
       console.error('Supabase delete product error:', err);
     }
+  }
+}
+
+/**
+ * Push Verified Local Catalog to Live Supabase
+ */
+export async function pushLocalCatalogToLive(): Promise<{ success: boolean; count: number; error?: string }> {
+  if (!isSupabaseConfigured) {
+    return { success: false, count: 0, error: 'Supabase is not configured' };
+  }
+  try {
+    const raw = getCache('gls_cache_products') || [];
+    if (!Array.isArray(raw) || raw.length === 0) {
+      return { success: false, count: 0, error: 'No products in local catalog to push' };
+    }
+
+    const { error } = await supabase.from('products').upsert(raw);
+    if (error) {
+      return { success: false, count: 0, error: error.message };
+    }
+
+    // Broadcast to live clients that the catalog updated
+    const channel = createUniqueChannel('products_realtime');
+    channel.send({
+      type: 'broadcast',
+      event: 'product_saved',
+      payload: { count: raw.length, timestamp: Date.now() },
+    }).catch(() => {});
+
+    return { success: true, count: raw.length };
+  } catch (err: any) {
+    return { success: false, count: 0, error: err?.message || 'Failed to push catalog' };
+  }
+}
+
+/**
+ * Pull Live Catalog from Supabase into Local Computer
+ */
+export async function pullLiveCatalogToLocal(): Promise<{ success: boolean; count: number; error?: string }> {
+  if (!isSupabaseConfigured) {
+    return { success: false, count: 0, error: 'Supabase is not configured' };
+  }
+  try {
+    const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    if (error || !Array.isArray(data)) {
+      return { success: false, count: 0, error: error?.message || 'Failed to fetch from Supabase' };
+    }
+    setCache('gls_cache_products', data);
+    listeners.products.forEach(cb => cb(data));
+    await localFetch('/api/sync/products/bulk-sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return { success: true, count: data.length };
+  } catch (err: any) {
+    return { success: false, count: 0, error: err?.message || 'Failed to pull live catalog' };
   }
 }
 
@@ -799,7 +964,7 @@ export async function saveRealtimeSettings(settings: StoreSettings) {
     console.warn('Server settings sync error:', err);
   }
 
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
       await supabase.from('settings').upsert({
         id: 'store_config',
@@ -813,6 +978,13 @@ export async function saveRealtimeSettings(settings: StoreSettings) {
 }
 
 export async function addRealtimeNotification(notification: StoreNotification) {
+  // 1. Immediately notify local listeners without waiting on network
+  try {
+    listeners.notifications.forEach(cb => {
+      localFetch('/api/sync/notifications').then(r => r.json()).then(cb).catch(() => {});
+    });
+  } catch (e) {}
+
   try {
     await localFetch('/api/sync/notifications', {
       method: 'POST',
@@ -823,8 +995,16 @@ export async function addRealtimeNotification(notification: StoreNotification) {
     console.warn('Server notification sync error:', err);
   }
 
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
+      // Broadcast instantaneously across all connected tabs/devices via Supabase WebSocket (<50ms)
+      const channel = createUniqueChannel('notifications_realtime');
+      channel.send({
+        type: 'broadcast',
+        event: 'new_notification',
+        payload: notification,
+      }).catch(() => {});
+
       const { error } = await supabase.from('notifications').upsert(notification);
       if (error) {
         console.error('Supabase add notification error:', error.message);
@@ -844,7 +1024,7 @@ export async function markRealtimeNotificationRead(notificationId: string) {
     console.warn('Server mark notification read error:', err);
   }
 
-  if (isSupabaseConfigured) {
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
       await supabase.from('notifications').update({ read: true }).eq('id', notificationId);
     } catch (err) {

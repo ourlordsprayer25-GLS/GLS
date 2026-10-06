@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
   Star,
@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Check,
   ChevronRight,
+  ChevronLeft,
   ThumbsUp,
   MessageSquare,
   Sparkles,
@@ -21,6 +22,9 @@ import {
   SlidersHorizontal,
   Laptop,
   Cpu,
+  ZoomIn,
+  ZoomOut,
+  X,
 } from 'lucide-react';
 import { Product, ProductVariant, ProductSize, Review, StoreSettings } from '../types/store';
 import { SizeChartModal } from './SizeChartModal';
@@ -68,6 +72,22 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   const isWishlisted = wishlistIds.includes(product.id);
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
+
+  // Image Slideshow & Inline Hover Magnifier States
+  const [isHoverZoomed, setIsHoverZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
+
+  // Auto-rotate product images every 4s if more than 1 image exists (pauses during hover)
+  useEffect(() => {
+    if (!product.images || product.images.length <= 1 || isAutoPlayPaused || isHoverZoomed) return;
+
+    const timer = setInterval(() => {
+      setSelectedImageIndex((prev) => (prev + 1) % product.images.length);
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [product.images, isAutoPlayPaused, isHoverZoomed]);
 
   // Active Details Tab
   const [activeTab, setActiveTab] = useState<'description' | 'details' | 'specs' | 'materials' | 'shipping'>(
@@ -205,10 +225,55 @@ export const ProductPage: React.FC<ProductPageProps> = ({
     }
   };
 
-  // Filter related products (exclude current product)
-  const relatedProducts = allProducts
-    .filter((p) => p.id !== product.id)
-    .slice(0, 3);
+  // Smart Related Products Algorithm:
+  // Scores candidates by same category, same brand, same department, and price closeness
+  const relatedProducts = useMemo(() => {
+    if (!allProducts || allProducts.length <= 1) return [];
+
+    const otherProducts = allProducts.filter((p) => p.id !== product.id);
+
+    const scored = otherProducts.map((p) => {
+      let score = 0;
+
+      // 1. Same category is highest priority (+10)
+      if (p.category && product.category && p.category.toLowerCase() === product.category.toLowerCase()) {
+        score += 10;
+      }
+
+      // 2. Same brand (+6)
+      if (
+        p.brand &&
+        product.brand &&
+        p.brand.trim().toLowerCase() !== 'generic' &&
+        p.brand.trim().toLowerCase() === product.brand.trim().toLowerCase()
+      ) {
+        score += 6;
+      }
+
+      // 3. Same department (+4)
+      if (p.department && product.department && p.department.toLowerCase() === product.department.toLowerCase()) {
+        score += 4;
+      }
+
+      // 4. Same condition (+2)
+      if (p.condition && product.condition && p.condition.toLowerCase() === product.condition.toLowerCase()) {
+        score += 2;
+      }
+
+      // 5. Similar price tier (+1)
+      if (product.price > 0 && p.price > 0) {
+        const ratio = Math.abs(p.price - product.price) / product.price;
+        if (ratio < 0.35) score += 1;
+      }
+
+      return { product: p, score };
+    });
+
+    // Sort by relevance score descending
+    scored.sort((a, b) => b.score - a.score);
+
+    return scored.slice(0, 4).map((s) => s.product);
+  }, [allProducts, product]);
 
   // Active image url
   const currentImageUrl =
@@ -295,26 +360,100 @@ export const ProductPage: React.FC<ProductPageProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
           {/* Left Column: Image Gallery */}
           <div className="lg:col-span-7 space-y-4">
-            {/* Primary Large Image Viewport */}
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-xs">
+            {/* Primary Large Image Viewport with Inline Hover Magnifier & Auto-Play Pause */}
+            <div
+              onMouseEnter={() => {
+                setIsHoverZoomed(true);
+                setIsAutoPlayPaused(true);
+              }}
+              onMouseLeave={() => {
+                setIsHoverZoomed(false);
+                setIsAutoPlayPaused(false);
+              }}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+                const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+                setZoomPosition({ x, y });
+              }}
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-xs group select-none cursor-crosshair"
+            >
               <img
                 src={currentImageUrl}
                 alt={currentImageAlt}
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover object-center transition-all duration-300"
+                style={{
+                  transformOrigin: isHoverZoomed ? `${zoomPosition.x}% ${zoomPosition.y}%` : 'center center',
+                  transform: isHoverZoomed ? 'scale(2.2)' : 'scale(1)',
+                  transition: isHoverZoomed ? 'transform 0.08s ease-out' : 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+                className="w-full h-full object-cover object-center pointer-events-none will-change-transform"
               />
 
+              {/* Prev / Next Chevrons on Primary Image */}
+              {product.images && product.images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+                    }}
+                    aria-label="Previous image"
+                    className={`absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer z-10 ${
+                      isHoverZoomed ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
+                    }`}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev + 1) % product.images.length);
+                    }}
+                    aria-label="Next image"
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer z-10 ${
+                      isHoverZoomed ? 'opacity-0 pointer-events-none' : 'opacity-0 group-hover:opacity-100'
+                    }`}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+
+              {/* Slideshow Progress Dots Indicator */}
+              {product.images && product.images.length > 1 && (
+                <div
+                  className={`absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full z-10 pointer-events-none transition-opacity duration-200 ${
+                    isHoverZoomed ? 'opacity-0' : 'opacity-100'
+                  }`}
+                >
+                  {product.images.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        selectedImageIndex === i ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+
               {product.tag && (
-                <span className="absolute top-4 left-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-xs">
+                <span className="absolute top-4 left-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-xs z-10">
                   {product.tag}
                 </span>
               )}
 
               {/* Image Quick Favorite */}
-              <div className="absolute top-4 right-4 flex items-center gap-2">
+              <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
                 <button
                   type="button"
-                  onClick={() => onToggleWishlist(product.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleWishlist(product.id);
+                  }}
                   aria-label={isWishlisted ? 'Remove from favorites' : 'Save to favorites'}
                   title={isWishlisted ? 'Saved in favorites' : 'Save to favorites'}
                   className={`p-2.5 bg-white/90 hover:bg-white rounded-full shadow-xs transition-colors cursor-pointer ${
@@ -327,7 +466,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
               {/* Caption overlay */}
               {product.images[selectedImageIndex]?.caption && (
-                <div className="absolute bottom-3 left-3 bg-slate-950/70 backdrop-blur-xs text-white text-[11px] px-2.5 py-1 rounded font-medium">
+                <div className="absolute bottom-3 left-3 bg-slate-950/70 backdrop-blur-xs text-white text-[11px] px-2.5 py-1 rounded font-medium z-10">
                   {product.images[selectedImageIndex].caption}
                 </div>
               )}
@@ -1129,19 +1268,21 @@ export const ProductPage: React.FC<ProductPageProps> = ({
           </div>
         </section>
 
-        {/* Related Products Section (Curated Stylist Lookbook Cards) */}
+        {/* Related Products Section (Smart Category & Brand Relevance) */}
         {relatedProducts.length > 0 && (
           <section className="mt-16 border-t border-slate-200/60 pt-16">
             <div className="flex items-center justify-between mb-8">
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">{storeName.toUpperCase()} CURATION</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">
+                  {language === 'fr' ? 'PRODUITS ASSOCIÉS' : 'RELATED HARDWARE'}
+                </span>
                 <h2 className="text-2xl font-display font-medium text-slate-950">
-                  {language === 'fr' ? 'Séléction de Tenue Complète' : 'Complete the Wardrobe'}
+                  {language === 'fr' ? 'Produits Similaires & Recommandés' : 'Similar & Related Products'}
                 </h2>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {relatedProducts.map((relProduct) => (
                 <ProductCard
                   key={relProduct.id}
@@ -1162,16 +1303,26 @@ export const ProductPage: React.FC<ProductPageProps> = ({
           </section>
         )}
 
-        {/* More to Love Section (Highly Elegant Editorial Product Showcase) */}
+        {/* More to Love Section (Curated Hardware Discoveries) */}
         {(() => {
+          const defaultTitle = language === 'fr' ? 'Découvertes du Catalogue' : 'More to Discover';
+          const defaultSubtitle = language === 'fr'
+            ? 'Découvrez d\'autres modèles, mises à niveau et équipements complémentaires issus de notre inventaire.'
+            : 'Explore alternative models, hardware upgrades, and complementary gear from our catalog.';
+          const defaultTag = language === 'fr' ? 'RECOMMANDATIONS' : 'CATALOG DISCOVERIES';
+
           const moreToLove = storeSettings?.moreToLoveSection || {
             enabled: true,
-            title: 'More to Love',
-            subtitle: 'Explore curated alternatives featuring pristine cuts and high-fashion engineering from our global archive.',
-            tagLabel: 'ARCHIVAL DISCOVERIES',
+            title: defaultTitle,
+            subtitle: defaultSubtitle,
+            tagLabel: defaultTag,
             itemCount: 4,
           };
           if (moreToLove.enabled === false) return null;
+
+          const displayTitle = (moreToLove.title === 'More to Love' || !moreToLove.title) ? defaultTitle : moreToLove.title;
+          const displaySubtitle = (moreToLove.subtitle && moreToLove.subtitle.includes('high-fashion') || !moreToLove.subtitle) ? defaultSubtitle : moreToLove.subtitle;
+          const displayTag = (moreToLove.tagLabel === 'ARCHIVAL DISCOVERIES' || !moreToLove.tagLabel) ? defaultTag : moreToLove.tagLabel;
 
           return (
             <section className="mt-16 border-t border-slate-200/80 pt-16">
@@ -1180,14 +1331,14 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-blue-600" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block">
-                      {moreToLove.tagLabel || 'ARCHIVAL DISCOVERIES'}
+                      {displayTag}
                     </span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-display font-medium text-slate-950">
-                    {moreToLove.title || 'More to Love'}
+                    {displayTitle}
                   </h2>
                   <p className="text-xs text-slate-500 max-w-xl">
-                    {moreToLove.subtitle || 'Explore curated alternatives featuring pristine cuts and high-fashion engineering from our global archive.'}
+                    {displaySubtitle}
                   </p>
                 </div>
                 <button 
@@ -1197,7 +1348,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   }}
                   className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest flex items-center gap-1.5 mt-4 md:mt-0 cursor-pointer"
                 >
-                  <span>{language === 'fr' ? 'Voir toute la collection' : 'Explore All Pieces'}</span>
+                  <span>{language === 'fr' ? 'Voir tout le catalogue' : 'Explore All Equipment'}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

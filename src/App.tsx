@@ -7,9 +7,12 @@ import { StorefrontView } from './components/StorefrontView';
 import { AdminView } from './components/admin/AdminView';
 import { FastLoadingScreen } from './components/FastLoadingScreen';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
+import { CookieConsentBanner } from './components/CookieConsentBanner';
+import { GoogleOneTap } from './components/GoogleOneTap';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useLanguageCurrency } from './context/LanguageCurrencyContext';
 import { SectionType } from './components/SectionPage';
+import { playNotificationSound } from './services/soundService';
 import {
   subscribeToProducts,
   subscribeToCategories,
@@ -375,45 +378,9 @@ function AppContent() {
     lastKnownStatusesRef.current = initialMap;
   }, []);
 
-  // Premium elegant synthesizer chime using Web Audio API (cross-browser & local-offline compatible)
+  // Premium elegant synthesizer chime using robust Web Audio API + fallback
   const playPremiumChime = () => {
-    try {
-      if (typeof navigator !== 'undefined' && (navigator as any).userActivation && !(navigator as any).userActivation.hasBeenActive) {
-        return; // Suppress chime if user hasn't interacted yet to prevent AudioContext warnings
-      }
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContextClass) return;
-      const ctx = new AudioContextClass();
-
-      // First chime tone (high and sweet - A5)
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(880, ctx.currentTime); 
-      gain1.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-
-      // Second tone slightly delayed (even higher - E6) for a professional double-chime experience
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(1320, ctx.currentTime + 0.12);
-      gain2.gain.setValueAtTime(0, ctx.currentTime);
-      gain2.gain.setValueAtTime(0.06, ctx.currentTime + 0.12);
-      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-
-      osc1.start(ctx.currentTime);
-      osc1.stop(ctx.currentTime + 0.45);
-
-      osc2.start(ctx.currentTime + 0.12);
-      osc2.stop(ctx.currentTime + 0.55);
-    } catch (e) {
-      console.warn('Audio playback was prevented by browser autoplay policy restrictions.', e);
-    }
+    playNotificationSound();
   };
 
   // Trigger native system banner notifications (drops from top, stays in background)
@@ -436,16 +403,31 @@ function AppContent() {
       navigate(targetUrl);
     };
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
-        registration.showNotification(title, defaultOptions);
-      }).catch(() => {
+    // Use Promise.race with a 600ms timeout so we never hang if ServiceWorker isn't active
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<null>((_, reject) => setTimeout(() => reject(new Error('timeout')), 600)),
+      ])
+        .then((registration: any) => {
+          if (registration && registration.showNotification) {
+            registration.showNotification(title, defaultOptions);
+          } else {
+            const notif = new Notification(title, defaultOptions);
+            notif.onclick = handleNotifClick;
+          }
+        })
+        .catch(() => {
+          try {
+            const notif = new Notification(title, defaultOptions);
+            notif.onclick = handleNotifClick;
+          } catch (_) {}
+        });
+    } else {
+      try {
         const notif = new Notification(title, defaultOptions);
         notif.onclick = handleNotifClick;
-      });
-    } else {
-      const notif = new Notification(title, defaultOptions);
-      notif.onclick = handleNotifClick;
+      } catch (_) {}
     }
   }, [navigate]);
 
@@ -686,6 +668,33 @@ function AppContent() {
       }
     });
   }, [products]);
+
+  // Real-time incoming notification audio feedback & toast watcher
+  const lastKnownNotifIdsRef = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!notifications || notifications.length === 0) return;
+
+    if (lastKnownNotifIdsRef.current === null) {
+      lastKnownNotifIdsRef.current = new Set(notifications.map(n => n.id));
+      return;
+    }
+
+    const newNotifs = notifications.filter(n => !lastKnownNotifIdsRef.current?.has(n.id) && !dismissedNotificationIds.has(n.id));
+    if (newNotifs.length > 0) {
+      newNotifs.forEach(n => lastKnownNotifIdsRef.current?.add(n.id));
+      const latest = newNotifs[0];
+      playNotificationSound();
+      setActiveToast({
+        id: latest.id,
+        title: latest.title,
+        message: latest.message,
+      });
+      triggerSystemNotification(latest.title, {
+        body: latest.message,
+        icon: '/pwa-192x192.png',
+      });
+    }
+  }, [notifications, dismissedNotificationIds, triggerSystemNotification]);
 
   // Dedicated Pages: Orders Page & Patron Profile Page & Section Sliding Hero Pages
   const [isOrdersPageOpen, setIsOrdersPageOpen] = useState(false);
@@ -1166,6 +1175,39 @@ function AppContent() {
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const wishlistCount = wishlistIds.length;
 
+  // Real-time Audio Chime & Active Toast alert when new customer notifications arrive
+  const alertedCustomerNotifIdsRef = useRef<Set<string>>(new Set());
+  const initialNotifsAbsorbedRef = useRef(false);
+
+  useEffect(() => {
+    if (!customerNotifications || customerNotifications.length === 0) return;
+    
+    // On initial boot, absorb existing baseline without firing chime
+    if (!initialNotifsAbsorbedRef.current || isInitialBootLoading) {
+      customerNotifications.forEach(n => alertedCustomerNotifIdsRef.current.add(n.id));
+      if (!isInitialBootLoading) initialNotifsAbsorbedRef.current = true;
+      return;
+    }
+
+    // Fire audio chime and toast whenever a newly arrived notification reaches the customer
+    customerNotifications.forEach((n) => {
+      if (!n.read && !alertedCustomerNotifIdsRef.current.has(n.id)) {
+        alertedCustomerNotifIdsRef.current.add(n.id);
+        playNotificationSound();
+        setActiveToast({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+        });
+        triggerSystemNotification(n.title, {
+          body: n.message,
+          tag: n.id,
+          data: { url: n.linkTarget ? (n.type === 'order' ? '/orders' : `/product/${n.linkTarget}`) : '/orders' },
+        });
+      }
+    });
+  }, [customerNotifications, isInitialBootLoading, triggerSystemNotification]);
+
   const handleProceedToCheckout = () => { if (!authUser) { authLogin(); return; } setIsCheckoutOpen(true); };
 
   return (
@@ -1227,7 +1269,14 @@ function AppContent() {
           }}
         />
       )}
-      <ScrollToTopButton />
+
+      {!isAdminPageOpen && (
+        <>
+          <GoogleOneTap />
+          <CookieConsentBanner onOpenTerms={handleOpenTermsPage} />
+          <ScrollToTopButton />
+        </>
+      )}
     </>
   );
 }

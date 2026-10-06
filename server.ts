@@ -426,6 +426,18 @@ async function startServer() {
   });
 
   // 4. Products Sync API
+  app.post('/api/sync/products/bulk-sync', (req, res) => {
+    if (Array.isArray(req.body) && req.body.length > 0) {
+      const clean = req.body.filter(p => !isMockProduct(p)).map(sanitizeProductVariants);
+      if (clean.length > 0) {
+        dbState.products = clean;
+        saveDB();
+        broadcastSyncEvent('products', dbState.products);
+      }
+    }
+    res.json({ success: true, count: dbState.products.length });
+  });
+
   app.get('/api/sync/products', (_req, res) => {
     res.json(dbState.products);
   });
@@ -945,7 +957,35 @@ Requirements:
 
   server.listen(PORT, () => {
     console.log(`GLADYNS full-stack live-sync server running on http://localhost:${PORT}`);
+    syncProductsFromSupabase();
   });
+}
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://objlslsagvfbhiddwsbz.supabase.co";
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iamxzbHNhZ3ZmYmhpZGR3c2J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NzEzMDcsImV4cCI6MjEwNjM0NzMwN30.r3wuFy3TgByhbPs72WDQZGoX7LlAPn61UwAw6JF0lcY";
+
+async function syncProductsFromSupabase() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.desc`, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const clean = data.filter((p: any) => !isMockProduct(p)).map(sanitizeProductVariants);
+        if (clean.length > 0) {
+          dbState.products = clean;
+          saveDB();
+          console.log(`[Supabase Sync] Successfully loaded ${clean.length} live products into data-store.json`);
+        }
+      }
+    }
+  } catch (err: any) {
+    console.warn('[Supabase Sync] Note: Background fetch from Supabase:', err?.message || err);
+  }
 }
 
 startServer();

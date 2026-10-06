@@ -39,6 +39,7 @@ import JsBarcode from 'jsbarcode';
 import { Product } from '../../types/store';
 import { CATEGORIES } from '../../data/products';
 import { saveRealtimeProduct, deleteRealtimeProduct, addRealtimeNotification } from '../../services/supabaseService';
+import { playNotificationSound } from '../../services/soundService';
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { SUPPORTED_CURRENCIES } from '../../data/currencies';
 import { FastActionLoader } from '../FastLoadingScreen';
@@ -725,6 +726,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
           return;
         }
         setProducts(prev => [product, ...prev]);
+        playNotificationSound();
         addRealtimeNotification({
           id: `notif-new-product-${product.id}-${Date.now()}`,
           title: `✨ New Arrival: ${product.name}`,
