@@ -28,7 +28,7 @@ import {
   Store,
   MessageSquare
 } from 'lucide-react';
-const defaultShopImg = '';
+const defaultShopImg = '/assets/gladyns_store_preview.png';
 import { saveRealtimeSettings } from '../../services/supabaseService';
 
 interface AdminSettingsProps {
@@ -121,33 +121,6 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
     };
     reader.readAsDataURL(file);
   };
-
-  const presetShopImages = [
-    {
-      id: 'textile-workshop',
-      label: 'Workshop & Craft Studio (Local Asset)',
-      url: defaultShopImg,
-      badge: 'Boutique Asset'
-    },
-    {
-      id: 'modern-flagship',
-      label: 'Minimalist Flagship Interior',
-      url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Unsplash HD'
-    },
-    {
-      id: 'design-studio',
-      label: 'European Design Studio & Curation Lab',
-      url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Unsplash HD'
-    },
-    {
-      id: 'exterior-facade',
-      label: 'Capital Flagship Exterior Facade',
-      url: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=1600&auto=format&fit=crop',
-      badge: 'Unsplash HD'
-    },
-  ];
 
   const currentShopImage = localSettings.aboutUs?.image || defaultShopImg;
 
@@ -256,11 +229,11 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 text-white">
                       <span className="text-[9px] font-mono uppercase tracking-widest bg-blue-600 text-white px-2 py-0.5 rounded w-max font-bold">
-                        Storefront Photo
+                        Live Storefront Photo
                       </span>
                       <p className="text-xs font-bold mt-1">{localSettings.storeName || 'GLADYNS'} Official Boutique & Flagship</p>
                       <p className="text-[10px] text-zinc-300 truncate">
-                        {localSettings.aboutUs?.atelierLocation || 'Porto & Florence'}
+                        {localSettings.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire"}
                       </p>
                     </div>
                   </div>
@@ -272,14 +245,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                       className="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
                     >
                       <Upload className="w-4 h-4" />
-                      <span>Upload New Photo</span>
+                      <span>Upload Store Photo</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => updateNested('aboutUs.image', defaultShopImg)}
                       className="py-2.5 px-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
-                      title="Reset to default workshop image"
+                      title="Reset to official default boutique image"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>Reset</span>
@@ -307,7 +280,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     <div className="relative">
                       <input
                         type="url"
-                        placeholder="https://images.unsplash.com/... or cloud image URL"
+                        placeholder="https://... direct image link (JPG, PNG, WEBP)"
                         value={localSettings.aboutUs?.image || ''}
                         onChange={(e) => updateNested('aboutUs.image', e.target.value)}
                         className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-mono"
@@ -318,31 +291,27 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     </p>
                   </div>
 
-                  <div className="space-y-2.5 pt-2">
-                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">
-                      Quick Pick Preset Studio Photos
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {presetShopImages.map((preset) => (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => updateNested('aboutUs.image', preset.url)}
-                          className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
-                            localSettings.aboutUs?.image === preset.url
-                              ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600'
-                              : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100/70 hover:border-zinc-300'
-                          }`}
-                        >
-                          <div className="h-12 w-full rounded-lg overflow-hidden bg-zinc-200">
-                            <img src={preset.url} alt={preset.label} className="w-full h-full object-cover" />
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-bold text-zinc-800 line-clamp-1">{preset.label}</p>
-                            <span className="text-[9px] font-mono text-zinc-400">{preset.badge}</span>
-                          </div>
-                        </button>
-                      ))}
+                  {/* Storefront Display Guide Box */}
+                  <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 space-y-2.5">
+                    <div className="flex items-center gap-2 text-blue-900 font-bold text-xs">
+                      <Sparkles className="w-4 h-4 text-blue-600" />
+                      <span>Where this Boutique Photo Appears on Storefront:</span>
+                    </div>
+                    <div className="space-y-2 text-xs text-zinc-600">
+                      <div className="flex items-start gap-2 bg-white/70 p-2.5 rounded-lg border border-blue-50">
+                        <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold text-zinc-900">Store Locator (/stores)</p>
+                          <p className="text-[11px] text-zinc-500">Displayed as the primary flagship showroom photo banner for customers visiting your location.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2 bg-white/70 p-2.5 rounded-lg border border-blue-50">
+                        <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold text-zinc-900">About Us Page (/about)</p>
+                          <p className="text-[11px] text-zinc-500">Presented as the official workshop and boutique studio photo in your brand narrative.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

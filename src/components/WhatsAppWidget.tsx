@@ -258,7 +258,7 @@ export const FloatingWhatsAppConcierge: React.FC<FloatingWhatsAppConciergeProps>
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 </h4>
                 <p className="text-[10px] text-slate-500 font-mono">
-                  {language === 'fr' ? 'Studios Paris & Abidjan · En ligne' : 'Porto & Florence Studios · Online'}
+                  {language === 'fr' ? 'Studio Abidjan · En ligne' : 'Abidjan Boutique Studio · Online'}
                 </p>
               </div>
             </div>

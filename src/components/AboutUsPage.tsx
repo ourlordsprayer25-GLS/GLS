@@ -167,11 +167,11 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
             <div className="lg:col-span-7 relative min-h-[340px] lg:min-h-full overflow-hidden bg-slate-950">
               <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-blue-950 pointer-events-none" />
               <img
-                src={storeSettings?.aboutUs?.image || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop'}
+                src={storeSettings?.aboutUs?.image || '/assets/gladyns_store_preview.png'}
                 alt={`${storeName} Official Boutique & Flagship`}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  const fallback = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop';
+                  const fallback = '/assets/gladyns_store_preview.png';
                   if (target.src !== fallback) {
                     target.src = fallback;
                   }
@@ -195,7 +195,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
               <div className="absolute bottom-4 left-4 right-4 text-white">
                 <div className="flex items-center gap-2 text-xs font-semibold text-slate-200 bg-black/40 backdrop-blur-md p-2.5 rounded-xl border border-white/10 w-max max-w-full">
                   <MapPin className="w-4 h-4 text-blue-400 shrink-0" />
-                  <span className="truncate">{storeSettings?.contactAddress || 'Porto & Florence'}</span>
+                  <span className="truncate">{storeSettings?.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire"}</span>
                 </div>
               </div>
             </div>

@@ -77,8 +77,15 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
             {/* Shop Image */}
             <div className="lg:col-span-6 relative min-h-[280px] lg:min-h-full overflow-hidden bg-slate-950">
               <img
-                src={storeSettings?.aboutUs?.image || ''}
+                src={storeSettings?.aboutUs?.image || '/assets/gladyns_store_preview.png'}
                 alt={`${storeName} Flagship Boutique`}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  const fallback = '/assets/gladyns_store_preview.png';
+                  if (target.src !== fallback) {
+                    target.src = fallback;
+                  }
+                }}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
@@ -90,7 +97,7 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
               </div>
               <div className="absolute bottom-4 left-4 right-4 text-white">
                 <p className="text-sm font-bold text-white">{storeName} Central Flagship</p>
-                <p className="text-xs text-slate-300 font-sans truncate">{storeSettings?.contactAddress || 'Porto & Florence'}</p>
+                <p className="text-xs text-slate-300 font-sans truncate">{storeSettings?.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire"}</p>
               </div>
             </div>
 
@@ -112,12 +119,12 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
                 <div className="space-y-2.5 text-xs text-slate-600 font-sans pt-3 border-t border-slate-100">
                   <div className="flex items-start gap-3">
                     <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                    <span className="font-semibold text-slate-900">{storeSettings?.contactAddress || 'Rua Miguel Bombarda 142, 4050-377 Porto, Portugal'}</span>
+                    <span className="font-semibold text-slate-900">{storeSettings?.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire"}</span>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <Clock className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>{storeSettings?.operatingHours || (isFr ? 'Lun - Sam : 10h00 - 19h00' : 'Monday – Saturday: 10:00 AM – 7:00 PM CET')}</span>
+                    <span>{storeSettings?.operatingHours || (isFr ? 'Lun - Sam : 08h00 - 19h00 (GMT)' : 'Monday – Saturday: 08:00 AM – 7:00 PM (GMT)')}</span>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -136,7 +143,7 @@ export const StoreLocatorPage: React.FC<StoreLocatorPageProps> = ({
 
               <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-3">
                 <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(storeSettings?.contactAddress || 'Porto Portugal')}`}
+                  href={`https://maps.google.com/?q=${encodeURIComponent(storeSettings?.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 py-3 px-4 bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer text-center"
