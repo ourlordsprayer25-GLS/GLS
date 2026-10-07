@@ -35,7 +35,6 @@ import { WishlistPage } from './WishlistPage';
 import { NotificationDrawer } from './NotificationDrawer';
 import { CheckoutModal } from './CheckoutModal';
 import { LanguageCurrencyModal } from './LanguageCurrencyModal';
-import { ShareModal } from './ShareModal';
 import { Footer } from './Footer';
 import { FloatingWhatsAppConcierge } from './WhatsAppWidget';
 import { FloatingCartWidget } from './FloatingCartWidget';
@@ -170,20 +169,36 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
     });
   };
 
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [shareProduct, setShareProduct] = useState<Product | null>(null);
-  const [shareInitialMode, setShareInitialMode] = useState<'store' | 'product'>('store');
+  const handleOpenShareStore = async () => {
+    let storeUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.gladyns.store';
+    if (storeUrl.includes('gladyns.store') && !storeUrl.includes('www.gladyns.store')) {
+      storeUrl = storeUrl.replace('://gladyns.store', '://www.gladyns.store');
+    }
 
-  const handleOpenShareStore = () => {
-    setShareProduct(selectedProduct || null);
-    setShareInitialMode('store');
-    setIsShareModalOpen(true);
-  };
+    const shareTitle = storeSettings?.storeName || 'GLADYNS ALL ACROSS';
+    const shareText = language === 'fr'
+      ? 'Découvrez GLADYNS ALL ACROSS — Instruments de musique, électronique haute fidélité, électroménager et mode intemporelle.'
+      : 'Discover GLADYNS ALL ACROSS — Musical instruments, precision audio electronics, home appliances, and timeless apparel.';
 
-  const handleOpenShareProduct = (prod: Product) => {
-    setShareProduct(prod);
-    setShareInitialMode('product');
-    setIsShareModalOpen(true);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: storeUrl,
+        });
+        return;
+      } catch (err) {}
+    }
+
+    try {
+      await navigator.clipboard?.writeText(storeUrl);
+      setActiveToast({
+        title: language === 'fr' ? 'Lien copié !' : 'Link copied!',
+        description: language === 'fr' ? 'Le lien de la boutique a été copié dans le presse-papier.' : 'Store link copied to clipboard.',
+        type: 'success',
+      });
+    } catch (_) {}
   };
 
   const lastViewKeyRef = useRef<string>('');
@@ -350,7 +365,6 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
                 handleProceedToCheckout();
               }}
               onOpenCollections={handleOpenCollectionsPage}
-              onOpenShare={handleOpenShareProduct}
               storeSettings={storeSettings}
             />
           ) : isCategoriesPageOpen ? (
@@ -663,14 +677,6 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
         />
 
         <LanguageCurrencyModal />
-
-        <ShareModal
-          isOpen={isShareModalOpen}
-          onClose={() => setIsShareModalOpen(false)}
-          product={shareProduct}
-          storeSettings={storeSettings}
-          initialMode={shareInitialMode}
-        />
 
         <Footer
           onOpenSection={handleOpenSectionPage}

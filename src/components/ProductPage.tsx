@@ -42,7 +42,6 @@ interface ProductPageProps {
   onAddToCart: (product: Product, variant: ProductVariant, size: ProductSize, quantity: number) => void;
   onBuyItNow?: (product: Product, variant: ProductVariant, size: ProductSize, quantity: number) => void;
   onOpenCollections?: () => void;
-  onOpenShare?: (product: Product) => void;
   storeSettings?: StoreSettings;
 }
 
@@ -56,7 +55,6 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   onAddToCart,
   onBuyItNow,
   onOpenCollections,
-  onOpenShare,
   storeSettings,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
@@ -812,15 +810,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   {/* Share Circle */}
                   <button
                     type="button"
-                    onClick={() => {
-                      if (onOpenShare) {
-                        onOpenShare(product);
-                      } else {
-                        handleShare();
-                      }
-                    }}
+                    onClick={handleShare}
                     className="w-[52px] h-[52px] rounded-full border border-slate-900 hover:border-blue-600 text-slate-900 hover:text-blue-600 flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer bg-white"
-                    title="Share product link"
+                    title={language === 'fr' ? 'Partager ce produit' : 'Share product link'}
                   >
                     {copiedShare ? (
                       <Check className="w-[18px] h-[18px] text-emerald-600" />

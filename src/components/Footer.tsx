@@ -36,12 +36,44 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenRefundPolicyPage,
   onOpenStoreLocatorPage,
   onOpenBrandPage,
-  onOpenShareModal,
   storeSettings,
 }) => {
   const { language } = useLanguageCurrency();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [copiedStoreLink, setCopiedStoreLink] = useState(false);
+
+  const handleShareStore = async () => {
+    let storeUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.gladyns.store';
+    if (storeUrl.includes('gladyns.store') && !storeUrl.includes('www.gladyns.store')) {
+      storeUrl = storeUrl.replace('://gladyns.store', '://www.gladyns.store');
+    }
+
+    const shareTitle = storeSettings?.storeName || 'GLADYNS ALL ACROSS';
+    const shareText = language === 'fr'
+      ? 'Découvrez GLADYNS ALL ACROSS — Instruments de musique, électronique haute fidélité, électroménager et mode intemporelle.'
+      : 'Discover GLADYNS ALL ACROSS — Musical instruments, precision audio electronics, home appliances, and timeless apparel.';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: storeUrl,
+        });
+        return;
+      } catch (err) {
+        // User dismissed native share sheet
+      }
+    }
+
+    // Fallback: copy link to clipboard with confirmation
+    try {
+      await navigator.clipboard?.writeText(storeUrl);
+      setCopiedStoreLink(true);
+      setTimeout(() => setCopiedStoreLink(false), 2500);
+    } catch (_) {}
+  };
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,17 +183,44 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Social Icons Bar & Share Boutique */}
           <div className="flex flex-wrap items-center gap-2">
-            {onOpenShareModal && (
-              <button
-                type="button"
-                onClick={onOpenShareModal}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-blue-600 text-zinc-300 hover:text-white border border-zinc-800 hover:border-blue-500 transition-all font-semibold text-xs cursor-pointer shadow-xs group"
-                title={language === 'fr' ? 'Partager la boutique GLADYNS' : 'Share GLADYNS Boutique'}
-              >
-                <Share2 className="w-3.5 h-3.5 text-blue-400 group-hover:text-white group-hover:scale-110 transition-transform" />
-                <span>{language === 'fr' ? 'Partager la Maison' : 'Share Boutique'}</span>
-              </button>
-            )}
+            {/* Share Boutique / Website Link (Native Share) */}
+            <button
+              type="button"
+              onClick={handleShareStore}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-blue-600 text-zinc-300 hover:text-white border border-zinc-800 hover:border-blue-500 transition-all font-semibold text-xs cursor-pointer shadow-xs group"
+              title={language === 'fr' ? 'Partager le site GLADYNS' : 'Share GLADYNS Website'}
+            >
+              {copiedStoreLink ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-400 font-bold">{language === 'fr' ? 'Lien copié !' : 'Link copied!'}</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-blue-400 group-hover:text-white group-hover:scale-110 transition-transform" />
+                  <span>{language === 'fr' ? 'Partager la Maison' : 'Share Store'}</span>
+                </>
+              )}
+            </button>
+
+            {/* Direct WhatsApp Store Share Button */}
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                (language === 'fr' ? 'Découvrez la boutique GLADYNS ALL ACROSS : ' : 'Discover GLADYNS ALL ACROSS: ') +
+                (typeof window !== 'undefined' && window.location.origin.includes('gladyns.store')
+                  ? 'https://www.gladyns.store'
+                  : typeof window !== 'undefined'
+                  ? window.location.origin
+                  : 'https://www.gladyns.store')
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Share store on WhatsApp"
+              title={language === 'fr' ? 'Partager la boutique sur WhatsApp' : 'Share store on WhatsApp'}
+              className="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center transition-all cursor-pointer border border-emerald-500 shadow-2xs"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5" />
+            </a>
             {storeSettings?.socialLinks.instagram && (
               <a
                 href={storeSettings.socialLinks.instagram}

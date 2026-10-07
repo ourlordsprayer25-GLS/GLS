@@ -1028,13 +1028,13 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Share Boutique Button */}
+            {/* Share Boutique Button (Hidden on Mobile) */}
             {onOpenShareModal && (
               <button
                 onClick={onOpenShareModal}
                 aria-label="Share Store"
-                title={language === 'fr' ? 'Partager la boutique GLADYNS & Obtenir la carte HD' : 'Share GLADYNS Boutique & Get HD Card'}
-                className="flex items-center justify-center p-2 sm:px-3 sm:py-2 bg-slate-100/90 hover:bg-blue-50 text-slate-800 hover:text-blue-600 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/60"
+                title={language === 'fr' ? 'Partager la boutique GLADYNS' : 'Share GLADYNS Store'}
+                className="hidden md:flex items-center justify-center p-2 sm:px-3 sm:py-2 bg-slate-100/90 hover:bg-blue-50 text-slate-800 hover:text-blue-600 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/60"
               >
                 <Share2 className="w-4 h-4 text-blue-600 shrink-0" />
                 <span className="hidden xl:inline ml-1.5">{language === 'fr' ? 'Partager' : 'Share'}</span>

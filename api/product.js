@@ -134,7 +134,7 @@ export default async function handler(req, res) {
 
   // Fallback image if product has no image or product not found
   if (!image) {
-    image = `https://${host}/api/product-image/${encodeURIComponent(slug || 'default')}.jpg`;
+    image = `https://${host}/og-banner.jpg`;
   }
 
   const productUrl = `https://${host}/product/${slug}`;
