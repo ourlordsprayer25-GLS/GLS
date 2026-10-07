@@ -19,6 +19,7 @@ interface CategoriesPageProps {
   onQuickAdd: (product: Product, variant: ProductVariant) => void;
   onBackToHome: () => void;
   onOpenBrand: () => void;
+  initialCategory?: string;
 }
 
 interface Slide {
@@ -40,12 +41,14 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
   onQuickAdd,
   onBackToHome,
   onOpenBrand,
+  initialCategory = 'all',
 }) => {
   const { language } = useLanguageCurrency();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isPausedHover, setIsPausedHover] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilterCategory, setSelectedFilterCategory] = useState<string>(initialCategory || 'all');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
 
@@ -164,7 +167,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
       categoryMap.get(catName)!.push(p);
     });
 
-    const categoryList: {
+    let categoryList: {
       categoryName: string;
       letter: string;
       products: Product[];
@@ -206,11 +209,24 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
       }
     });
 
+    // If a specific category filter is chosen, refine while preserving alphabetical format
+    if (selectedFilterCategory && selectedFilterCategory !== 'all') {
+      const matched = categoryList.filter(
+        (c) =>
+          c.categoryName.toLowerCase() === selectedFilterCategory.toLowerCase() ||
+          c.categoryName.toLowerCase().includes(selectedFilterCategory.toLowerCase()) ||
+          selectedFilterCategory.toLowerCase().includes(c.categoryName.toLowerCase())
+      );
+      if (matched.length > 0) {
+        categoryList = matched;
+      }
+    }
+
     // Sort categories alphabetically (e.g. Accessories, Activewear, Apparel, Bags, Coats, Essentials, Knitwear)
     categoryList.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
 
     return categoryList;
-  }, [products, searchQuery]);
+  }, [products, searchQuery, selectedFilterCategory]);
 
   // Set of letters populated by categories
   const populatedLetters = useMemo(() => {
@@ -229,8 +245,41 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
     return map;
   }, [alphabetizedCategories]);
 
+  // List of all unique category labels for quick pills
+  const allAvailableCategories = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => {
+      const cat = p.categoryLabel || p.category;
+      if (cat) set.add(cat);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  // If initialCategory is given and not 'all', smoothly scroll to it on load
+  useEffect(() => {
+    if (initialCategory && initialCategory !== 'all') {
+      setSelectedFilterCategory(initialCategory);
+      const timer = setTimeout(() => {
+        const matchingCat = alphabetizedCategories.find(c => 
+          c.categoryName.toLowerCase().includes(initialCategory.toLowerCase()) ||
+          initialCategory.toLowerCase().includes(c.categoryName.toLowerCase())
+        );
+        if (matchingCat) {
+          const anchorId = `category-${matchingCat.categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+          const el = document.getElementById(anchorId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setActiveLetter(matchingCat.letter);
+          }
+        }
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [initialCategory, alphabetizedCategories]);
+
   const scrollToLetter = (letter: string) => {
     setActiveLetter(letter);
+    setSelectedFilterCategory('all');
     const targetId = letterToCategoryId.get(letter);
     if (targetId) {
       const el = document.getElementById(targetId);
@@ -433,6 +482,38 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Quick Category Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pt-3 mt-3 border-t border-zinc-100 no-scrollbar">
+            <button
+              onClick={() => setSelectedFilterCategory('all')}
+              className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all cursor-pointer ${
+                selectedFilterCategory === 'all'
+                  ? 'bg-zinc-950 text-white shadow-xs'
+                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+              }`}
+            >
+              {language === 'fr' ? 'Toutes les catégories (A-Z)' : 'All Categories (A-Z)'}
+            </button>
+            {allAvailableCategories.map((cat) => {
+              const isSelected = selectedFilterCategory.toLowerCase() === cat.toLowerCase();
+              return (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    setSelectedFilterCategory(cat);
+                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-zinc-950 text-white shadow-xs'
+                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
         </div>
 

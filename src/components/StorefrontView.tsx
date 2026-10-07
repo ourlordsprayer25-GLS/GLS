@@ -98,7 +98,7 @@ interface StorefrontViewProps {
   requestNotificationPermission: () => Promise<boolean>;
   handleBackToShop: () => void;
   handleOpenSectionPage: (s: SectionType, cat?: string) => void;
-  handleOpenCategoriesPage: () => void;
+  handleOpenCategoriesPage: (cat?: string) => void;
   handleOpenBrandPage: () => void;
   handleOpenAboutUsPage: () => void;
   handleOpenTermsPage: () => void;
@@ -376,6 +376,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
               onQuickAdd={handleQuickAdd}
               onBackToHome={handleBackToShop}
               onOpenBrand={handleOpenBrandPage}
+              initialCategory={selectedCategory}
             />
           ) : isAboutUsPageOpen ? (
             <AboutUsPage
@@ -488,17 +489,30 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
               onBackToShop={handleBackToShop}
             />
           ) : activeSectionPage ? (
-            <SectionPage
-              sectionType={activeSectionPage}
-              initialCategory={sectionPageCategory}
-              allProducts={products}
-              categories={categories}
-              wishlistIds={wishlistIds}
-              onToggleWishlist={handleToggleWishlist}
-              onSelectProduct={handleSelectProduct}
-              onQuickAdd={handleQuickAdd}
-              onBackToHome={handleBackToShop}
-            />
+            activeSectionPage === 'categories' ? (
+              <CategoriesPage
+                products={products}
+                wishlistIds={wishlistIds}
+                onToggleWishlist={handleToggleWishlist}
+                onSelectProduct={handleSelectProduct}
+                onQuickAdd={handleQuickAdd}
+                onBackToHome={handleBackToShop}
+                onOpenBrand={handleOpenBrandPage}
+                initialCategory={sectionPageCategory}
+              />
+            ) : (
+              <SectionPage
+                sectionType={activeSectionPage}
+                initialCategory={sectionPageCategory}
+                allProducts={products}
+                categories={categories}
+                wishlistIds={wishlistIds}
+                onToggleWishlist={handleToggleWishlist}
+                onSelectProduct={handleSelectProduct}
+                onQuickAdd={handleQuickAdd}
+                onBackToHome={handleBackToShop}
+              />
+            )
           ) : (
             <div>
               <HeroSection
@@ -520,8 +534,8 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
                 <CategorySection
                   products={products}
                   categories={categories}
-                  onSelectCategory={(cat) => handleOpenSectionPage('categories', cat)}
-                  onViewAllCategories={() => handleOpenSectionPage('categories')}
+                  onSelectCategory={(cat) => handleOpenCategoriesPage(cat)}
+                  onViewAllCategories={() => handleOpenCategoriesPage()}
                 />
               </div>
 

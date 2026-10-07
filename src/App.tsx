@@ -944,11 +944,16 @@ function AppContent() {
     } else if (rawHash.startsWith('section/')) {
       const secName = rawHash.replace('section/', '') as SectionType;
       closeAllMainViews();
-      setActiveSectionPage(secName);
+      if (secName === 'categories') {
+        setIsCategoriesPageOpen(true);
+      } else {
+        setActiveSectionPage(secName);
+      }
     } else if (rawHash.startsWith('category/')) {
       const catName = rawHash.replace('category/', '');
       closeAllMainViews();
       setSelectedCategory(catName);
+      setIsCategoriesPageOpen(true);
     }
   }, [products, closeAllMainViews]);
 
@@ -1193,10 +1198,21 @@ function AppContent() {
   };
   const handleOpenSectionPage = (section: any, category: string = 'all') => {
     setIsNotificationsOpen(false);
+    if (section === 'categories') {
+      setSelectedCategory(category);
+      setIsCategoriesPageOpen(true);
+      navigate('/categories');
+      return;
+    }
     navigate(`/section/${section}`);
     setSectionPageCategory(category);
   };
-  const handleOpenCategoriesPage = () => { setIsNotificationsOpen(false); navigate('/categories'); };
+  const handleOpenCategoriesPage = (category: string = 'all') => {
+    setIsNotificationsOpen(false);
+    setSelectedCategory(category);
+    setIsCategoriesPageOpen(true);
+    navigate('/categories');
+  };
   const handleOpenBrandPage = () => { setIsNotificationsOpen(false); navigate('/brand'); };
   const handleOpenAboutUsPage = () => { setIsNotificationsOpen(false); navigate('/about-us'); };
   const handleOpenTermsPage = () => { setIsNotificationsOpen(false); navigate('/terms'); };
