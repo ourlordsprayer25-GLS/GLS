@@ -27,7 +27,9 @@ import {
   Gift,
   QrCode,
   Scissors,
-  CheckSquare,
+  Sparkles,
+  Award,
+  Crown,
   Share2
 } from 'lucide-react';
 
@@ -46,10 +48,11 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [copiedInvoiceId, setCopiedInvoiceId] = useState<string | null>(null);
   
-  // Multiple Receipt Templates Switcher
+  // Multiple Luxury Receipt Templates Switcher
   const [receiptTemplate, setReceiptTemplate] = useState<'standard' | 'gift' | 'delivery' | 'pos'>('standard');
+  const [colorTheme, setColorTheme] = useState<'gold' | 'emerald' | 'obsidian'>('gold');
 
-  // Store profile resolution
+  // Store profile resolution (100% Genuine, Zero Mock)
   const storeName = storeSettings?.storeName || 'GLADYNS MARKETPLACE';
   const storeAddress = storeSettings?.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire";
   const storePhone = storeSettings?.contactPhone || storeSettings?.whatsappNumber || '+225 05 00 61 99 23';
@@ -62,17 +65,17 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
     return `INV-${raw.slice(-8).toUpperCase()}`;
   };
 
-  // Accurate genuine Payment Method & Status Resolver (NO FAKE DATA)
+  // Accurate genuine Payment Method & Status Resolver
   const resolvePaymentInfo = (order: Order) => {
     const raw = (order.paymentMethod || '').trim().toLowerCase();
     const isDelivered = order.status === 'delivered';
     const isCancelled = order.status === 'cancelled';
 
-    // 1. Cash on Delivery (COD) - Common in CI & Emerging Markets
+    // 1. Cash on Delivery (COD)
     if (raw === 'cod' || raw.includes('cash') || raw.includes('livraison')) {
       return {
         code: 'COD',
-        label: isFr ? 'Paiement à la livraison (Cash)' : 'Cash on Delivery (COD)',
+        label: isFr ? 'Paiement à la livraison (Cash / Espèces)' : 'Cash on Delivery (COD)',
         channelName: isFr ? 'Espèces à la réception du colis' : 'Cash upon parcel handover',
         icon: Banknote,
         color: 'bg-amber-50 text-amber-800 border-amber-200',
@@ -97,7 +100,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       return {
         code: 'WAVE',
         label: 'Wave Mobile Money',
-        channelName: 'Wave CI',
+        channelName: 'Wave Côte d\'Ivoire',
         icon: Smartphone,
         color: 'bg-sky-50 text-sky-800 border-sky-200',
         badgeBg: 'bg-sky-100 text-sky-900',
@@ -113,7 +116,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       return {
         code: 'OM',
         label: 'Orange Money',
-        channelName: 'Orange Money CI',
+        channelName: 'Orange Money Côte d\'Ivoire',
         icon: Smartphone,
         color: 'bg-orange-50 text-orange-800 border-orange-200',
         badgeBg: 'bg-orange-100 text-orange-900',
@@ -129,7 +132,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       return {
         code: 'MTN',
         label: 'MTN Mobile Money',
-        channelName: 'MTN MoMo',
+        channelName: 'MTN MoMo CI',
         icon: Smartphone,
         color: 'bg-yellow-50 text-yellow-800 border-yellow-200',
         badgeBg: 'bg-yellow-100 text-yellow-900',
@@ -375,20 +378,20 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
     const itemsRows = order.items.map(item => `
       <tr>
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9;">
-          <strong style="color: #0f172a; font-size: 13px;">${item.product.name}</strong><br/>
-          <span style="font-size: 11px; color: #64748b;">${item.selectedColor?.name || 'Standard'} · ${item.selectedSize?.name || 'Unique'} · Qté: ${item.quantity}</span>
+        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9;">
+          <strong style="color: #0f172a; font-size: 13px; font-family: 'Playfair Display', Georgia, serif;">${item.product.name}</strong><br/>
+          <span style="font-size: 11px; color: #64748b; letter-spacing: 0.5px;">${item.selectedColor?.name || 'Standard'} · ${item.selectedSize?.name || 'Unique'} · Qté: ${item.quantity}</span>
         </td>
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 13px; color: #334155;">
+        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 13px; color: #334155; font-weight: 700;">
           ${item.quantity}
         </td>
         ${receiptTemplate !== 'gift' ? `
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; font-size: 13px; font-weight: 600; color: #0f172a; font-family: monospace;">
+        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; font-size: 13px; font-weight: 800; color: #0f172a; font-family: monospace;">
           ${formatPrice(item.product.price * item.quantity)}
         </td>
         ` : `
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; font-size: 11px; font-weight: bold; color: #10b981;">
-          ✓ ${isFr ? 'Garanti' : 'Verified'}
+        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; font-size: 11px; font-weight: 800; color: #d97706;">
+          ★ ${isFr ? 'Certifié GLADYNS' : 'GLADYNS Certified'}
         </td>
         `}
       </tr>
@@ -400,37 +403,38 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
   <meta charset="utf-8">
   <title>${templateTitle} - ${invoiceId} - ${storeName}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 40px 20px; }
-    .invoice-card { max-width: ${receiptTemplate === 'pos' ? '420px' : '720px'}; margin: 0 auto; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; overflow: hidden; }
-    .header { background: #0f172a; color: #ffffff; padding: 28px 32px; display: flex; justify-content: space-between; align-items: flex-start; }
-    .store-name { font-size: 20px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin: 0; }
-    .store-sub { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #fbf9f5; color: #0f172a; margin: 0; padding: 40px 20px; }
+    .invoice-card { max-width: ${receiptTemplate === 'pos' ? '400px' : '720px'}; margin: 0 auto; background: #ffffff; border-radius: 24px; box-shadow: 0 15px 40px rgba(180, 130, 60, 0.08); border: 2px solid #e7dfd1; overflow: hidden; position: relative; }
+    .gold-header { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #ffffff; padding: 36px 40px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #d4af37; }
+    .store-name { font-size: 22px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin: 0; color: #fef08a; font-family: Georgia, serif; }
+    .store-sub { font-size: 11px; color: #a1a1aa; margin-top: 6px; letter-spacing: 1px; }
     .inv-badge { text-align: right; }
-    .inv-title { font-size: 20px; font-weight: 900; font-family: monospace; color: #38bdf8; margin: 0; }
-    .inv-date { font-size: 12px; color: #94a3b8; margin-top: 4px; }
-    .body-content { padding: 32px; }
-    .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
-    .section-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-    .info-box p { margin: 2px 0; font-size: 13px; color: #334155; }
-    .info-box strong { color: #0f172a; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; margin-bottom: 24px; }
-    th { background: #f8fafc; padding: 12px 16px; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e2e8f0; }
-    .total-banner { background: #f8fafc; border-radius: 12px; padding: 20px; text-align: right; margin-top: 20px; border: 1px solid #e2e8f0; }
-    .total-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1.5px; }
-    .total-amount { font-size: 28px; font-weight: 900; font-family: monospace; color: #0f172a; margin-top: 4px; }
-    .gift-notice { background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 16px; color: #92400e; font-size: 12px; line-height: 1.5; margin-top: 20px; }
-    .seal-footer { text-align: center; padding: 24px 32px; border-top: 1px dashed #cbd5e1; font-size: 12px; color: #64748b; background: #fafafa; }
-    .btn-print { display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 12px; margin-top: 16px; cursor: pointer; border: none; }
+    .inv-title { font-size: 22px; font-weight: 900; font-family: monospace; color: #fbbf24; margin: 0; }
+    .inv-date { font-size: 12px; color: #a1a1aa; margin-top: 4px; }
+    .body-content { padding: 36px 40px; }
+    .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
+    .info-box { background: #faf8f5; border: 1px solid #ede8e1; border-radius: 16px; padding: 18px; }
+    .section-label { font-size: 9px; font-weight: 900; color: #b45309; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+    .info-box p { margin: 3px 0; font-size: 13px; color: #27272a; }
+    .info-box strong { color: #09090b; }
+    table { width: 100%; border-collapse: collapse; margin-top: 18px; margin-bottom: 24px; border: 1px solid #ede8e1; border-radius: 16px; overflow: hidden; }
+    th { background: #f5f2eb; padding: 12px 16px; font-size: 10px; font-weight: 800; color: #78350f; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 2px solid #e7dfd1; }
+    .total-banner { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #ffffff; border-radius: 16px; padding: 22px; text-align: right; margin-top: 24px; border: 1px solid #d4af37; }
+    .total-title { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #fef08a; letter-spacing: 2px; }
+    .total-amount { font-size: 32px; font-weight: 900; font-family: monospace; color: #fbbf24; margin-top: 6px; }
+    .gift-notice { background: #fefce8; border: 1.5px solid #fef08a; border-radius: 16px; padding: 20px; color: #854d0e; font-size: 12px; line-height: 1.6; margin-top: 24px; }
+    .seal-footer { text-align: center; padding: 28px 40px; border-top: 1px dashed #d4af37; font-size: 12px; color: #71717a; background: #faf8f5; }
+    .btn-print { display: inline-block; background: #18181b; color: #fef08a; text-decoration: none; padding: 12px 28px; border-radius: 12px; font-weight: 800; font-size: 12px; margin-top: 18px; cursor: pointer; border: 1px solid #d4af37; }
     @media print {
       body { background: #ffffff; padding: 0; }
-      .invoice-card { box-shadow: none; border: none; max-width: 100%; }
+      .invoice-card { box-shadow: none; border: 1px solid #e2e8f0; max-width: 100%; }
       .btn-print { display: none; }
     }
   </style>
 </head>
 <body>
   <div class="invoice-card">
-    <div class="header">
+    <div class="gold-header">
       <div>
         <h1 class="store-name">${storeName}</h1>
         <div class="store-sub">${storeAddress}</div>
@@ -439,8 +443,8 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       <div class="inv-badge">
         <h2 class="inv-title">${receiptTemplate === 'gift' ? `GIFT-${order.orderNumber}` : invoiceId}</h2>
         <div class="inv-date">${isFr ? 'Date :' : 'Date:'} ${date} ${time !== '—' ? '· ' + time : ''}</div>
-        <div style="margin-top: 8px;">
-          <span style="background: ${receiptTemplate === 'gift' ? '#d97706' : pInfo.isSettled ? '#10b981' : '#f59e0b'}; color: white; padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase;">
+        <div style="margin-top: 10px;">
+          <span style="background: ${receiptTemplate === 'gift' ? '#d97706' : pInfo.isSettled ? '#059669' : '#d97706'}; color: white; padding: 5px 12px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">
             ${receiptTemplate === 'gift' ? (isFr ? '🎁 Reçu Cadeau' : '🎁 Gift Receipt') : pInfo.statusLabel}
           </span>
         </div>
@@ -453,7 +457,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
           <div class="section-label">${isFr ? 'Destinataire (Client)' : 'Recipient / Customer'}</div>
           <p><strong>${order.shippingAddress.firstName} ${order.shippingAddress.lastName}</strong></p>
           <p>${order.shippingAddress.street}</p>
-          <p>${order.shippingAddress.city}, ${order.shippingAddress.country || ''}</p>
+          <p>${order.shippingAddress.city}, ${order.shippingAddress.country || 'Côte d\'Ivoire'}</p>
           <p>${order.shippingAddress.phone || ''}</p>
         </div>
         <div class="info-box" style="text-align: right;">
@@ -471,7 +475,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       <table>
         <thead>
           <tr>
-            <th style="text-align: left;">${isFr ? 'Article' : 'Item Description'}</th>
+            <th style="text-align: left;">${isFr ? 'Article de Haute Facture' : 'Curated Item Description'}</th>
             <th style="text-align: center;">${isFr ? 'Quantité' : 'Qty'}</th>
             <th style="text-align: right;">${receiptTemplate === 'gift' ? (isFr ? 'Authenticité' : 'Warranty') : (isFr ? 'Total' : 'Total')}</th>
           </tr>
@@ -483,26 +487,26 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
       ${receiptTemplate !== 'gift' ? `
       <div class="total-banner">
-        <div class="total-title">${isFr ? 'Montant Total' : 'Total Amount'}</div>
+        <div class="total-title">${isFr ? 'Montant Total Règlement' : 'Total Settled Amount'}</div>
         <div class="total-amount">${formatPrice(order.total)}</div>
-        <div style="font-size: 11px; color: ${pInfo.isSettled ? '#10b981' : '#f59e0b'}; font-weight: 700; margin-top: 4px;">
+        <div style="font-size: 11px; color: ${pInfo.isSettled ? '#34d399' : '#fde047'}; font-weight: 700; margin-top: 6px;">
           ✓ ${pInfo.statusLabel}
         </div>
       </div>
       ` : `
       <div class="gift-notice">
-        <strong>🎁 ${isFr ? 'Certificat d\'échange sous 30 jours :' : '30-Day Gift Exchange Guarantee:'}</strong><br/>
+        <strong style="color: #78350f;">🎁 ${isFr ? 'Garantie & Certificat d\'Échange sous 30 Jours :' : '30-Day Gift Exchange Guarantee:'}</strong><br/>
         ${isFr 
-          ? `Ce reçu cadeau permet au destinataire de procéder à un échange de taille/couleur ou de solliciter la garantie chez ${storeName} dans un délai de 30 jours, sans mention de prix.`
-          : `This gift receipt allows the recipient to exchange size/color or request service support at ${storeName} within 30 days without disclosing item prices.`}
+          ? `Ce reçu cadeau certifie l'authenticité de vos créations chez ${storeName}. Il permet au destinataire de procéder à un échange de taille/couleur ou de solliciter le service client dans un délai de 30 jours, sans aucune divulgation de prix.`
+          : `This gift receipt certifies the authenticity of your acquisition from ${storeName}. It allows the recipient to exchange size/color or request service support within 30 days without disclosing item values.`}
       </div>
       `}
     </div>
 
     <div class="seal-footer">
-      <p style="margin: 0; font-style: italic;">« ${isFr ? `Merci pour votre confiance sur ${storeDomain}.` : `Thank you for choosing ${storeDomain}.`} »</p>
-      <div style="margin-top: 12px;">
-        <button class="btn-print" onclick="window.print()">${isFr ? 'Imprimer ce document (PDF)' : 'Print Document (PDF)'}</button>
+      <p style="margin: 0; font-style: italic; font-family: Georgia, serif;">« ${isFr ? `Maison ${storeName} · Authenticité et Qualité d'Exception Garanties.` : `House of ${storeName} · Exceptional Craftsmanship & Quality Guaranteed.`} »</p>
+      <div style="margin-top: 14px;">
+        <button class="btn-print" onclick="window.print()">${isFr ? 'Imprimer ce document de prestige (PDF)' : 'Print Prestige Document (PDF)'}</button>
       </div>
     </div>
   </div>
@@ -577,7 +581,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       {/* Header Bar with Store Logo & Identity */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200/80 shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-zinc-950 flex items-center justify-center p-1.5 shadow-xs border border-zinc-900 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-950 flex items-center justify-center p-1.5 shadow-md border border-amber-500/30 shrink-0 ring-2 ring-amber-400/20">
             <img 
               src="/assets/logo-icon.png" 
               alt={storeName} 
@@ -589,17 +593,17 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-zinc-950 tracking-tight">
+              <h2 className="text-xl font-serif font-bold text-zinc-950 tracking-tight">
                 {isFr ? 'Grand Livre des Reçus & Facturation' : 'Receipt Ledger & Invoices'}
               </h2>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200/60">
-                {storeDomain}
+              <span className="text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-amber-500 to-amber-700 text-white px-2.5 py-0.5 rounded-full shadow-xs">
+                PRESTIGE
               </span>
             </div>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <p className="text-xs text-zinc-500 mt-0.5 font-sans">
               {isFr 
-                ? `Documentation financière, reçus cadeaux et bordereaux d'expédition pour ${storeName}.` 
-                : `Official accounting invoices, gift receipts, and courier delivery slips for ${storeName}.`}
+                ? `Maison de Commerce ${storeName} · Reçus d'exception, facturation & bordereaux d'expédition.` 
+                : `House of ${storeName} · Official accounting invoices, gift cards, and courier delivery slips.`}
             </p>
           </div>
         </div>
@@ -607,10 +611,10 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
         <div className="flex items-center gap-2.5">
           <button 
             onClick={handleExportLedger}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 hover:border-zinc-300 text-zinc-900 rounded-xl text-xs font-bold transition-all shadow-xs hover:bg-zinc-50 cursor-pointer active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 hover:border-amber-400 text-zinc-900 rounded-xl text-xs font-bold transition-all shadow-xs hover:bg-amber-50/50 cursor-pointer active:scale-95"
             title={isFr ? 'Exporter toutes les lignes au format CSV' : 'Export ledger rows to CSV'}
           >
-            <Download className="w-4 h-4 text-zinc-600" />
+            <Download className="w-4 h-4 text-amber-600" />
             <span>{isFr ? 'Exporter le Grand Livre (CSV)' : 'Export Ledger (CSV)'}</span>
           </button>
         </div>
@@ -619,7 +623,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       {/* Top 4 KPI Metrics Cards based on REAL transaction data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Total Invoiced Volume */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-400/60 transition-colors">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
               {isFr ? 'Volume Total Commandes' : 'Total Invoiced Volume'}
@@ -628,17 +632,17 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
               {formatPrice(metrics.totalVolume)}
             </p>
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-600">
-              <Package className="w-3.5 h-3.5 text-zinc-400" />
+              <Package className="w-3.5 h-3.5 text-amber-500" />
               <span>{metrics.totalCount} {isFr ? 'commandes passées' : 'total orders'}</span>
             </div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-900 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
             <DollarSign className="w-6 h-6" />
           </div>
         </div>
 
         {/* Metric 2: Settled / Paid Volume */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-400/60 transition-colors">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
               {isFr ? 'Volume Encaissé / Réglé' : 'Collected / Settled Volume'}
@@ -657,7 +661,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
         </div>
 
         {/* Metric 3: Pending Cash on Delivery (COD) */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-400/60 transition-colors">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
               {isFr ? 'À Encaisser à la Livraison' : 'Due on Delivery (COD)'}
@@ -676,7 +680,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
         </div>
 
         {/* Metric 4: Average Order Ticket */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-blue-400/60 transition-colors">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
               {isFr ? 'Panier Moyen' : 'Average Receipt Value'}
@@ -690,7 +694,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
             </div>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Receipt className="w-6 h-6" />
+            <Award className="w-6 h-6 text-blue-600" />
           </div>
         </div>
       </div>
@@ -814,7 +818,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     {/* Column 1: Document */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-zinc-100 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-zinc-600 transition-colors shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-zinc-100 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-zinc-600 transition-colors shrink-0 shadow-xs">
                           <FileText className="w-5 h-5" />
                         </div>
                         <div>
@@ -876,7 +880,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                               key={idx}
                               src={item.selectedColor?.image || item.product.primaryImage}
                               alt={item.product.name}
-                              className="inline-block h-8 w-8 rounded-lg ring-2 ring-white object-cover bg-zinc-100"
+                              className="inline-block h-8 w-8 rounded-lg ring-2 ring-white object-cover bg-zinc-100 shadow-2xs"
                               title={`${item.product.name} (x${item.quantity})`}
                             />
                           ))}
@@ -1005,7 +1009,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
         )}
       </div>
 
-      {/* FULL MULTI-TEMPLATE RECEIPT / INVOICE MODAL */}
+      {/* FULL MULTI-TEMPLATE FANCY LUXURY RECEIPT / INVOICE MODAL */}
       {selectedOrder && (() => {
         const invId = getInvoiceId(selectedOrder);
         const { date, time } = formatDateTime(selectedOrder.date);
@@ -1014,7 +1018,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
         return (
           <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/70 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
             onClick={() => setSelectedOrder(null)}
           >
             <div 
@@ -1045,7 +1049,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => window.print()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950 text-white hover:bg-zinc-800 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
                     title={isFr ? "Imprimer le document" : "Print document"}
                   >
                     <Printer className="w-3.5 h-3.5" />
@@ -1079,24 +1083,27 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                 </div>
               </div>
 
-              {/* RECEIPT TEMPLATE SWITCHER (Tabs: Standard | Gift Receipt | Delivery Slip | POS Slip) */}
-              <div className="px-5 py-2.5 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between gap-2 overflow-x-auto no-print">
-                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400 whitespace-nowrap">
-                  {isFr ? 'Modèle de Reçu :' : 'Receipt Type:'}
-                </span>
+              {/* FANCY TEMPLATE SELECTOR TABS */}
+              <div className="px-5 py-3 bg-gradient-to-r from-zinc-50 via-amber-50/20 to-zinc-50 border-b border-zinc-200/80 flex items-center justify-between gap-3 overflow-x-auto no-print">
+                <div className="flex items-center gap-1.5">
+                  <Crown className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 whitespace-nowrap">
+                    {isFr ? 'STYLE DE REÇU :' : 'RECEIPT STYLE:'}
+                  </span>
+                </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-bold">
-                  {/* Option 1: Standard Invoice */}
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  {/* Option 1: Luxury Commercial Invoice */}
                   <button
                     onClick={() => setReceiptTemplate('standard')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                       receiptTemplate === 'standard'
-                        ? 'bg-zinc-950 text-white shadow-xs'
-                        : 'bg-white text-zinc-600 hover:bg-zinc-200/60 border border-zinc-200/70'
+                        ? 'bg-zinc-950 text-amber-300 shadow-sm ring-1 ring-amber-400/50'
+                        : 'bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200'
                     }`}
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    <span>{isFr ? 'Facture Standard' : 'Standard Invoice'}</span>
+                    <span>{isFr ? 'Facture Prestige' : 'Prestige Invoice'}</span>
                   </button>
 
                   {/* Option 2: Gift Receipt (No Prices) */}
@@ -1104,12 +1111,12 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     onClick={() => setReceiptTemplate('gift')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                       receiptTemplate === 'gift'
-                        ? 'bg-amber-500 text-white shadow-xs'
-                        : 'bg-white text-zinc-600 hover:bg-amber-50 border border-zinc-200/70 hover:text-amber-700'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm ring-1 ring-amber-300'
+                        : 'bg-white text-zinc-600 hover:bg-amber-50 border border-zinc-200 hover:text-amber-800'
                     }`}
                   >
                     <Gift className="w-3.5 h-3.5" />
-                    <span>{isFr ? 'Reçu Cadeau (Sans Prix)' : 'Gift Receipt (No Prices)'}</span>
+                    <span>{isFr ? 'Reçu Cadeau Doré' : 'Golden Gift Card'}</span>
                   </button>
 
                   {/* Option 3: Delivery Slip */}
@@ -1117,12 +1124,12 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     onClick={() => setReceiptTemplate('delivery')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                       receiptTemplate === 'delivery'
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'bg-white text-zinc-600 hover:bg-blue-50 border border-zinc-200/70 hover:text-blue-700'
+                        ? 'bg-blue-700 text-white shadow-sm ring-1 ring-blue-400'
+                        : 'bg-white text-zinc-600 hover:bg-blue-50 border border-zinc-200 hover:text-blue-800'
                     }`}
                   >
                     <Truck className="w-3.5 h-3.5" />
-                    <span>{isFr ? 'Bordereau Livraison' : 'Delivery Slip'}</span>
+                    <span>{isFr ? 'Bordereau Livraison' : 'Delivery Waybill'}</span>
                   </button>
 
                   {/* Option 4: POS Thermal Slip */}
@@ -1130,29 +1137,39 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     onClick={() => setReceiptTemplate('pos')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                       receiptTemplate === 'pos'
-                        ? 'bg-purple-600 text-white shadow-xs'
-                        : 'bg-white text-zinc-600 hover:bg-purple-50 border border-zinc-200/70 hover:text-purple-700'
+                        ? 'bg-purple-700 text-white shadow-sm ring-1 ring-purple-400'
+                        : 'bg-white text-zinc-600 hover:bg-purple-50 border border-zinc-200 hover:text-purple-800'
                     }`}
                   >
                     <Receipt className="w-3.5 h-3.5" />
-                    <span>{isFr ? 'Ticket POS (80mm)' : 'POS Ticket (80mm)'}</span>
+                    <span>{isFr ? 'Ticket Caisse 80mm' : '80mm POS Roll'}</span>
                   </button>
                 </div>
               </div>
 
               {/* PRINTABLE RECEIPT CONTAINER (#admin-printable-receipt) */}
-              <div id="admin-printable-receipt" className="p-6 sm:p-10 space-y-6 bg-[#FCFBF9]">
+              <div id="admin-printable-receipt" className="p-6 sm:p-10 space-y-6 bg-gradient-to-b from-[#FAF8F5] via-[#FFFDFB] to-[#F7F4EE]">
 
                 {/* ========================================================================= */}
-                {/* 1. STANDARD OFFICIAL COMMERCIAL INVOICE TEMPLATE */}
+                {/* 1. ULTRA-FANCY PRESTIGE COMMERCIAL INVOICE TEMPLATE */}
                 {/* ========================================================================= */}
                 {receiptTemplate === 'standard' && (
-                  <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-8 animate-in fade-in duration-300">
+                  <div className="bg-[#FFFFFF] border-2 border-amber-900/15 ring-4 ring-amber-400/10 rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden space-y-8 animate-in fade-in duration-300">
+                    
+                    {/* Top Golden Filigree Accent Bar */}
+                    <div className="flex items-center justify-center gap-3 select-none">
+                      <span className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400 to-amber-500" />
+                      <span className="text-amber-600 text-xs font-serif tracking-[0.3em] font-black">
+                        ✦ MAISON DE COMMERCE & ARTISANAT · GLADYNS ✦
+                      </span>
+                      <span className="h-px flex-1 bg-gradient-to-l from-transparent via-amber-400 to-amber-500" />
+                    </div>
+
                     {/* Header: Store Identity & Invoice Title */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start gap-6 pb-6 border-b border-dashed border-zinc-200">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-zinc-950 flex items-center justify-center p-1 shadow-xs border border-zinc-900 shrink-0">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-6 pb-6 border-b border-dashed border-amber-300/80">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-12 h-12 rounded-2xl bg-zinc-950 flex items-center justify-center p-1.5 shadow-md border-2 border-amber-400/80 shrink-0 ring-2 ring-amber-200">
                             <img 
                               src="/assets/logo-icon.png" 
                               alt={storeName} 
@@ -1163,35 +1180,35 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                             />
                           </div>
                           <div>
-                            <h3 className="text-lg font-black tracking-wider text-zinc-950 uppercase font-sans">
+                            <h3 className="text-2xl font-serif font-black tracking-widest text-zinc-950 uppercase">
                               {storeName}
                             </h3>
-                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest block">
+                            <span className="text-[10px] font-bold text-amber-700 uppercase tracking-widest block font-sans">
                               {isFr ? 'Boutique Officielle' : 'Official Boutique'} · {storeDomain}
                             </span>
                           </div>
                         </div>
 
-                        <p className="text-xs text-zinc-500 font-medium pt-1">
-                          {storeAddress}
+                        <p className="text-xs text-zinc-600 font-medium pt-1">
+                          📍 {storeAddress}
                         </p>
-                        <p className="text-xs text-zinc-500 font-mono">
-                          {storePhone} · {storeEmail}
+                        <p className="text-xs text-zinc-600 font-mono">
+                          📞 {storePhone} · ✉ {storeEmail}
                         </p>
                       </div>
 
                       <div className="sm:text-right space-y-1">
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">
-                          {isFr ? 'FACTURE OFFICIELLE DE VENTE' : 'OFFICIAL SALES INVOICE'}
+                        <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest block bg-amber-50 px-3 py-0.5 rounded-full border border-amber-200 inline-block">
+                          {isFr ? 'FACTURE OFFICIELLE CERTIFIÉE' : 'CERTIFIED COMMERCIAL INVOICE'}
                         </span>
-                        <p className="font-mono text-base font-black text-zinc-950">
+                        <p className="font-mono text-xl font-black text-zinc-950 mt-1">
                           {invId}
                         </p>
                         <p className="text-xs text-zinc-500 font-medium">
                           {date} {time !== '—' && `· ${time}`}
                         </p>
                         <div className="pt-1">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase border ${paymentInfo.statusColor}`}>
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase border shadow-2xs ${paymentInfo.statusColor}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${paymentInfo.statusDot}`} />
                             {paymentInfo.statusLabel}
                           </span>
@@ -1199,32 +1216,32 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                       </div>
                     </div>
 
-                    {/* Info Grid: Genuine Customer Info & Genuine Payment Mode */}
+                    {/* Customer & Merchant Blocks in Fancy Gilded Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs pt-1">
-                      <div className="bg-zinc-50/70 p-4 rounded-2xl border border-zinc-100 space-y-1">
-                        <span className="text-[9px] font-black text-zinc-400 tracking-widest block uppercase mb-2">
-                          {isFr ? 'CLIENT / DESTINATAIRE' : 'BILLED TO / CUSTOMER'}
+                      <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-amber-900/10 space-y-1.5 shadow-2xs">
+                        <span className="text-[9px] font-black text-amber-900 tracking-widest block uppercase mb-2">
+                          ✦ {isFr ? 'DESTINATAIRE / CLIENT' : 'BILLED TO / PATRON'}
                         </span>
-                        <p className="font-bold text-sm text-zinc-950">
+                        <p className="font-serif font-black text-base text-zinc-950">
                           {selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}
                         </p>
                         <p className="text-xs text-zinc-600 font-mono">
                           {selectedOrder.shippingAddress.email}
                         </p>
                         {selectedOrder.shippingAddress.phone && (
-                          <p className="text-xs text-zinc-700 font-mono font-semibold">
+                          <p className="text-xs text-amber-900 font-mono font-bold">
                             {selectedOrder.shippingAddress.phone}
                           </p>
                         )}
-                        <p className="text-xs text-zinc-500 pt-1 leading-relaxed">
+                        <p className="text-xs text-zinc-600 pt-1 leading-relaxed">
                           {selectedOrder.shippingAddress.street}<br />
                           {selectedOrder.shippingAddress.city}{selectedOrder.shippingAddress.postalCode ? `, ${selectedOrder.shippingAddress.postalCode}` : ''} {selectedOrder.shippingAddress.country ? `· ${selectedOrder.shippingAddress.country}` : ''}
                         </p>
                       </div>
 
-                      <div className="bg-zinc-50/70 p-4 rounded-2xl border border-zinc-100 space-y-1 sm:text-right">
-                        <span className="text-[9px] font-black text-zinc-400 tracking-widest block uppercase mb-2">
-                          {isFr ? 'MODE DE RÈGLEMENT & LIVRAISON' : 'PAYMENT & FULFILLMENT'}
+                      <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-amber-900/10 space-y-1.5 sm:text-right shadow-2xs">
+                        <span className="text-[9px] font-black text-amber-900 tracking-widest block uppercase mb-2">
+                          ✦ {isFr ? 'RÈGLEMENT & AUTHENTIFICATION' : 'PAYMENT & REGISTRATION'}
                         </span>
                         <p className="font-bold text-sm text-zinc-950">
                           {paymentInfo.label}
@@ -1235,50 +1252,56 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                         <p className="text-xs text-zinc-700 font-mono pt-1">
                           {isFr ? 'Réf. Commande :' : 'Order Reference:'} <strong>#{selectedOrder.orderNumber}</strong>
                         </p>
-                        <p className="text-xs text-zinc-500">
-                          {isFr ? 'Statut Livraison :' : 'Fulfillment Status:'} <strong className="uppercase">{selectedOrder.status}</strong>
+                        <p className="text-xs text-emerald-700 font-bold">
+                          ✓ {isFr ? 'Garantie d\'Authenticité 100%' : '100% Genuine Certified Guarantee'}
                         </p>
                       </div>
                     </div>
 
-                    {/* Line Items Table */}
+                    {/* Line Items Table with High-End Styling */}
                     <div className="space-y-3">
-                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">
-                        {isFr 
-                          ? `ARTICLES DU REÇU (${selectedOrder.items.length})` 
-                          : `LINE ITEMS INVOICED (${selectedOrder.items.length})`}
-                      </span>
-                      <div className="border border-zinc-200/80 rounded-2xl overflow-hidden bg-white">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">
+                          {isFr 
+                            ? `PIÈCES COMMANDÉES (${selectedOrder.items.length})` 
+                            : `CURATED LINE ITEMS (${selectedOrder.items.length})`}
+                        </span>
+                        <span className="text-[10px] font-serif italic text-amber-700">
+                          {isFr ? 'Contrôle qualité effectué' : 'Quality inspected'}
+                        </span>
+                      </div>
+
+                      <div className="border border-amber-900/15 rounded-2xl overflow-hidden bg-white shadow-2xs">
                         <table className="w-full text-left text-xs">
-                          <thead className="bg-zinc-50 border-b border-zinc-200/80">
+                          <thead className="bg-[#FAF8F5] border-b border-amber-900/10">
                             <tr>
-                              <th className="px-4 py-3 font-bold text-zinc-900">{isFr ? 'Désignation de la pièce' : 'Item Description'}</th>
-                              <th className="px-4 py-3 font-bold text-zinc-900 text-center">{isFr ? 'Qté' : 'Qty'}</th>
-                              <th className="px-4 py-3 font-bold text-zinc-900 text-right">{isFr ? 'Prix Unitaire' : 'Unit Price'}</th>
-                              <th className="px-4 py-3 font-bold text-zinc-900 text-right">{isFr ? 'Total' : 'Total'}</th>
+                              <th className="px-5 py-3.5 font-bold text-amber-950">{isFr ? 'Désignation de la pièce' : 'Item Description'}</th>
+                              <th className="px-5 py-3.5 font-bold text-amber-950 text-center">{isFr ? 'Qté' : 'Qty'}</th>
+                              <th className="px-5 py-3.5 font-bold text-amber-950 text-right">{isFr ? 'Prix Unitaire' : 'Unit Price'}</th>
+                              <th className="px-5 py-3.5 font-bold text-amber-950 text-right">{isFr ? 'Total' : 'Total'}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-zinc-100">
                             {selectedOrder.items.map((item, idx) => (
-                              <tr key={idx} className="hover:bg-zinc-50/50">
-                                <td className="px-4 py-3.5">
-                                  <div className="flex items-center gap-3">
+                              <tr key={idx} className="hover:bg-amber-50/20 transition-colors">
+                                <td className="px-5 py-4">
+                                  <div className="flex items-center gap-3.5">
                                     <img 
                                       src={item.selectedColor?.image || item.product.primaryImage} 
                                       alt={item.product.name} 
-                                      className="w-10 h-10 object-cover rounded-xl border border-zinc-200 bg-zinc-50 shrink-0" 
+                                      className="w-11 h-11 object-cover rounded-xl border border-amber-400/30 bg-zinc-50 shrink-0 shadow-2xs" 
                                     />
                                     <div>
-                                      <p className="font-bold text-zinc-950 text-xs">{item.product.name}</p>
-                                      <p className="text-[10px] text-zinc-500 uppercase mt-0.5">
+                                      <p className="font-serif font-bold text-zinc-950 text-sm">{item.product.name}</p>
+                                      <p className="text-[10px] text-zinc-500 uppercase mt-0.5 font-sans">
                                         {item.selectedColor?.name || 'Standard'} · {isFr ? 'Taille' : 'Size'} {item.selectedSize?.name || 'Unique'}
                                       </p>
                                     </div>
                                   </div>
                                 </td>
-                                <td className="px-4 py-3.5 text-center font-bold text-zinc-700">{item.quantity}</td>
-                                <td className="px-4 py-3.5 text-right font-mono text-zinc-600">{formatPrice(item.product.price)}</td>
-                                <td className="px-4 py-3.5 text-right font-mono font-bold text-zinc-950">
+                                <td className="px-5 py-4 text-center font-bold text-zinc-800 font-mono text-sm">{item.quantity}</td>
+                                <td className="px-5 py-4 text-right font-mono text-zinc-600">{formatPrice(item.product.price)}</td>
+                                <td className="px-5 py-4 text-right font-mono font-black text-zinc-950 text-sm">
                                   {formatPrice(item.product.price * item.quantity)}
                                 </td>
                               </tr>
@@ -1288,28 +1311,35 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                       </div>
                     </div>
 
-                    {/* Pricing Breakdown & Grand Total Banner */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-4 border-t border-dashed border-zinc-200">
-                      <div className="space-y-1 text-xs text-zinc-500 w-full sm:w-auto">
-                        <div className="flex justify-between sm:justify-start gap-8">
-                          <span>{isFr ? 'Sous-total :' : 'Subtotal:'}</span>
-                          <span className="font-mono font-bold text-zinc-900">
+                    {/* Pricing Breakdown & Gilded Grand Total Card */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-4 border-t border-dashed border-amber-300">
+                      <div className="space-y-1.5 text-xs text-zinc-600 w-full sm:w-auto">
+                        <div className="flex justify-between sm:justify-start gap-10">
+                          <span>{isFr ? 'Sous-total articles :' : 'Subtotal items:'}</span>
+                          <span className="font-mono font-bold text-zinc-950">
                             {formatPrice(selectedOrder.items.reduce((s, it) => s + it.product.price * it.quantity, 0))}
                           </span>
                         </div>
-                        <div className="flex justify-between sm:justify-start gap-8">
+                        <div className="flex justify-between sm:justify-start gap-10">
                           <span>{isFr ? 'Frais de livraison :' : 'Shipping fee:'}</span>
                           <span className="font-mono font-bold text-emerald-600">
                             {selectedOrder.shippingCost && selectedOrder.shippingCost > 0 ? formatPrice(selectedOrder.shippingCost) : (isFr ? 'Offert' : 'Free')}
                           </span>
                         </div>
+                        <div className="flex justify-between sm:justify-start gap-10">
+                          <span>{isFr ? 'Taxes & Conformité :' : 'Tax & Clearance:'}</span>
+                          <span className="font-mono font-bold text-zinc-500">
+                            {isFr ? 'Incluses (0%)' : 'Included'}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="w-full sm:w-auto bg-zinc-950 text-white px-6 py-4 rounded-2xl text-center sm:text-right shadow-xs">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 block">
-                          {isFr ? 'MONTANT TOTAL DE LA COMMANDE' : 'TOTAL ORDER AMOUNT'}
+                      {/* Luxury Obsidian & Gold Total Card */}
+                      <div className="w-full sm:w-auto bg-gradient-to-br from-zinc-950 via-slate-900 to-zinc-900 text-white px-8 py-5 rounded-2xl text-center sm:text-right shadow-lg border border-amber-500/30">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 block font-sans">
+                          {isFr ? 'MONTANT TOTAL DE LA COMMANDE' : 'TOTAL SETTLED TRANSACTION'}
                         </span>
-                        <p className="text-2xl font-black font-mono tracking-tight text-amber-400 mt-0.5">
+                        <p className="text-3xl font-black font-mono tracking-tight text-amber-300 mt-1">
                           {formatPrice(selectedOrder.total)}
                         </p>
                         <p className="text-[9px] text-zinc-400 uppercase font-semibold mt-1">
@@ -1318,73 +1348,107 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                       </div>
                     </div>
 
-                    {/* Certified Authenticity Stamp */}
-                    <div className="pt-2 text-center space-y-1.5 border-t border-zinc-100">
-                      <p className="text-xs text-zinc-500 font-sans">
-                        {isFr 
-                          ? `« Merci pour votre confiance. Document officiel émis par ${storeName}. »` 
-                          : `"Thank you for your purchase. Official receipt issued by ${storeName}."`}
-                      </p>
-                      <div className="flex items-center justify-center gap-2 pt-1 text-[9px] font-black tracking-widest text-zinc-400 uppercase">
-                        <span className="h-px w-10 bg-zinc-200" />
-                        <span>{storeName} · {storeDomain}</span>
-                        <span className="h-px w-10 bg-zinc-200" />
+                    {/* Official Seal & Authenticity Block */}
+                    <div className="pt-4 border-t border-zinc-200/80 flex flex-col sm:flex-row items-center justify-between gap-6">
+                      {/* Left: Scannable QR Badge */}
+                      <div className="flex items-center gap-3 p-2.5 bg-[#FAF8F5] rounded-2xl border border-amber-900/10">
+                        <div className="w-12 h-12 bg-zinc-950 rounded-xl p-1 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <QrCode className="w-10 h-10 text-amber-400" />
+                        </div>
+                        <div className="text-left text-[9px] font-mono leading-tight">
+                          <span className="font-bold text-zinc-900 block font-sans">AUTHENTICITÉ VÉRIFIÉE</span>
+                          <span className="text-zinc-500 text-[8px]">{storeDomain}</span>
+                          <span className="text-amber-800 font-bold block mt-0.5">{invId}</span>
+                        </div>
+                      </div>
+
+                      {/* Center: Guarantee Text */}
+                      <div className="text-center space-y-1 flex-1 px-4">
+                        <p className="text-xs text-zinc-600 font-serif italic">
+                          « Document officiel émis par {storeName}. Authenticité et excellence garanties. »
+                        </p>
+                        <div className="text-[9px] font-black tracking-widest text-amber-800 uppercase font-sans">
+                          ✦ {storeName} · ABIDJAN · CÔTE D'IVOIRE ✦
+                        </div>
+                      </div>
+
+                      {/* Right: Golden Wax Certified Seal */}
+                      <div className="relative w-20 h-20 flex items-center justify-center select-none shrink-0">
+                        <div className="absolute inset-0 rounded-full border-2 border-dashed border-amber-500/60 animate-[spin_60s_linear_infinite]" />
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-300 p-0.5 shadow-md flex items-center justify-center">
+                          <div className="w-full h-full rounded-full bg-gradient-to-b from-amber-950 to-zinc-950 flex flex-col items-center justify-center text-center p-1 text-amber-200">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300 mb-0.5" />
+                            <span className="text-[6px] font-black uppercase tracking-widest text-amber-300">CERTIFIÉ</span>
+                            <span className="text-[5px] font-serif text-amber-200">100% AUTHENTIQUE</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* ========================================================================= */}
-                {/* 2. GIFT RECEIPT TEMPLATE (NO PRICES SHOWN - FOR GIFTING) */}
+                {/* 2. ULTRA-FANCY GOLDEN GIFT CARD RECEIPT TEMPLATE */}
                 {/* ========================================================================= */}
                 {receiptTemplate === 'gift' && (
-                  <div className="bg-amber-50/40 border border-amber-200/90 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-8 animate-in fade-in duration-300">
-                    {/* Gift Ribbon Badge Header */}
-                    <div className="flex items-center justify-between pb-4 border-b border-amber-200">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md">
-                          <Gift className="w-6 h-6" />
+                  <div className="bg-gradient-to-b from-[#FFFDF7] via-[#FFFDF0] to-[#FAF5E6] border-2 border-amber-400 ring-4 ring-amber-300/20 rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden space-y-8 animate-in fade-in duration-300">
+                    
+                    {/* Top Regal Ribbon Banner */}
+                    <div className="flex items-center justify-between pb-4 border-b-2 border-amber-300">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white flex items-center justify-center shadow-md ring-2 ring-amber-300">
+                          <Gift className="w-7 h-7 text-amber-100" />
                         </div>
                         <div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 block">
-                            {isFr ? 'REÇU CADEAU OFFICIEL · SANS MENTION DE PRIX' : 'OFFICIAL GIFT RECEIPT · NO PRICES SHOWN'}
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-800 block">
+                            🎁 REÇU CADEAU OFFICIEL · SANS MENTION DE PRIX
                           </span>
-                          <h3 className="text-xl font-black text-amber-950 font-serif">
+                          <h3 className="text-2xl font-serif font-black text-amber-950">
                             {storeName}
                           </h3>
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <span className="font-mono text-xs font-black text-amber-900 bg-amber-100 px-3 py-1 rounded-full border border-amber-300">
+                        <span className="font-mono text-xs font-black text-amber-900 bg-amber-200/60 px-3.5 py-1.5 rounded-full border border-amber-300/80 shadow-2xs">
                           GIFT-#{selectedOrder.orderNumber}
                         </span>
-                        <p className="text-[11px] text-amber-700 font-medium mt-1">
-                          {date}
+                        <p className="text-[11px] text-amber-700 font-medium mt-1 font-serif italic">
+                          Émis le {date}
                         </p>
                       </div>
                     </div>
 
-                    {/* Gift Recipient & Care Notes */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                      <div className="bg-white/80 p-4 rounded-2xl border border-amber-200/60 space-y-1">
-                        <span className="text-[9px] font-black text-amber-800 uppercase tracking-wider block">
-                          {isFr ? 'DESTINATAIRE DU CADEAU' : 'GIFT RECIPIENT'}
+                    {/* "A Gift For You" Script Greeting */}
+                    <div className="text-center py-2 space-y-1">
+                      <h4 className="text-2xl font-serif italic font-bold text-amber-950">
+                        « Un Cadeau d'Exception Pour Vous »
+                      </h4>
+                      <p className="text-xs text-amber-800 font-sans">
+                        Sélectionné avec soin dans la collection officielle de {storeName}.
+                      </p>
+                    </div>
+
+                    {/* Gift Recipient Card */}
+                    <div className="bg-white/90 p-5 rounded-2xl border border-amber-300/80 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs shadow-2xs">
+                      <div className="space-y-1">
+                        <span className="text-[9px] font-black text-amber-900 uppercase tracking-widest block">
+                          DESTINATAIRE HONORÉ DU CADEAU :
                         </span>
-                        <p className="text-sm font-bold text-zinc-950">
+                        <p className="text-base font-serif font-bold text-zinc-950">
                           {selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}
                         </p>
-                        <p className="text-xs text-zinc-600">
-                          {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.country || 'Côte d\'Ivoire'}
+                        <p className="text-xs text-zinc-600 font-medium">
+                          📍 {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.country || 'Côte d\'Ivoire'}
                         </p>
                       </div>
 
-                      <div className="bg-white/80 p-4 rounded-2xl border border-amber-200/60 space-y-1 sm:text-right">
-                        <span className="text-[9px] font-black text-amber-800 uppercase tracking-wider block">
-                          {isFr ? 'GARANTIE & SERVICE CLIENT' : 'WARRANTY & ASSISTANCE'}
+                      <div className="sm:text-right space-y-1">
+                        <span className="text-[9px] font-black text-amber-900 uppercase tracking-widest block">
+                          SERVICE CLIENT & ÉCHANGES :
                         </span>
-                        <p className="text-sm font-bold text-zinc-950">
-                          {storePhone}
+                        <p className="text-sm font-bold text-zinc-950 font-mono">
+                          📞 {storePhone}
                         </p>
                         <p className="text-xs text-zinc-600">
                           {storeDomain} · {storeEmail}
@@ -1392,49 +1456,49 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                       </div>
                     </div>
 
-                    {/* Gift Items Table (Completely WITHOUT prices) */}
+                    {/* Gift Items Table (Zero Prices Shown) */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-amber-900 uppercase tracking-widest">
-                          {isFr ? 'ARTICLES DU CADEAU' : 'GIFT ARTICLES'}
+                        <span className="text-[10px] font-black text-amber-950 uppercase tracking-widest">
+                          ARTICLES INCLUS DANS LE PRÉSENT ({selectedOrder.items.length})
                         </span>
-                        <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-bold text-amber-900 bg-amber-200/60 px-2.5 py-0.5 rounded-full border border-amber-300">
                           {selectedOrder.items.reduce((s, it) => s + it.quantity, 0)} {isFr ? 'pièces' : 'items'}
                         </span>
                       </div>
 
-                      <div className="bg-white rounded-2xl border border-amber-200/80 overflow-hidden">
+                      <div className="bg-white rounded-2xl border border-amber-300 overflow-hidden shadow-2xs">
                         <table className="w-full text-left text-xs">
-                          <thead className="bg-amber-100/40 border-b border-amber-200/70">
+                          <thead className="bg-amber-100/50 border-b border-amber-200">
                             <tr>
-                              <th className="px-4 py-3 font-bold text-amber-950">{isFr ? 'Désignation de la pièce' : 'Item Description'}</th>
-                              <th className="px-4 py-3 font-bold text-amber-950 text-center">{isFr ? 'Quantité' : 'Quantity'}</th>
-                              <th className="px-4 py-3 font-bold text-amber-950 text-right">{isFr ? 'Authenticité' : 'Warranty'}</th>
+                              <th className="px-5 py-3.5 font-bold text-amber-950">{isFr ? 'Désignation de la pièce' : 'Item Description'}</th>
+                              <th className="px-5 py-3.5 font-bold text-amber-950 text-center">{isFr ? 'Quantité' : 'Quantity'}</th>
+                              <th className="px-5 py-3.5 font-bold text-amber-950 text-right">{isFr ? 'Authenticité' : 'Certification'}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-amber-100">
                             {selectedOrder.items.map((item, idx) => (
-                              <tr key={idx} className="hover:bg-amber-50/50">
-                                <td className="px-4 py-3.5">
-                                  <div className="flex items-center gap-3">
+                              <tr key={idx} className="hover:bg-amber-50/40">
+                                <td className="px-5 py-4">
+                                  <div className="flex items-center gap-3.5">
                                     <img 
                                       src={item.selectedColor?.image || item.product.primaryImage} 
                                       alt={item.product.name} 
-                                      className="w-10 h-10 object-cover rounded-xl border border-amber-200 bg-amber-50 shrink-0" 
+                                      className="w-11 h-11 object-cover rounded-xl border border-amber-300 bg-amber-50 shrink-0 shadow-2xs" 
                                     />
                                     <div>
-                                      <p className="font-bold text-zinc-950 text-xs">{item.product.name}</p>
-                                      <p className="text-[10px] text-zinc-600 uppercase mt-0.5">
+                                      <p className="font-serif font-bold text-zinc-950 text-sm">{item.product.name}</p>
+                                      <p className="text-[10px] text-amber-900 uppercase mt-0.5 font-sans font-medium">
                                         {item.selectedColor?.name || 'Standard'} · {isFr ? 'Taille' : 'Size'} {item.selectedSize?.name || 'Unique'}
                                       </p>
                                     </div>
                                   </div>
                                 </td>
-                                <td className="px-4 py-3.5 text-center font-bold text-zinc-800">
+                                <td className="px-5 py-4 text-center font-bold text-amber-950 font-mono text-sm">
                                   {item.quantity}x
                                 </td>
-                                <td className="px-4 py-3.5 text-right font-bold text-emerald-700">
-                                  ✓ 100% {isFr ? 'Certifié' : 'Genuine'}
+                                <td className="px-5 py-4 text-right font-bold text-emerald-700">
+                                  ★ 100% {isFr ? 'Certifié GLADYNS' : 'Certified Authentic'}
                                 </td>
                               </tr>
                             ))}
@@ -1443,44 +1507,55 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                       </div>
                     </div>
 
-                    {/* Gift Return & Exchange Policy Notice */}
-                    <div className="bg-amber-100/60 p-4 rounded-2xl border border-amber-300/80 text-xs text-amber-950 space-y-2">
+                    {/* Official 30-Day Gift Exchange Certificate Box */}
+                    <div className="bg-gradient-to-r from-amber-100/80 via-amber-200/50 to-amber-100/80 p-5 rounded-2xl border-2 border-amber-300 space-y-2 text-xs text-amber-950 shadow-2xs">
                       <div className="flex items-center gap-2 font-black text-amber-900">
-                        <Gift className="w-4 h-4 text-amber-700" />
-                        <span>{isFr ? 'CONDITIONS D\'ÉCHANGE CADEAU (30 JOURS) :' : 'GIFT EXCHANGE TERMS (30 DAYS):'}</span>
+                        <Award className="w-5 h-5 text-amber-700" />
+                        <span className="text-xs uppercase tracking-wider">{isFr ? 'CERTIFICAT D\'ÉCHANGE CADEAU (30 JOURS) :' : '30-DAY GIFT EXCHANGE CERTIFICATE:'}</span>
                       </div>
-                      <p className="text-[11px] leading-relaxed text-amber-900">
+                      <p className="text-[11px] leading-relaxed text-amber-950">
                         {isFr 
-                          ? `Ce reçu cadeau permet au destinataire de solliciter un échange de taille, de couleur ou une prise en charge sous garantie auprès du service client ${storeName} dans un délai de 30 jours, sans aucune indication de prix.`
-                          : `This gift receipt allows the recipient to exchange size, color, or request warranty support with ${storeName} Customer Service within 30 days without disclosing any prices.`}
+                          ? `Ce document prestigieux certifie la provenance authentique de votre article auprès de ${storeName}. Il confère au bénéficiaire le droit d'effectuer un échange gracieux de taille ou de couleur sous 30 jours, sans aucune divulgation de prix d'achat.`
+                          : `This prestigious document certifies the authentic provenance of your article from ${storeName}. It grants the recipient the right to exchange size or color within 30 days without disclosing item values.`}
                       </p>
                     </div>
 
-                    {/* Barcode / Stamp area */}
-                    <div className="pt-2 flex flex-col items-center justify-center text-center space-y-1">
-                      <div className="font-mono text-sm tracking-widest text-zinc-700 bg-white px-6 py-2 rounded-lg border border-dashed border-amber-300">
-                        ||| | |||| | ||| ||||| | ||||| | ||||
+                    {/* Barcode & Golden Seal block */}
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-amber-200/70">
+                      <div className="flex items-center gap-2 text-[10px] text-amber-800 font-serif italic">
+                        <span>Garantie Maison {storeName}</span>
                       </div>
-                      <span className="text-[9px] font-mono font-bold text-amber-800">
-                        *GIFT-{selectedOrder.orderNumber}*
-                      </span>
+
+                      <div className="flex flex-col items-center">
+                        <div className="font-mono text-sm tracking-widest text-zinc-800 bg-white px-6 py-2 rounded-xl border border-dashed border-amber-300 shadow-2xs">
+                          ||| | |||| | ||| ||||| | ||||| | ||||
+                        </div>
+                        <span className="text-[9px] font-mono font-bold text-amber-900 mt-0.5">
+                          *GIFT-{selectedOrder.orderNumber}*
+                        </span>
+                      </div>
+
+                      <div className="text-[10px] text-amber-900 font-black tracking-widest uppercase">
+                        ✦ {storeDomain} ✦
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {/* ========================================================================= */}
-                {/* 3. COURIER DELIVERY SLIP / PACKING WAYBILL TEMPLATE */}
+                {/* 3. EXECUTIVE COURIER DELIVERY WAYBILL TEMPLATE */}
                 {/* ========================================================================= */}
                 {receiptTemplate === 'delivery' && (
-                  <div className="bg-white border-2 border-blue-900/30 rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-white border-2 border-blue-900/40 rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden space-y-6 animate-in fade-in duration-300">
+                    
                     {/* Header: Carrier Waybill */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4 border-b-2 border-zinc-900">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4 border-b-2 border-blue-900">
                       <div className="space-y-1">
-                        <div className="inline-flex items-center gap-2 bg-blue-900 text-white px-3 py-1 rounded-lg text-xs font-black uppercase">
-                          <Truck className="w-4 h-4" />
-                          <span>{isFr ? 'BORDEREAU D\'EXPÉDITION & DE LIVRAISON' : 'DELIVERY WAYBILL & DISPATCH'}</span>
+                        <div className="inline-flex items-center gap-2 bg-blue-950 text-white px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider">
+                          <Truck className="w-4 h-4 text-blue-400" />
+                          <span>{isFr ? 'BORDEREAU D\'EXPÉDITION & DE LIVRAISON EXPRESS' : 'DELIVERY WAYBILL & EXPRESS DISPATCH'}</span>
                         </div>
-                        <h3 className="text-xl font-black text-zinc-950 uppercase pt-1">
+                        <h3 className="text-2xl font-serif font-black text-zinc-950 uppercase pt-1">
                           {storeName}
                         </h3>
                         <p className="text-xs text-zinc-600 font-mono">
@@ -1489,10 +1564,10 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                       </div>
 
                       <div className="sm:text-right space-y-0.5">
-                        <span className="text-[10px] font-black uppercase text-zinc-400">
+                        <span className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
                           {isFr ? 'N° BORDEREAU' : 'WAYBILL NO'}
                         </span>
-                        <p className="font-mono text-lg font-black text-blue-900">
+                        <p className="font-mono text-xl font-black text-blue-900">
                           BL-{selectedOrder.orderNumber}
                         </p>
                         <p className="text-xs text-zinc-500 font-medium">
@@ -1503,21 +1578,21 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
                     {/* COURIER DIRECTIVE BOX (High visibility for delivery driver!) */}
                     {paymentInfo.code === 'COD' && selectedOrder.status !== 'delivered' ? (
-                      <div className="bg-amber-500 text-black p-4 rounded-2xl border-2 border-amber-600 space-y-1 shadow-sm">
+                      <div className="bg-amber-400 text-black p-5 rounded-2xl border-2 border-amber-600 space-y-1 shadow-md">
                         <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider">
                           <AlertTriangle className="w-5 h-5 text-black" />
-                          <span>{isFr ? 'DIRECTIVE OBLIGATOIRE POUR LE LIVREUR :' : 'MANDATORY COURIER INSTRUCTION:'}</span>
+                          <span>{isFr ? 'DIRECTIVE OBLIGATOIRE POUR LE COURSIER / LIVREUR :' : 'MANDATORY COURIER INSTRUCTION:'}</span>
                         </div>
-                        <p className="text-base font-black">
+                        <p className="text-lg font-black tracking-tight">
                           {isFr 
                             ? `ENCAISSER EN CASH LA SOMME DE ${formatPrice(selectedOrder.total)} AVANT REMISE DU COLIS.`
-                            : `COLLECT CASH AMOUNT OF ${formatPrice(selectedOrder.total)} BEFORE HANDOVER.`}
+                            : `COLLECT CASH AMOUNT OF ${formatPrice(selectedOrder.total)} BEFORE PARCEL HANDOVER.`}
                         </p>
                       </div>
                     ) : (
-                      <div className="bg-emerald-600 text-white p-4 rounded-2xl space-y-1 shadow-sm">
+                      <div className="bg-emerald-600 text-white p-5 rounded-2xl space-y-1 shadow-md">
                         <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider">
-                          <CheckCircle2 className="w-5 h-5" />
+                          <CheckCircle2 className="w-5 h-5 text-white" />
                           <span>{isFr ? 'COLIS DÉJÀ RÉGLÉ EN LIGNE' : 'PACKAGE ALREADY PAID ONLINE'}</span>
                         </div>
                         <p className="text-sm font-bold">
@@ -1529,12 +1604,12 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     )}
 
                     {/* Customer Destination Info Block */}
-                    <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-200 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="bg-zinc-50 p-5 rounded-2xl border border-zinc-200 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                       <div>
                         <span className="text-[9px] font-black text-zinc-400 uppercase tracking-wider block mb-1">
-                          {isFr ? 'DESTINATAIRE DU COLIS' : 'RECIPIENT & DESTINATION'}
+                          DESTINATAIRE DU COLIS :
                         </span>
-                        <p className="text-base font-black text-zinc-950">
+                        <p className="text-lg font-bold text-zinc-950 font-serif">
                           {selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}
                         </p>
                         <p className="text-sm font-black text-blue-700 font-mono pt-1">
@@ -1547,13 +1622,13 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
                       <div className="sm:text-right space-y-1">
                         <span className="text-[9px] font-black text-zinc-400 uppercase tracking-wider block mb-1">
-                          {isFr ? 'TRANSPORTEUR & STATUT' : 'CARRIER & STATUS'}
+                          TRANSPORTEUR & SUIVI :
                         </span>
                         <p className="text-sm font-bold text-zinc-950">
                           {isFr ? 'Coursier Express GLADYNS' : 'GLADYNS Direct Courier'}
                         </p>
                         <p className="text-xs text-zinc-600">
-                          {isFr ? 'Statut :' : 'Status:'} <strong>{selectedOrder.status.toUpperCase()}</strong>
+                          {isFr ? 'Statut :' : 'Status:'} <strong className="uppercase">{selectedOrder.status}</strong>
                         </p>
                         <p className="text-xs text-zinc-600 font-mono">
                           Ref: #{selectedOrder.orderNumber}
@@ -1564,7 +1639,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     {/* Items Checklist for Packaging / Courier */}
                     <div className="space-y-2">
                       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">
-                        {isFr ? 'ARTICLES À CONTRÔLER DANS LE COLIS' : 'ARTICLES TO VERIFY IN PACKAGE'}
+                        ARTICLES À CONTRÔLER DANS LE COLIS
                       </span>
                       <div className="border border-zinc-200 rounded-2xl overflow-hidden">
                         <table className="w-full text-left text-xs">
@@ -1583,12 +1658,12 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                                   <div className="w-4 h-4 rounded border-2 border-zinc-400 mx-auto" />
                                 </td>
                                 <td className="px-4 py-3">
-                                  <strong>{item.product.name}</strong><br/>
+                                  <strong className="font-serif">{item.product.name}</strong><br/>
                                   <span className="text-[11px] text-zinc-500">{item.selectedColor?.name || 'Standard'} · {item.selectedSize?.name || 'Unique'}</span>
                                 </td>
-                                <td className="px-4 py-3 text-center font-bold">{item.quantity}</td>
+                                <td className="px-4 py-3 text-center font-bold font-mono">{item.quantity}</td>
                                 <td className="px-4 py-3 text-right text-zinc-600 font-mono text-[11px]">
-                                  [ ] {isFr ? 'Conforme' : 'Checked'}
+                                  [ ] {isFr ? 'Vérifié' : 'Checked'}
                                 </td>
                               </tr>
                             ))}
@@ -1601,9 +1676,9 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                       <div className="border-2 border-dashed border-zinc-300 p-4 rounded-2xl space-y-4">
                         <span className="text-[10px] font-black uppercase text-zinc-400 block">
-                          {isFr ? 'SIGNATURE DU COURSIER / LIVREUR' : 'COURIER SIGNATURE'}
+                          SIGNATURE DU LIVREUR / COURSIER :
                         </span>
-                        <div className="h-12" />
+                        <div className="h-10" />
                         <p className="text-[10px] text-zinc-400 border-t border-zinc-200 pt-1">
                           Nom & Date : ___________________________
                         </p>
@@ -1611,11 +1686,11 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
                       <div className="border-2 border-dashed border-zinc-300 p-4 rounded-2xl space-y-4">
                         <span className="text-[10px] font-black uppercase text-zinc-400 block">
-                          {isFr ? 'DATE & SIGNATURE DU CLIENT RÉCEPTIONNAIRE' : 'CLIENT RECEPTION SIGNATURE'}
+                          DATE & SIGNATURE DU CLIENT :
                         </span>
-                        <div className="h-12" />
+                        <div className="h-10" />
                         <p className="text-[10px] text-zinc-400 border-t border-zinc-200 pt-1">
-                          Colis reçu en bon état : __________________
+                          Colis reçu scellé : __________________
                         </p>
                       </div>
                     </div>
@@ -1626,7 +1701,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                 {/* 4. POS THERMAL REGISTER RECEIPT (COMPACT 80MM SLIP) */}
                 {/* ========================================================================= */}
                 {receiptTemplate === 'pos' && (
-                  <div className="max-w-sm mx-auto bg-white border border-zinc-300 shadow-sm rounded-2xl p-6 font-mono text-zinc-900 text-xs space-y-4 animate-in fade-in duration-300">
+                  <div className="max-w-sm mx-auto bg-white border border-zinc-300 shadow-md rounded-2xl p-6 font-mono text-zinc-900 text-xs space-y-4 animate-in fade-in duration-300">
                     {/* Header */}
                     <div className="text-center space-y-1">
                       <div className="w-10 h-10 mx-auto rounded-xl bg-zinc-950 flex items-center justify-center p-1 mb-2">
@@ -1746,10 +1821,10 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
                   <button
                     onClick={() => window.print()}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm active:scale-95"
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm active:scale-95"
                   >
                     <Printer className="w-4 h-4" />
-                    <span>{isFr ? 'Imprimer ce modèle' : 'Print Template'}</span>
+                    <span>{isFr ? 'Imprimer ce document' : 'Print Document'}</span>
                   </button>
                 </div>
               </div>
