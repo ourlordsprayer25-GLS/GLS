@@ -65,3 +65,18 @@ h1, h2, h3, .font-display {
 ::-webkit-scrollbar-thumb:hover {
   background: #A1A1AA;
 }
+
+/* ==========================================================================
+   Universal Legacy Mobile Fallback: Force mobile hiding & remove 3D OS bevels
+   ========================================================================== */
+button, input, select, textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+@media (max-width: 1023px) {
+  aside.hidden,
+  .hidden {
+    display: none !important;
+  }
+}

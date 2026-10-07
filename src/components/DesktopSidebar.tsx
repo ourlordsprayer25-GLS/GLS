@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Home,
   LayoutGrid,
@@ -73,6 +73,24 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
 }) => {
   const { language, currency, country, setIsSelectorModalOpen } = useLanguageCurrency();
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Absolute safeguard against legacy mobile engines rendering desktop sidebar
+  const [isMobileScreen, setIsMobileScreen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 1024;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isMobileScreen) {
+    return null;
+  }
 
   return (
     <aside

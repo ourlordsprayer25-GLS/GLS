@@ -7,12 +7,88 @@ import {VitePWA} from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function unwrapLegacyCss(code: string): string {
+  let result = code;
+
+  // 1. Remove empty layer declarations: @layer components; etc.
+  result = result.replace(/@layer\s+[a-z0-9_-]+\s*;/gi, '');
+
+  // 2. Unwrap @layer <name> { ... }
+  const layerRegex = /@layer\s+[a-z0-9_-]+\s*\{/gi;
+  let match: RegExpExecArray | null;
+  while ((match = layerRegex.exec(result)) !== null) {
+    const startIdx = match.index;
+    const openBraceIdx = startIdx + match[0].length - 1;
+    let depth = 1;
+    let closeBraceIdx = -1;
+    for (let i = openBraceIdx + 1; i < result.length; i++) {
+      if (result[i] === '{') depth++;
+      else if (result[i] === '}') {
+        depth--;
+        if (depth === 0) {
+          closeBraceIdx = i;
+          break;
+        }
+      }
+    }
+    if (closeBraceIdx !== -1) {
+      result =
+        result.slice(0, startIdx) +
+        result.slice(openBraceIdx + 1, closeBraceIdx) +
+        result.slice(closeBraceIdx + 1);
+      layerRegex.lastIndex = startIdx;
+    } else {
+      break;
+    }
+  }
+
+  // 3. Unwrap :where(...) selectors for older browser compatibility (Chrome < 88 / MIUI Browser)
+  let idx: number;
+  while ((idx = result.indexOf(':where(')) !== -1) {
+    const openParen = idx + 6;
+    let depth = 1;
+    let closeParen = -1;
+    for (let i = openParen + 1; i < result.length; i++) {
+      if (result[i] === '(') depth++;
+      else if (result[i] === ')') {
+        depth--;
+        if (depth === 0) {
+          closeParen = i;
+          break;
+        }
+      }
+    }
+    if (closeParen !== -1) {
+      const inner = result.slice(openParen + 1, closeParen);
+      result = result.slice(0, idx) + inner + result.slice(closeParen + 1);
+    } else {
+      break;
+    }
+  }
+
+  return result;
+}
+
 export default defineConfig(() => {
   return {
     base: '/',
     plugins: [
       react(),
       tailwindcss(),
+      {
+        name: 'legacy-css-unwrapper',
+        enforce: 'post',
+        generateBundle(_, bundle) {
+          for (const fileName in bundle) {
+            if (fileName.endsWith('.css')) {
+              const chunk = bundle[fileName];
+              if (chunk && chunk.type === 'asset' && typeof chunk.source === 'string') {
+                chunk.source = unwrapLegacyCss(chunk.source);
+              }
+            }
+          }
+        },
+      },
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['apple-touch-icon.png'],
