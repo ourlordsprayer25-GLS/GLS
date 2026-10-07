@@ -110,30 +110,51 @@ export const SUPPORTED_COUNTRIES: CountryInfo[] = [
 ];
 
 /**
- * Auto-detects device language ('fr' or 'en')
+ * Directly detects the user's OS and device language ('fr' or 'en')
  */
-export function detectDeviceLanguage(): Language {
+export function getDeviceSystemLanguage(): Language {
   if (typeof window === 'undefined') return 'en';
-
   try {
-    const saved = localStorage.getItem('gladyns_language');
-    if (saved === 'fr' || saved === 'en') return saved;
-  } catch {
-    // ignore
-  }
+    const browserLanguages = navigator.languages && navigator.languages.length > 0 
+      ? navigator.languages 
+      : [navigator.language || (navigator as any).userLanguage || 'en'];
 
-  try {
-    const browserLanguages = navigator.languages || [navigator.language || 'en'];
     for (const lang of browserLanguages) {
-      if (lang && lang.toLowerCase().startsWith('fr')) {
-        return 'fr';
+      if (lang && typeof lang === 'string') {
+        const clean = lang.toLowerCase();
+        if (clean.startsWith('fr')) {
+          return 'fr';
+        }
+        if (clean.startsWith('en')) {
+          return 'en';
+        }
       }
     }
   } catch {
     // fallback
   }
-
   return 'en';
+}
+
+/**
+ * Auto-detects device language ('fr' or 'en'), respecting manual user choices when explicitly saved
+ */
+export function detectDeviceLanguage(forceSystem = false): Language {
+  if (typeof window === 'undefined') return 'en';
+
+  if (!forceSystem) {
+    try {
+      const isManual = localStorage.getItem('gladyns_language_manual');
+      const saved = localStorage.getItem('gladyns_language');
+      if (isManual === 'true' && (saved === 'fr' || saved === 'en')) {
+        return saved;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return getDeviceSystemLanguage();
 }
 
 /**

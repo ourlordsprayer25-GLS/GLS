@@ -49,70 +49,79 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
 
-  const CATEGORY_HERO_FALLBACK = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop';
+  const CATEGORY_HERO_FALLBACK = '/assets/gladyns_store_preview.png';
 
-  const heroSlides: Slide[] = [
-    {
-      id: 'cat-slide-1',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Catalogue Multi-Rayons' : 'Multi-Department Catalog',
-      title: language === 'fr' ? 'Tous les Rayons de la Boutique' : 'Shop All Store Departments',
-      subtitle: language === 'fr'
-        ? 'Découvrez nos sélections d\'instruments de musique, électronique de pointe, électroménager et maroquinerie.'
-        : 'Browse all curated disciplines across Musical Instruments, Precision Electronics, Home Appliances, Apparel, and Tuscan Leather Carry.',
-      ctaText: language === 'fr' ? 'Explorer les Rayons' : 'Explore Departments',
-    },
-    {
-      id: 'cat-slide-musical',
-      image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Instruments & Studio' : 'Musical Instruments & Studio',
-      title: language === 'fr' ? 'Synthétiseurs & Hi-Fi Vinyle' : 'Polyphonic Synthesizers & Vinyl Hi-Fi',
-      subtitle: language === 'fr'
-        ? 'Synthétiseurs analogiques 8 voix, platines direct-drive et enceintes de monitoring studio.'
-        : 'Discrete 8-voice analog synthesizers, direct-drive turntables with carbon tonearms, and ribbon studio monitors.',
-      ctaText: language === 'fr' ? 'Matériel Musical' : 'View Musical Gear',
-    },
-    {
-      id: 'cat-slide-appliances',
-      image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Électroménager & Maison' : 'Home Appliances & Living',
-      title: language === 'fr' ? 'Art de Vivre & Espace Barista' : 'Autonomous Living & Barista Craft',
-      subtitle: language === 'fr'
-        ? 'Aspirateurs robots LiDAR, machines à expresso italiennes et purificateurs d\'air HEPA 13.'
-        : 'LiDAR auto-empty robot vacuums, Italian dual-boiler espresso systems, and medical-grade HEPA 13 air purifiers.',
-      ctaText: language === 'fr' ? 'Voir l\'Électroménager' : 'View Appliances',
-    },
-    {
-      id: 'cat-slide-electronics',
-      image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Électronique & Audio' : 'Electronics & Audio',
-      title: language === 'fr' ? 'Casques Planar & Tech Studio' : 'Planar Magnetic & Studio Tech',
-      subtitle: language === 'fr'
-        ? 'Casques acoustiques planar haute résolution, composants audiophiles et périphériques studio usinés.'
-        : 'High-res planar acoustic headphones, audiophile hi-fi components, and tactile machined studio gear.',
-      ctaText: language === 'fr' ? 'Voir l\'Électronique' : 'View Electronics',
-    },
-    {
-      id: 'cat-slide-2',
-      image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Mode & Confection' : 'Fashion & Tailoring',
-      title: language === 'fr' ? 'Coupes Architecturales & Sergé' : 'Architectural Cuts & Twill',
-      subtitle: language === 'fr'
-        ? 'Manteaux en laine vierge de Biella double face et vestes d\'atelier en sergé selvedge japonais.'
-        : 'Double-faced Biella virgin wool overcoats and Japanese selvedge twill workwear jackets.',
-      ctaText: language === 'fr' ? 'Voir la Mode' : 'View Apparel',
-    },
-    {
-      id: 'cat-slide-4',
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Maroquinerie Toscane' : 'Tuscan Leather Carry',
-      title: language === 'fr' ? 'Sacs de Voyage en Cuir Végétal' : 'Vegetable-Tanned Travel Bags',
-      subtitle: language === 'fr'
-        ? 'Cuir pleine fleur certifié lustré à la cire d\'abeille biologique pour une patine noble.'
-        : 'Consortium-certified full-grain cowhide burnished with organic beeswax to develop rich patina.',
-      ctaText: language === 'fr' ? 'Voir la Maroquinerie' : 'View Leather Goods',
-    },
-  ];
+  // Dynamic slides generated from real store products
+  const heroSlides: Slide[] = useMemo(() => {
+    // Helper to find a product image by category or fallback to store preview
+    const findProductImg = (catKeywords: string[], defaultFallback = CATEGORY_HERO_FALLBACK) => {
+      const match = products.find((p) => {
+        const cat = (p.categoryLabel || p.category || '').toLowerCase();
+        const name = (p.name || '').toLowerCase();
+        return catKeywords.some((k) => cat.includes(k) || name.includes(k)) && p.primaryImage;
+      });
+      return match?.primaryImage || defaultFallback;
+    };
+
+    const audioImg = findProductImg(['audio', 'sound', 'bose', 'marshall', 'jbl']);
+    const laptopImg = findProductImg(['laptop', 'computer', 'hp', 'elitebook']);
+    const chargerImg = findProductImg(['charger', 'type-c', '120w', 'phone']);
+    const watchBagImg = findProductImg(['watch', 'bag', 'baggy', 'smart-watch']);
+    const hardwareImg = findProductImg(['ram', 'access', 'mouse', 'usb']);
+
+    return [
+      {
+        id: 'cat-slide-audio',
+        image: audioImg,
+        badge: language === 'fr' ? 'Électronique & Audio' : 'Audio & Electronics',
+        title: language === 'fr' ? 'Casques Bose, Marshall & Audio Hi-Fi' : 'Bose, Marshall & Hi-Fi Audio',
+        subtitle: language === 'fr'
+          ? 'Casques antibruit Bose Ultra, enceintes Marshall, audio JBL et accessoires haute fidélité certifiés.'
+          : 'Bose Ultra noise-cancelling headphones, Marshall Bluetooth speakers, and verified acoustic gear.',
+        ctaText: language === 'fr' ? 'Explorer l\'Audio' : 'View Audio Gear',
+      },
+      {
+        id: 'cat-slide-laptops',
+        image: laptopImg,
+        badge: language === 'fr' ? 'Informatique & Ordinateurs' : 'Computing & Laptops',
+        title: language === 'fr' ? 'PC Portables HP EliteBook & Bureautique' : 'HP EliteBook Laptops & Tech',
+        subtitle: language === 'fr'
+          ? 'Ordinateurs portables professionnels HP équipés de processeurs Intel Core i5 et stockage SSD rapide.'
+          : 'Professional HP EliteBook business laptops with Intel Core i5 processors and blazing SSD storage.',
+        ctaText: language === 'fr' ? 'Voir les Ordinateurs' : 'View Laptops',
+      },
+      {
+        id: 'cat-slide-chargers',
+        image: chargerImg,
+        badge: language === 'fr' ? 'Charge Rapide & Alimentation' : 'Fast Chargers & Power Tech',
+        title: language === 'fr' ? 'Chargeurs Type-C 120W & Câbles' : 'Type-C 120W Fast Chargers',
+        subtitle: language === 'fr'
+          ? 'Blocs de recharge ultra-rapide 120W et câbles renforcés haute intensité compatibles tous appareils.'
+          : 'High-wattage 120W fast charging adapters and heavy-duty cables for all your smart devices.',
+        ctaText: language === 'fr' ? 'Voir les Chargeurs' : 'View Chargers',
+      },
+      {
+        id: 'cat-slide-wearables',
+        image: watchBagImg,
+        badge: language === 'fr' ? 'Montres Connectées & Sacs' : 'Smartwatches & Carry',
+        title: language === 'fr' ? 'Montres S10 & Sacs Lifestyle GLADYNS' : 'S10 Smartwatches & Signature Bags',
+        subtitle: language === 'fr'
+          ? 'Montres intelligentes avec suivi d\'activité complet et sacs de transport exclusifs de la boutique.'
+          : 'S10 feature-rich smartwatches and exclusive GLADYNS lifestyle bags built for mobility.',
+        ctaText: language === 'fr' ? 'Voir la Collection' : 'View Lifestyle',
+      },
+      {
+        id: 'cat-slide-hardware',
+        image: hardwareImg,
+        badge: language === 'fr' ? 'Hardware & Périphériques' : 'Hardware & Peripherals',
+        title: language === 'fr' ? 'Mémoires RAM DDR4 & Accessoires PC' : 'DDR4 RAM Modules & PC Accessories',
+        subtitle: language === 'fr'
+          ? 'Barrettes RAM 8Go / 16Go, boîtiers pour disques externes, souris sans fil et hubs USB.'
+          : 'High-speed DDR4 8GB / 16GB RAM modules, external drive enclosures, and wireless mice.',
+        ctaText: language === 'fr' ? 'Voir les Accessoires' : 'View Peripherals',
+      },
+    ];
+  }, [products, language]);
 
   // Auto slideshow
   useEffect(() => {

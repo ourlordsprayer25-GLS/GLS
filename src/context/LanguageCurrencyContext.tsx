@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { Language, CurrencyConfig, CountryInfo } from '../types/localization';
-import { SUPPORTED_CURRENCIES, SUPPORTED_COUNTRIES, detectCountryAndCurrency, detectDeviceLanguage } from '../data/currencies';
+import { SUPPORTED_CURRENCIES, SUPPORTED_COUNTRIES, detectCountryAndCurrency, detectDeviceLanguage, getDeviceSystemLanguage } from '../data/currencies';
 import { TRANSLATIONS, TranslationKey } from '../data/translations';
 
 interface LanguageCurrencyContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  resetToDeviceLanguage: () => void;
   currency: CurrencyConfig;
   setCurrency: (currencyCode: string) => void;
   country: CountryInfo;
@@ -16,6 +17,8 @@ interface LanguageCurrencyContextType {
   formatPrice: (priceInUSD: number) => string;
   convertPrice: (priceInUSD: number) => number;
   isAutoDetected: boolean;
+  isLanguageAutoDetected: boolean;
+  deviceLanguage: Language;
   isSelectorModalOpen: boolean;
   setIsSelectorModalOpen: (open: boolean) => void;
 }
@@ -24,6 +27,14 @@ const LanguageCurrencyContext = createContext<LanguageCurrencyContextType | null
 
 export const LanguageCurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAutoDetected, setIsAutoDetected] = useState(true);
+  const [isLanguageAutoDetected, setIsLanguageAutoDetected] = useState(() => {
+    try {
+      return localStorage.getItem('gladyns_language_manual') !== 'true';
+    } catch {
+      return true;
+    }
+  });
+  const [deviceLanguage, setDeviceLanguage] = useState<Language>(() => getDeviceSystemLanguage());
   const [isSelectorModalOpen, setIsSelectorModalOpen] = useState(false);
 
   // Initialize Language
@@ -42,12 +53,36 @@ export const LanguageCurrencyProvider: React.FC<{ children: ReactNode }> = ({ ch
     return detected.countryCode;
   });
 
+  // Listen for device language changes in OS/browser
+  useEffect(() => {
+    const updateFromDevice = () => {
+      const currentDeviceLang = getDeviceSystemLanguage();
+      setDeviceLanguage(currentDeviceLang);
+      try {
+        const isManual = localStorage.getItem('gladyns_language_manual');
+        if (isManual !== 'true') {
+          setLanguageState(currentDeviceLang);
+          setIsLanguageAutoDetected(true);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    window.addEventListener('languagechange', updateFromDevice);
+    return () => window.removeEventListener('languagechange', updateFromDevice);
+  }, []);
+
   // Check if user previously manually set these
   useEffect(() => {
     try {
+      const isManual = localStorage.getItem('gladyns_language_manual');
       const savedLang = localStorage.getItem('gladyns_language');
       const savedCurr = localStorage.getItem('gladyns_currency');
       const savedCountry = localStorage.getItem('gladyns_country');
+      if (isManual === 'true') {
+        setIsLanguageAutoDetected(false);
+      }
       if (savedLang || savedCurr || savedCountry) {
         setIsAutoDetected(false);
       }
@@ -59,11 +94,26 @@ export const LanguageCurrencyProvider: React.FC<{ children: ReactNode }> = ({ ch
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     setIsAutoDetected(false);
+    setIsLanguageAutoDetected(false);
     try {
       localStorage.setItem('gladyns_language', lang);
+      localStorage.setItem('gladyns_language_manual', 'true');
     } catch {
       // ignore
     }
+  };
+
+  const resetToDeviceLanguage = () => {
+    try {
+      localStorage.removeItem('gladyns_language_manual');
+      localStorage.removeItem('gladyns_language');
+    } catch {
+      // ignore
+    }
+    const detected = getDeviceSystemLanguage();
+    setLanguageState(detected);
+    setDeviceLanguage(detected);
+    setIsLanguageAutoDetected(true);
   };
 
   const setCurrency = (code: string) => {
@@ -152,6 +202,7 @@ export const LanguageCurrencyProvider: React.FC<{ children: ReactNode }> = ({ ch
       value={{
         language,
         setLanguage,
+        resetToDeviceLanguage,
         currency: activeCurrency,
         setCurrency,
         country: activeCountry,
@@ -162,6 +213,8 @@ export const LanguageCurrencyProvider: React.FC<{ children: ReactNode }> = ({ ch
         formatPrice,
         convertPrice,
         isAutoDetected,
+        isLanguageAutoDetected,
+        deviceLanguage,
         isSelectorModalOpen,
         setIsSelectorModalOpen,
       }}

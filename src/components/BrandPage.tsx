@@ -52,50 +52,79 @@ export const BrandPage: React.FC<BrandPageProps> = ({
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
 
-  const BRAND_HERO_FALLBACK = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop';
+  const BRAND_HERO_FALLBACK = '/assets/gladyns_store_preview.png';
 
-  const heroSlides: Slide[] = [
-    {
-      id: 'brand-slide-1',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Répertoire des Marques' : 'Brand Directory',
-      title: language === 'fr' ? 'La Maison & Les Grandes Marques' : 'The Maison & Brand Archive',
-      subtitle: language === 'fr'
-        ? 'Répertoire alphabétique complet de nos partenaires d\'exception et marques patrimoniales.'
-        : 'Complete alphabetical directory of monitored partner studios and heritage brands, from Adidas Originals to Tuscan leather houses.',
-      ctaText: language === 'fr' ? 'Explorer les Marques' : 'Explore Brands',
-    },
-    {
-      id: 'brand-slide-2',
-      image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Ateliers Européens' : 'European Studio Guild',
-      title: language === 'fr' ? 'Savoir-Faire & Maîtrise' : 'Direct Monitored Craft',
-      subtitle: language === 'fr'
-        ? 'Partenariats directs avec des ateliers indépendants à Porto, Biella, Kojima et en Toscane.'
-        : 'Permanent contracts with independent workshops across Porto, Biella, Kojima, and Tuscany with 100% material traceability.',
-      ctaText: language === 'fr' ? 'Découvrir les Ateliers' : 'Discover Studios',
-    },
-    {
-      id: 'brand-slide-3',
-      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Matières Nobles' : 'Material Sovereignty',
-      title: language === 'fr' ? 'Zéro Matière Synthétique' : 'Zero Synthetic Fillers',
-      subtitle: language === 'fr'
-        ? 'Pièces non doublées conçues sans thermocollant synthétique ni microplastiques polluants.'
-        : 'Unlined split-face garments without synthetic fusible linings or microplastics that return harmoniously to the earth.',
-      ctaText: language === 'fr' ? 'Lire le Manifeste' : 'Read Manifesto',
-    },
-    {
-      id: 'brand-slide-4',
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop',
-      badge: language === 'fr' ? 'Engagement Qualité' : 'Lifetime Covenant',
-      title: language === 'fr' ? 'Support & Garantie Étendue' : 'Complimentary Product Support',
-      subtitle: language === 'fr'
-        ? 'Chaque création GLADYNS bénéficie d\'une assistance technique réactive et d\'un suivi durable.'
-        : 'Every GLADYNS object is backed by dynamic technical support and lifetime product restoration.',
-      ctaText: language === 'fr' ? 'Voir la Garantie' : 'View Product Warranty',
-    },
-  ];
+  // Dynamic slides generated from real store brand products
+  const heroSlides: Slide[] = useMemo(() => {
+    // Helper to find a product image by brand keyword or fallback
+    const findBrandImg = (brandKeywords: string[], defaultFallback = BRAND_HERO_FALLBACK) => {
+      const match = products.find((p) => {
+        const brand = (p.brand || '').toLowerCase();
+        const name = (p.name || '').toLowerCase();
+        return brandKeywords.some((k) => brand.includes(k) || name.includes(k)) && p.primaryImage;
+      });
+      return match?.primaryImage || defaultFallback;
+    };
+
+    const boseImg = findBrandImg(['bose']);
+    const hpImg = findBrandImg(['hp', 'elitebook']);
+    const gladynsImg = findBrandImg(['gladyns', 's10', 'baggy']);
+    const marshallImg = findBrandImg(['marshall', 'jbl']);
+    const regrsiImg = findBrandImg(['regrsi', 'techno', 'itel']);
+
+    return [
+      {
+        id: 'brand-slide-bose',
+        image: boseImg,
+        badge: language === 'fr' ? 'Acoustique & Son Référence' : 'Reference Audio Brand',
+        title: language === 'fr' ? 'Espace Marque Officielle BOSE' : 'Official BOSE Brand Space',
+        subtitle: language === 'fr'
+          ? 'Casques Bose Ultra à réduction active de bruit, oreillettes sans fil et technologie spatiale certifiée.'
+          : 'BOSE Ultra noise-cancelling headphones and precision acoustic gear available with full warranty.',
+        ctaText: language === 'fr' ? 'Explorer BOSE' : 'Explore BOSE',
+      },
+      {
+        id: 'brand-slide-hp',
+        image: hpImg,
+        badge: language === 'fr' ? 'Informatique & PC Portables' : 'Enterprise Computing',
+        title: language === 'fr' ? 'Espace Marque Officielle HP' : 'Official HP Brand Space',
+        subtitle: language === 'fr'
+          ? 'Ordinateurs portables HP EliteBook, souris sans fil haute précision et chargeurs d\'origine.'
+          : 'HP EliteBook business laptops, precision wireless mice, and certified genuine power adapters.',
+        ctaText: language === 'fr' ? 'Explorer HP' : 'Explore HP',
+      },
+      {
+        id: 'brand-slide-gladyns',
+        image: gladynsImg,
+        badge: language === 'fr' ? 'Maison Signature GLADYNS' : 'GLADYNS Signature Brand',
+        title: language === 'fr' ? 'Créations & Collections GLADYNS' : 'GLADYNS Signature Collections',
+        subtitle: language === 'fr'
+          ? 'Montres connectées S10, sacs lifestyle Bagins et accessoires conçus avec rigueur et élégance.'
+          : 'S10 smartwatches, Bagins carry bags, and foundation accessories designed for enduring quality.',
+        ctaText: language === 'fr' ? 'Voir GLADYNS' : 'View GLADYNS',
+      },
+      {
+        id: 'brand-slide-marshall',
+        image: marshallImg,
+        badge: language === 'fr' ? 'Audio Vintage & JBL' : 'Marshall & JBL Sound',
+        title: language === 'fr' ? 'Espace Marques Marshall & JBL' : 'Marshall & JBL Acoustics',
+        subtitle: language === 'fr'
+          ? 'Enceintes Bluetooth emblématiques et audio portable puissant pour les passionnés de musique.'
+          : 'Iconic Bluetooth speakers and acoustic engineering built for uncompromising sound fidelity.',
+        ctaText: language === 'fr' ? 'Voir Marshall & JBL' : 'View Acoustics',
+      },
+      {
+        id: 'brand-slide-regrsi',
+        image: regrsiImg,
+        badge: language === 'fr' ? 'Charge Rapide & Électronique' : 'Power & Fast Charging',
+        title: language === 'fr' ? 'Espace Marques REGRSI & TECHNO' : 'REGRSI & TECHNO Power Tech',
+        subtitle: language === 'fr'
+          ? 'Blocs de recharge Type-C 120W, câbles ultra-rapides et adaptateurs haute puissance certifiés.'
+          : '120W ultra-fast charging bricks, heavy-duty cables, and high-performance power solutions.',
+        ctaText: language === 'fr' ? 'Voir les Chargeurs' : 'View Power Tech',
+      },
+    ];
+  }, [products, language]);
 
   // Auto-slideshow
   useEffect(() => {

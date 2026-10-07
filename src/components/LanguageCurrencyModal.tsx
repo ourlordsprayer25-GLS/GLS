@@ -15,6 +15,9 @@ export const LanguageCurrencyModal: React.FC = () => {
     allCountries,
     t,
     isAutoDetected,
+    isLanguageAutoDetected,
+    resetToDeviceLanguage,
+    deviceLanguage,
     isSelectorModalOpen,
     setIsSelectorModalOpen,
     formatPrice,
@@ -110,10 +113,50 @@ export const LanguageCurrencyModal: React.FC = () => {
             {/* Tab 1: Language */}
             {activeTab === 'language' && (
               <div className="space-y-4">
+                {/* Device Language Auto-Detection Card */}
+                <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-all ${
+                  isLanguageAutoDetected 
+                    ? 'bg-blue-50/70 border-blue-200' 
+                    : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-slate-900">
+                          {language === 'fr' ? 'Langue de l\'appareil (Automatique)' : 'Device Language (Auto-Detect)'}
+                        </p>
+                        {isLanguageAutoDetected && (
+                          <span className="text-[9px] font-mono bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">
+                            {language === 'fr' ? 'ACTIF' : 'ACTIVE'}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        {language === 'fr' 
+                          ? `Détecté sur votre appareil : ${deviceLanguage === 'fr' ? 'Français (FR)' : 'English (EN)'}`
+                          : `Detected on your device: ${deviceLanguage === 'fr' ? 'Français (FR)' : 'English (EN)'}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!isLanguageAutoDetected && (
+                    <button
+                      type="button"
+                      onClick={resetToDeviceLanguage}
+                      className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0"
+                    >
+                      {language === 'fr' ? 'Utiliser' : 'Use Device'}
+                    </button>
+                  )}
+                </div>
+
                 <p className="text-xs text-slate-500">
                   {language === 'fr' 
-                    ? 'Choisissez votre langue préférée. La langue de votre appareil est détectée automatiquement.' 
-                    : 'Select your preferred shopping language. Device language is automatically detected.'}
+                    ? 'Ou sélectionnez manuellement votre langue préférée :' 
+                    : 'Or manually choose your preferred shopping language:'}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

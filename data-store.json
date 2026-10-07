@@ -1528,7 +1528,28 @@
       "preferences": {},
       "sessionStatus": null,
       "lastSeen": null,
-      "updated_at": "2026-10-07T16:15:39.009+00:00"
+      "updated_at": "2026-10-07T16:43:54.44+00:00"
+    },
+    {
+      "id": "967ad8f8-a378-44b2-b7a2-1eb061063fcb",
+      "firstName": "Chioma",
+      "lastName": "",
+      "email": "c83747777@gmail.com",
+      "phone": "",
+      "memberSince": "October 2026",
+      "tier": "Bronze",
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "addresses": [],
+      "preferences": {
+        "dropAlerts": false,
+        "newsletter": false,
+        "preferredSize": "M",
+        "sustainablePackaging": false
+      },
+      "sessionStatus": "online",
+      "lastSeen": "Active Now",
+      "updated_at": "2026-10-07T16:43:10.954928+00:00"
     },
     {
       "id": "guest-qby3atv-1791388103279",
@@ -1577,27 +1598,6 @@
       "sessionStatus": null,
       "lastSeen": null,
       "updated_at": "2026-10-07T15:46:31.769+00:00"
-    },
-    {
-      "id": "967ad8f8-a378-44b2-b7a2-1eb061063fcb",
-      "firstName": "Chioma",
-      "lastName": "",
-      "email": "c83747777@gmail.com",
-      "phone": "",
-      "memberSince": "October 2026",
-      "tier": "Bronze",
-      "loyaltyPoints": 0,
-      "lifetimePoints": 0,
-      "addresses": [],
-      "preferences": {
-        "dropAlerts": false,
-        "newsletter": false,
-        "preferredSize": "M",
-        "sustainablePackaging": false
-      },
-      "sessionStatus": "online",
-      "lastSeen": "Active Now",
-      "updated_at": "2026-10-07T15:44:22.315179+00:00"
     },
     {
       "id": "guest-zkuhkgn-1791313202465",
@@ -3000,6 +3000,22 @@
       "updated_at": "2026-10-03T12:26:16.886+00:00"
     },
     {
+      "id": "da0e1d8b-0254-474b-bbeb-8711ce979fd6",
+      "firstName": "Test",
+      "lastName": "Customer",
+      "email": "testdebug1791029608274@gmail.com",
+      "phone": null,
+      "memberSince": "Oct 2026",
+      "tier": "Bronze VIP",
+      "loyaltyPoints": 100,
+      "lifetimePoints": 100,
+      "addresses": [],
+      "preferences": {},
+      "sessionStatus": "online",
+      "lastSeen": "Active Now",
+      "updated_at": "2026-10-03T12:21:39.055714+00:00"
+    },
+    {
       "id": "64a560d3-9c0a-48f8-8c77-67373017f093",
       "firstName": "Chibuikekene",
       "lastName": "",
@@ -3016,22 +3032,6 @@
         "preferredSize": "M",
         "sustainablePackaging": false
       },
-      "sessionStatus": "online",
-      "lastSeen": "Active Now",
-      "updated_at": "2026-10-03T12:21:39.055714+00:00"
-    },
-    {
-      "id": "da0e1d8b-0254-474b-bbeb-8711ce979fd6",
-      "firstName": "Test",
-      "lastName": "Customer",
-      "email": "testdebug1791029608274@gmail.com",
-      "phone": null,
-      "memberSince": "Oct 2026",
-      "tier": "Bronze VIP",
-      "loyaltyPoints": 100,
-      "lifetimePoints": 100,
-      "addresses": [],
-      "preferences": {},
       "sessionStatus": "online",
       "lastSeen": "Active Now",
       "updated_at": "2026-10-03T12:21:39.055714+00:00"
@@ -3410,5 +3410,5 @@
     "guest-ssaw1es-1791283380934": [],
     "guest-1mmvwv3-1791295068330": []
   },
-  "lastUpdated": 1791389906138
+  "lastUpdated": 1791391465519
 }
