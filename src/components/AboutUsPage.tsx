@@ -37,32 +37,32 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
 
   const milestones = [
     {
-      year: '2018',
-      title: isFr ? 'Fondation à Porto' : 'Porto Studio Founded',
+      year: isFr ? 'Avril 2026' : 'April 2026',
+      title: isFr ? 'Le Premier Projet Web' : 'First Online Store Created',
       desc: isFr
-        ? 'Création du premier studio de design et curation au cœur du Portugal.'
-        : 'Creation of our first design and product curation studio in Northern Portugal.',
+        ? 'Lancement de notre toute première boutique numérique et début passionné de notre aventure e-commerce.'
+        : 'Creation of our very first e-commerce store and catalog, marking the start of our digital journey.',
     },
     {
-      year: '2020',
-      title: isFr ? 'Engagement 100% Éco-Certifié' : '100% Organic & Traceable',
+      year: isFr ? 'Mai – Juil. 2026' : 'May – July 2026',
+      title: isFr ? '8+ Versions & Résilience' : '8+ Iterations & Technical Resilience',
       desc: isFr
-        ? 'Certification GOTS pour l\'ensemble des cotons et tannerie végétale sans sels de chrome.'
-        : 'GOTS organic cotton certification and 100% vegetable-tanned leather processes.',
+        ? 'Conception et mise à l\'épreuve de plus de 8 plateformes web différentes. Chaque défi rencontré a forgé notre expertise.'
+        : 'Building and testing over 8 different website architectures. Overcoming early setbacks to build an unshakeable technical foundation.',
     },
     {
-      year: '2022',
-      title: isFr ? 'Expansion à Florence & Milan' : 'Florence & Milan Expansion',
+      year: isFr ? 'Août – Sept. 2026' : 'Aug – Sept 2026',
+      title: isFr ? 'Refonte Intégrale & Qualité' : 'Architecture & Quality Overhaul',
       desc: isFr
-        ? 'Partenariat exclusif avec des studios familiaux italiens spécialisés.'
-        : 'Exclusive partnership with multigenerational Italian family studios in Tuscany.',
+        ? 'Intégration du système de commandes en temps réel, factures sécurisées, logistique de livraison et design moderne.'
+        : 'Comprehensive overhaul integrating live order pipelines, luxury invoice generation, and bank-grade data security.',
     },
     {
-      year: '2025',
-      title: isFr ? 'Boutique Officielle Directe' : 'Direct Digital Boutique',
+      year: isFr ? 'Octobre 2026' : 'October 2026',
+      title: isFr ? 'Lancement Officiel GLADYNS' : 'Official GLADYNS Marketplace Launch',
       desc: isFr
-        ? 'Lancement de notre expérience numérique mondiale sans intermédiaires pour nos membres patrons.'
-        : 'Global digital boutique launch delivering direct-to-patron luxury without middlemen.',
+        ? 'Consécration de nos efforts : ouverture officielle de la marketplace moderne, rapide et fiable au service de nos clients.'
+        : 'The triumphant official launch: an ultra-fast, robust, and beautiful digital department store built to serve our patrons with excellence.',
     },
   ];
 
@@ -127,7 +127,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 relative z-10 text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-bold">
             <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            <span>{isFr ? 'Maison d\'Artisanat Européen' : 'European Artisanal House'}</span>
+            <span>{isFr ? 'Boutique & Curation d\'Excellence' : 'Curated Department House & Boutique'}</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight text-white leading-tight">
@@ -136,8 +136,8 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
 
           <p className="text-sm sm:text-lg text-slate-300 font-sans max-w-2xl mx-auto leading-relaxed">
             {storeSettings?.aboutUs.content || (isFr
-              ? 'Fondée entre Porto et Florence, GLADYNS réinvente le luxe contemporain à travers une confection éthique, des micro-séries limitées et un respect absolu de la matière.'
-              : 'Founded between Porto and Florence, GLADYNS redefines modern luxury through ethical craftsmanship, limited micro-batches, and uncompromising raw materials.')}
+              ? 'GLADYNS incarne l\'excellence du commerce moderne avec une sélection rigoureuse d\'appareils électroniques, d\'équipements audio et d\'articles de mode au standard le plus élevé.'
+              : 'GLADYNS redefines modern commerce through rigorous curation of high-precision audio, smart home appliances, and timeless wardrobe foundations.')}
           </p>
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
@@ -277,63 +277,63 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           </div>
         </div>
 
-        {/* Section 2: Studio Locations & Atelier Network */}
+        {/* Section 2: Studio Locations & Service Network */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-xs space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
             <div>
               <span className="text-[10px] uppercase font-mono font-bold text-blue-600 tracking-wider">
-                {isFr ? 'RÉSEAU DE PARTENAIRES' : 'PARTNER NETWORK'}
+                {isFr ? 'NOTRE RÉSEAU & INFRASTRUCTURE' : 'OUR SERVICE & LOGISTICS NETWORK'}
               </span>
               <h3 className="text-2xl font-display font-bold text-slate-950 mt-1">
-                {isFr ? 'Porto, Florence & Biella' : 'Porto, Florence & Biella'}
+                {isFr ? 'Showroom, Contrôle Qualité & Service Client' : 'Flagship Boutique, Quality & Direct Care'}
               </h3>
             </div>
             <div className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200">
               <MapPin className="w-4 h-4 text-blue-600" />
-              <span>{isFr ? 'Partenaires Certifiés UE' : 'EU Certified Partners'}</span>
+              <span>{storeSettings?.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire"}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/70 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-slate-950">Porto Studio</span>
+                <span className="font-bold text-sm text-slate-950">{isFr ? 'Showroom & Siège Central' : 'Central Flagship Hub'}</span>
                 <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-bold">
-                  Active
+                  {isFr ? 'Abidjan' : 'HQ Lab'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
                 {isFr
-                  ? 'Spécialisé dans la confection de vestes de travail, cotons biologiques lisses et maroquinerie.'
-                  : 'Specializing in chore coats, organic heavy twills, and structured leathercraft.'}
+                  ? 'Espace d\'exposition, gestion des stocks et accueil personnalisé pour nos clients et membres.'
+                  : 'Official curation showroom, inventory management, and private appointments for our members.'}
               </p>
             </div>
 
             <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/70 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-slate-950">Florence Studio</span>
+                <span className="font-bold text-sm text-slate-950">{isFr ? 'Contrôle Qualité Rigoureux' : 'Rigorous Quality Testing'}</span>
                 <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-bold">
-                  Active
+                  100% {isFr ? 'Certifié' : 'Verified'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
                 {isFr
-                  ? 'Expertise en mailles fines de laine mérinos et tannerie végétale de Toscane.'
-                  : 'Mastery in fine merino knits and Tuscan vegetable-tanned full-grain hides.'}
+                  ? 'Vérification méticuleuse de chaque produit audio, équipement électronique et article de mode avant expédition.'
+                  : 'Multi-point verification and operational testing of every electronic device and curated fashion piece.'}
               </p>
             </div>
 
             <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/70 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-slate-950">Biella Mill</span>
+                <span className="font-bold text-sm text-slate-950">{isFr ? 'Expédition Express & Suivi' : 'Express Courier Dispatch'}</span>
                 <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-bold">
-                  Active
+                  {isFr ? 'En Direct' : 'Live Tracking'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
                 {isFr
-                  ? 'Filatures de laine italienne responsable et tissus techniques haute précision.'
-                  : 'Responsible Italian wool spinning and high-precision technical outerwear textiles.'}
+                  ? 'Livraison rapide avec suivi en 5 étapes, bons de livraison officiels et assistance conciergerie dédiée.'
+                  : 'Swift dispatch with live 5-stage tracking, official waybills, and dedicated concierge direct support.'}
               </p>
             </div>
           </div>

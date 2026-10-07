@@ -395,7 +395,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     type="text"
                     value={localSettings.aboutUs?.atelierLocation || ''}
                     onChange={(e) => updateNested('aboutUs.atelierLocation', e.target.value)}
-                    placeholder="e.g. Porto, Portugal & Florence, Italy"
+                    placeholder="e.g. Abidjan, Côte d'Ivoire"
                     className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
                   />
                 </div>
@@ -408,7 +408,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     type="text"
                     value={localSettings.aboutUs?.foundedYear || ''}
                     onChange={(e) => updateNested('aboutUs.foundedYear', e.target.value)}
-                    placeholder="e.g. 2018"
+                    placeholder="e.g. 2026"
                     className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
                   />
                 </div>
@@ -723,7 +723,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
                     type="text"
                     value={localSettings.contactAddress || ''}
                     onChange={(e) => setLocalSettings({...localSettings, contactAddress: e.target.value})}
-                    placeholder="Rua Miguel Bombarda 142, 4050-377 Porto, Portugal"
+                    placeholder="Habitat Extension, E 24, Abidjan, Côte d'Ivoire"
                     className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium"
                   />
                 </div>

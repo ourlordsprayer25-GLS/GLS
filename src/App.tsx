@@ -68,7 +68,7 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
     content: 'GLADYNS is a modern multi-department store curating premium electronics, studio musical instruments, autonomous smart home appliances, and timeless wardrobe foundations. Every department represents uncompromising engineering, sustainable materials, and rigorous functional design.',
     image: '/assets/gladyns_store_preview.png',
     secondaryImage: '',
-    foundedYear: '2022',
+    foundedYear: '2026',
     atelierLocation: "Abidjan, Côte d'Ivoire",
     missionStatement: 'Pure Engineering, Acoustic Precision, and Enduring Quality Across Every Department.',
   },
