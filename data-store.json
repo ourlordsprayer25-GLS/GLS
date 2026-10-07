@@ -1528,7 +1528,44 @@
       "preferences": {},
       "sessionStatus": null,
       "lastSeen": null,
-      "updated_at": "2026-10-07T17:23:56.446+00:00"
+      "updated_at": "2026-10-07T17:54:06.173+00:00"
+    },
+    {
+      "id": "967ad8f8-a378-44b2-b7a2-1eb061063fcb",
+      "firstName": "Chioma",
+      "lastName": "",
+      "email": "c83747777@gmail.com",
+      "phone": "",
+      "memberSince": "October 2026",
+      "tier": "Bronze",
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "addresses": [],
+      "preferences": {
+        "dropAlerts": false,
+        "newsletter": false,
+        "preferredSize": "M",
+        "sustainablePackaging": false
+      },
+      "sessionStatus": "online",
+      "lastSeen": "Active Now",
+      "updated_at": "2026-10-07T17:42:11.164209+00:00"
+    },
+    {
+      "id": "guest-ejypejp-1791394676218",
+      "firstName": null,
+      "lastName": null,
+      "email": null,
+      "phone": null,
+      "memberSince": null,
+      "tier": null,
+      "loyaltyPoints": 0,
+      "lifetimePoints": 0,
+      "addresses": [],
+      "preferences": {},
+      "sessionStatus": null,
+      "lastSeen": null,
+      "updated_at": "2026-10-07T17:37:59.748+00:00"
     },
     {
       "id": "guest-u6xjueu-1791392747536",
@@ -1577,27 +1614,6 @@
       "sessionStatus": null,
       "lastSeen": null,
       "updated_at": "2026-10-07T17:04:08.01+00:00"
-    },
-    {
-      "id": "967ad8f8-a378-44b2-b7a2-1eb061063fcb",
-      "firstName": "Chioma",
-      "lastName": "",
-      "email": "c83747777@gmail.com",
-      "phone": "",
-      "memberSince": "October 2026",
-      "tier": "Bronze",
-      "loyaltyPoints": 0,
-      "lifetimePoints": 0,
-      "addresses": [],
-      "preferences": {
-        "dropAlerts": false,
-        "newsletter": false,
-        "preferredSize": "M",
-        "sustainablePackaging": false
-      },
-      "sessionStatus": "online",
-      "lastSeen": "Active Now",
-      "updated_at": "2026-10-07T16:43:10.954928+00:00"
     },
     {
       "id": "guest-qby3atv-1791388103279",
@@ -3131,22 +3147,6 @@
       "sessionStatus": null,
       "lastSeen": null,
       "updated_at": "2026-10-03T09:52:33.884+00:00"
-    },
-    {
-      "id": "guest-mdfr1ex-1791021112692",
-      "firstName": null,
-      "lastName": null,
-      "email": null,
-      "phone": null,
-      "memberSince": null,
-      "tier": null,
-      "loyaltyPoints": 0,
-      "lifetimePoints": 0,
-      "addresses": [],
-      "preferences": {},
-      "sessionStatus": null,
-      "lastSeen": null,
-      "updated_at": "2026-10-03T09:51:53.636+00:00"
     }
   ],
   "notifications": [],
@@ -3410,5 +3410,5 @@
     "guest-ssaw1es-1791283380934": [],
     "guest-1mmvwv3-1791295068330": []
   },
-  "lastUpdated": 1791393946675
+  "lastUpdated": 1791395663907
 }

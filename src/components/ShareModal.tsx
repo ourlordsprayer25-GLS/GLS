@@ -88,9 +88,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   if (!isOpen) return null;
 
+  const rawOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://www.gladyns.store';
+  const cleanOrigin = (rawOrigin.includes('gladyns.store') && !rawOrigin.includes('www.gladyns.store'))
+    ? rawOrigin.replace('://gladyns.store', '://www.gladyns.store')
+    : rawOrigin;
+
   const currentUrl = mode === 'product' && product
-    ? `${window.location.origin}/product/${product.slug || product.id}`
-    : window.location.origin;
+    ? `${cleanOrigin}/product/${product.id}`
+    : cleanOrigin;
 
   const shareText = mode === 'product' && product
     ? (language === 'fr'
