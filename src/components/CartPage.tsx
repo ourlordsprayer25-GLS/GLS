@@ -100,7 +100,7 @@ export const CartPage: React.FC<CartPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] py-10 lg:py-16">
+    <div className="min-h-screen bg-[#FDFDFD] pt-6 pb-28 lg:pt-12 lg:pb-16">
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Navigation Breadcrumb / Header */}
@@ -196,78 +196,98 @@ export const CartPage: React.FC<CartPageProps> = ({
               </div>
 
               {/* Cart Items List */}
-              <div className="bg-white rounded-3xl border border-zinc-200/80 shadow-xs divide-y divide-zinc-100 overflow-hidden">
-                {validItems.map((item) => (
-                  <div key={item.id} className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 group">
-                    <div 
-                      onClick={() => onSelectProduct && onSelectProduct(item.product)}
-                      className="w-24 h-28 sm:w-28 sm:h-32 rounded-2xl overflow-hidden bg-zinc-100 shrink-0 cursor-pointer border border-zinc-200"
-                    >
-                      <img src={item.selectedColor.image || item.product.primaryImage} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    </div>
+              <div className="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 shadow-xs divide-y divide-zinc-100 overflow-hidden">
+                {validItems.map((item) => {
+                  const isApparelCategory = ['apparel', 'clothing', 'fashion', 'shoes', 'footwear', 'men', 'women'].includes((item.product?.category || '').toLowerCase()) || ['apparel', 'clothing', 'fashion', 'shoes', 'footwear', 'men', 'women'].includes((item.product?.categoryLabel || '').toLowerCase());
+                  const hasExplicitSizes = Boolean(item.product?.sizes && item.product.sizes.length > 0);
+                  const shouldShowSize = (isApparelCategory || hasExplicitSizes) && item.selectedSize && !['standard', 'default', 'one size', 'taille unique', ''].includes(String(typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize).toLowerCase());
+                  const hasColor = Boolean(item.selectedColor?.name && !['standard', 'default', ''].includes(item.selectedColor.name.toLowerCase()));
 
-                    <div className="flex-1 min-w-0 space-y-1.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                            {item.product.category}
-                          </span>
-                          <h3 
-                            onClick={() => onSelectProduct && onSelectProduct(item.product)}
-                            className="text-sm font-display font-bold text-zinc-950 truncate cursor-pointer hover:underline"
-                          >
-                            {item.product.name}
-                          </h3>
-                        </div>
-                        <button
-                          onClick={() => onRemoveItem(item.id)}
-                          className="p-1.5 text-zinc-400 hover:text-rose-600 transition-colors cursor-pointer rounded-lg hover:bg-rose-50"
-                          title="Remove item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                  return (
+                    <div key={item.id} className="p-3 sm:p-5 flex flex-row items-center gap-3 sm:gap-5 group hover:bg-zinc-50/60 transition-colors">
+                      {/* Product Thumbnail (Compact & fixed ratio on mobile) */}
+                      <div 
+                        onClick={() => onSelectProduct && onSelectProduct(item.product)}
+                        className="w-20 h-24 sm:w-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-100 shrink-0 cursor-pointer border border-zinc-200/90 relative"
+                      >
+                        <img 
+                          src={item.selectedColor?.image || item.product.primaryImage} 
+                          alt={item.product.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        />
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 font-medium">
-                        {item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) && (
-                          <span>{language === 'fr' ? 'Couleur :' : 'Color:'} <strong className="text-zinc-800">{item.selectedColor.name}</strong></span>
-                        )}
-                        {item.selectedColor?.name && !['standard', 'default'].includes(item.selectedColor.name.toLowerCase()) &&
-                         item.selectedSize && !['standard', 'default', 'one size', 'taille unique'].includes(String(typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize).toLowerCase()) && (
-                          <span>•</span>
-                        )}
-                        {item.selectedSize && !['standard', 'default', 'one size', 'taille unique'].includes(String(typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize).toLowerCase()) && (
-                          <span>{language === 'fr' ? 'Taille / Format :' : 'Size:'} <strong className="text-zinc-800 uppercase">{typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize}</strong></span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2">
-                        {/* Quantity Controls */}
-                        <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden bg-zinc-50">
+                      {/* Product Details & Actions */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5">
+                        {/* Top: Category + Delete Button */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-blue-600 block truncate">
+                              {item.product.categoryLabel || item.product.category || 'Maison'}
+                            </span>
+                            <h3 
+                              onClick={() => onSelectProduct && onSelectProduct(item.product)}
+                              className="text-xs sm:text-sm font-display font-bold text-zinc-950 truncate cursor-pointer hover:text-blue-900 transition-colors mt-0.5"
+                              title={item.product.name}
+                            >
+                              {item.product.name}
+                            </h3>
+                          </div>
                           <button
-                            onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                            className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer text-xs font-bold"
+                            onClick={() => onRemoveItem(item.id)}
+                            className="p-1 sm:p-1.5 text-zinc-400 hover:text-rose-600 transition-colors cursor-pointer rounded-lg hover:bg-rose-50 shrink-0"
+                            title="Remove item"
+                            aria-label="Remove item"
                           >
-                            -
-                          </button>
-                          <span className="w-10 text-center text-xs font-mono font-bold text-zinc-900">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer text-xs font-bold"
-                          >
-                            +
+                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
                         </div>
 
-                        <span className="text-sm font-mono font-bold text-zinc-950">
-                          {formatPrice(item.product.price * item.quantity)}
-                        </span>
+                        {/* Middle: Color / Size if genuinely applicable */}
+                        {(hasColor || shouldShowSize) && (
+                          <div className="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-zinc-500 font-medium py-1">
+                            {hasColor && (
+                              <span>{language === 'fr' ? 'Couleur :' : 'Color:'} <strong className="text-zinc-800">{item.selectedColor.name}</strong></span>
+                            )}
+                            {hasColor && shouldShowSize && <span>•</span>}
+                            {shouldShowSize && (
+                              <span>{language === 'fr' ? 'Taille :' : 'Size:'} <strong className="text-zinc-800 uppercase">{typeof item.selectedSize === 'object' ? item.selectedSize?.name : item.selectedSize}</strong></span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Bottom Row: Quantity Stepper (left) & Price (right) */}
+                        <div className="flex items-center justify-between gap-2 pt-1.5 mt-auto">
+                          {/* Quantity Controls Pill */}
+                          <div className="flex items-center border border-zinc-200 rounded-lg sm:rounded-xl overflow-hidden bg-zinc-50/80 shadow-2xs">
+                            <button
+                              onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                              className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer text-xs font-bold"
+                              aria-label="Decrease quantity"
+                            >
+                              -
+                            </button>
+                            <span className="w-8 sm:w-10 text-center text-xs font-mono font-bold text-zinc-900">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                              className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer text-xs font-bold"
+                              aria-label="Increase quantity"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          {/* Line Total Price */}
+                          <span className="text-xs sm:text-sm font-mono font-bold text-zinc-950 text-right whitespace-nowrap">
+                            {formatPrice(item.product.price * item.quantity)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
