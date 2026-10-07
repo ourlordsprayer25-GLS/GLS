@@ -1094,7 +1094,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           )}
 
           {activeTab === 'tracker' && (
-            <AdminCustomerTracker users={users} setUsers={setUsers} />
+            <AdminCustomerTracker users={users} setUsers={setUsers} orders={orders} />
           )}
 
           {activeTab === 'orders' && (
@@ -1135,7 +1135,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           )}
 
           {activeTab === 'receipts' && (
-            <AdminReceipts orders={orders} />
+            <AdminReceipts orders={orders} storeSettings={storeSettings} />
           )}
 
           {activeTab === 'settings' && (

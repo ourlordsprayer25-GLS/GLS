@@ -50,13 +50,13 @@ const getGuestId = () => {
 };
 
 const DEFAULT_STORE_SETTINGS: StoreSettings = {
-  storeName: 'GLADYNS DEPARTMENT STORE',
-  storeDescription: 'Curated Department House redefining modern living through audio precision, musical instruments, smart home appliances, and artisanal fashion.',
-  contactEmail: 'concierge@gladyns.com',
+  storeName: 'GLADYNS MARKETPLACE',
+  storeDescription: 'Boutique Officielle GLADYNS - Électronique, Audio, Mode et Accessoires de qualité certifiée.',
+  contactEmail: 'contact@gladyns.store',
   contactPhone: '+225 05 00 61 99 23',
-  contactAddress: 'Rua Miguel Bombarda 142, 4050-377 Porto, Portugal',
+  contactAddress: 'Habitat Extension, E 24, Abidjan, Côte d\'Ivoire',
   whatsappNumber: '+225 05 00 61 99 23',
-  operatingHours: 'Monday – Saturday: 10:00 AM – 7:00 PM CET',
+  operatingHours: 'Lundi – Samedi: 08h00 – 19h00 (GMT)',
   socialLinks: {
     instagram: 'https://instagram.com/gladyns',
     twitter: 'https://twitter.com/gladyns',
@@ -331,8 +331,23 @@ function AppContent() {
     const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
     const deviceType: 'mobile' | 'desktop' | 'tablet' = /iPad|tablet/i.test(ua) ? 'tablet' : isMobile ? 'mobile' : 'desktop';
-    const os = /iPhone|iPad|iPod/.test(ua) ? 'iOS Mobile' : /Android/.test(ua) ? 'Android' : /Macintosh/.test(ua) ? 'macOS' : /Windows/.test(ua) ? 'Windows' : 'Desktop OS';
-    const browser = isPwa ? 'GLADYNS PWA Standalone' : /Chrome/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : 'Web Browser';
+    
+    // Genuine OS detection
+    const os = /iPhone|iPad|iPod/.test(ua) ? 'iOS Mobile' 
+      : /Android/.test(ua) ? 'Android' 
+      : /Macintosh|Mac OS X/.test(ua) ? 'macOS' 
+      : /Windows NT 10.0|Windows 11/.test(ua) ? 'Windows 11/10'
+      : /Windows/.test(ua) ? 'Windows'
+      : /Linux/.test(ua) ? 'Linux'
+      : 'Desktop OS';
+
+    // Genuine Browser detection
+    const browser = isPwa ? 'GLADYNS PWA Standalone' 
+      : /Edg\//.test(ua) ? 'Microsoft Edge'
+      : /Chrome\//.test(ua) ? 'Google Chrome' 
+      : /Firefox\//.test(ua) ? 'Mozilla Firefox'
+      : /Safari\//.test(ua) ? 'Apple Safari' 
+      : 'Web Browser';
 
     if (authUser) {
       const fullName = authUser.user_metadata?.full_name || authUser.user_metadata?.name || '';
@@ -344,6 +359,16 @@ function AppContent() {
         time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
         exactTimestamp: now.toISOString(),
       };
+
+      // Genuine Location derived from user saved addresses or existing location
+      const savedAddr = user?.addresses?.[0];
+      const realLocation = user?.location || (savedAddr ? {
+        country: savedAddr.country || "Côte d'Ivoire",
+        countryCode: 'CI',
+        city: savedAddr.city || 'Abidjan',
+        flag: savedAddr.country === "Côte d'Ivoire" || savedAddr.country === "Ivory Coast" ? '🇨🇮' : '🌍',
+        ipAddress: undefined,
+      } : undefined);
 
       const updatedProfile: UserProfile = {
         ...DEFAULT_USER_PROFILE,
@@ -360,13 +385,7 @@ function AppContent() {
           browser,
           isPwa,
         },
-        location: user?.location || {
-          country: "Côte d'Ivoire",
-          countryCode: 'CI',
-          city: 'Abidjan',
-          flag: '🇨🇮',
-          ipAddress: '154.120.91.44',
-        },
+        location: realLocation,
         sessionStatus: 'online',
         lastSeen: 'Active Now',
         sessionDurationMinutes: (user?.sessionDurationMinutes || 0) + 1,

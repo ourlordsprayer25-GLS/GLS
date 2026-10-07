@@ -485,13 +485,14 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
  * Real-time Subscription to Users across all devices & Supabase
  */
 const isMockUser = (u: any) => {
-  if (!u) return false;
+  if (!u) return true;
+  if (!u.email || typeof u.email !== 'string' || u.email.trim() === '') return true;
+  if (u.id?.startsWith('guest-') || u.id === 'usr-guest') return true;
   return (
     u.id === 'usr-c001' ||
     u.id === 'usr-c002' ||
     u.id === 'usr-c003' ||
     u.id === 'usr-c004' ||
-    u.id === 'usr-guest' ||
     u.id?.startsWith('usr-c00') ||
     u.email?.includes('@gladyns-patron.ci') ||
     u.email?.includes('@luxeparis.fr') ||
@@ -925,6 +926,23 @@ export async function updateRealtimeUserProfile(userProfile: UserProfile) {
       await supabase.from('users').upsert(userProfile);
     } catch (err) {
       console.error('Supabase update user profile error:', err);
+    }
+  }
+}
+
+export async function deleteRealtimeUser(userId: string) {
+  if (!userId) return;
+  try {
+    await localFetch(`/api/sync/users/${userId}`, {
+      method: 'DELETE',
+    });
+  } catch (err) {}
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('users').delete().eq('id', userId);
+    } catch (err) {
+      console.error('Supabase delete user error:', err);
     }
   }
 }

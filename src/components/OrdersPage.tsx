@@ -1144,13 +1144,13 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4 border-b border-dashed border-slate-200">
                     <div>
                       <h3 className="text-xl font-display font-bold tracking-widest text-slate-900 uppercase">
-                        GLADYNS MARKETPLACE
+                        {storeSettings?.storeName || 'GLADYNS MARKETPLACE'}
                       </h3>
                       <p className="text-[10px] text-slate-500 font-medium tracking-wider uppercase mt-0.5">
-                        Paris · New York · Milan
+                        {storeSettings?.contactAddress || 'Abidjan, Côte d\'Ivoire'}
                       </p>
                       <p className="text-[9px] text-slate-400 font-mono mt-0.5">
-                        www.gladyns.com
+                        gladyns.store · {storeSettings?.contactPhone || storeSettings?.whatsappNumber || '+225 05 00 61 99 23'}
                       </p>
                     </div>
                     <div className="sm:text-right">
@@ -1161,7 +1161,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                         {invoiceModalOrder.orderNumber}
                       </p>
                       <p className="text-[10px] text-slate-500 mt-1">
-                        {invoiceModalOrder.date || 'Sep 23, 2026'}
+                        {invoiceModalOrder.date || 'Oct 7, 2026'}
                       </p>
                     </div>
                   </div>
@@ -1177,7 +1177,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                           {invoiceModalOrder.shippingAddress.firstName} {invoiceModalOrder.shippingAddress.lastName}
                         </p>
                         <p className="text-[11px] text-indigo-600 font-mono font-semibold">
-                          {invoiceModalOrder.shippingAddress.phone || '+1(555) 382-9102'}
+                          {invoiceModalOrder.shippingAddress.phone || '—'}
                         </p>
                         <p className="text-[10px] text-slate-500 uppercase leading-tight mt-1">
                           {invoiceModalOrder.shippingAddress.street}, {invoiceModalOrder.shippingAddress.city}, {invoiceModalOrder.shippingAddress.country}
@@ -1187,20 +1187,20 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
 
                     <div>
                       <span className="text-[9px] font-black text-amber-900/70 tracking-wider block uppercase mb-1">
-                        {language === 'fr' ? 'ÉTABLI PAR (ADMIN)' : 'PREPARED BY (ADMIN)'}
+                        {language === 'fr' ? 'ÉMETTEUR DU REÇU' : 'ISSUED BY'}
                       </span>
                       <div className="space-y-0.5 text-slate-800">
                         <p className="font-bold text-slate-950">
-                          Admin: Eléonore de Laurent
+                          {storeSettings?.storeName || 'GLADYNS STORE'}
                         </p>
                         <p className="text-[11px] text-emerald-600 font-mono font-semibold">
-                          {language === 'fr' ? 'Signataire Autorisé' : 'Authorized Signatory'}
+                          {language === 'fr' ? 'Service Facturation & Commandes' : 'Billing & Fulfillment Team'}
                         </p>
                         <p className="text-[10px] text-slate-400 leading-tight mt-1 uppercase">
                           {language === 'fr' ? (
-                            <>Siège GLADYNS Paris <br /> ID Terminal : #FR-GL-902</>
+                            <>{storeSettings?.contactAddress || 'Abidjan, Côte d\'Ivoire'} <br /> Réf. Caisse : #{invoiceModalOrder.orderNumber}</>
                           ) : (
-                            <>GLADYNS Paris HQ Office <br /> Terminal ID: #FR-GL-902</>
+                            <>{storeSettings?.contactAddress || 'Abidjan, Côte d\'Ivoire'} <br /> Register Ref: #{invoiceModalOrder.orderNumber}</>
                           )}
                         </p>
                       </div>
