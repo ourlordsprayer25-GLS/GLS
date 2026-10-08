@@ -84,14 +84,14 @@ export const TRANSLATIONS = {
     // New Arrivals
     newArrivalsBadge: 'JUST LANDED',
     newArrivalsTitle: 'New Season Arrivals',
-    newArrivalsSubtitle: 'Fresh additions in modern outerwear, smart living appliances, and sound systems.',
+    newArrivalsSubtitle: 'Fresh additions in enterprise computing, smart living appliances, and sound systems.',
     viewCatalog: 'View Full Catalog',
 
     // Product Card & Detail
     color: 'Color',
-    size: 'Size',
+    size: 'Configuration',
     edition: 'Edition / Model',
-    sizeGuide: 'Size & Dimensions Guide',
+    sizeGuide: 'Dimensions & Specs Guide',
     genuineGuarantee: '100% Genuine Certified',
     lowStockNotice: 'Low stock: Only {count} units remaining in this configuration.',
     inquireWhatsApp: 'Inquire via WhatsApp Support',
@@ -248,14 +248,14 @@ export const TRANSLATIONS = {
     // New Arrivals
     newArrivalsBadge: 'NOUVEAUTÉS',
     newArrivalsTitle: 'Nouveautés de Saison',
-    newArrivalsSubtitle: 'Dernières créations en vestes modernes, électroménager intelligent et systèmes audio.',
+    newArrivalsSubtitle: 'Dernières innovations en informatique, électroménager intelligent et systèmes audio.',
     viewCatalog: 'Voir tout le catalogue',
 
     // Product Card & Detail
     color: 'Couleur',
-    size: 'Taille',
+    size: 'Configuration',
     edition: 'Édition / Modèle',
-    sizeGuide: 'Guide des tailles et dimensions',
+    sizeGuide: 'Guide des dimensions et spécifications',
     genuineGuarantee: '100% Garanti Authentique',
     lowStockNotice: 'Stock limité : plus que {count} unités restantes dans cette configuration.',
     inquireWhatsApp: 'Demander via WhatsApp Support',

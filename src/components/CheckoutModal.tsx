@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   X,
   Check,
@@ -15,8 +15,9 @@ import {
   MapPin,
   Search,
   Navigation,
+  Smartphone,
 } from 'lucide-react';
-import { CartItem, ShippingAddress, Order, UserProfile } from '../types/store';
+import { CartItem, ShippingAddress, Order, UserProfile, StoreSettings } from '../types/store';
 import { WhatsAppButton, WhatsAppIcon, getWhatsAppLink } from './WhatsAppWidget';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { COUNTRY_CODES, COUNTRIES } from '../data/countries';
@@ -29,6 +30,7 @@ interface CheckoutModalProps {
   onOpenOrders?: () => void;
   user?: any;
   onUpdateUser?: (updated: UserProfile) => void;
+  storeSettings?: StoreSettings;
 }
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
@@ -39,6 +41,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onOpenOrders,
   user,
   onUpdateUser,
+  storeSettings,
 }) => {
   const { formatPrice, t, language } = useLanguageCurrency();
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping');
@@ -102,14 +105,99 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [includeGiftPackaging, setIncludeGiftPackaging] = useState(false);
   const [giftNote, setGiftNote] = useState('');
 
+  // Dynamic Payment Methods Configured via Admin (ON / OFF)
+  const paymentConfig = useMemo(() => {
+    return {
+      card: storeSettings?.paymentMethods?.card ?? true,
+      applePay: storeSettings?.paymentMethods?.applePay ?? true,
+      wave: storeSettings?.paymentMethods?.wave ?? true,
+      orangeMoney: storeSettings?.paymentMethods?.orangeMoney ?? true,
+      mtnMomo: storeSettings?.paymentMethods?.mtnMomo ?? true,
+      klarna: storeSettings?.paymentMethods?.klarna ?? true,
+      cod: storeSettings?.paymentMethods?.cod ?? true,
+    };
+  }, [storeSettings?.paymentMethods]);
+
+  const availablePaymentMethods = useMemo(() => {
+    const list: Array<{
+      id: 'card' | 'apple-pay' | 'wave' | 'om' | 'klarna' | 'cod';
+      label: string;
+      sublabel: string;
+      icon?: any;
+      isApplePay?: boolean;
+    }> = [];
+
+    if (paymentConfig.card) {
+      list.push({
+        id: 'card',
+        label: language === 'fr' ? 'Carte' : 'Card',
+        sublabel: 'Visa / MC',
+        icon: CreditCard,
+      });
+    }
+    if (paymentConfig.applePay) {
+      list.push({
+        id: 'apple-pay',
+        label: ' Pay',
+        sublabel: '1-Click',
+        isApplePay: true,
+      });
+    }
+    if (paymentConfig.wave) {
+      list.push({
+        id: 'wave',
+        label: 'Wave',
+        sublabel: '0% Frais',
+        icon: Smartphone,
+      });
+    }
+    if (paymentConfig.orangeMoney || paymentConfig.mtnMomo) {
+      list.push({
+        id: 'om',
+        label: 'Mobile Money',
+        sublabel: 'Orange / MTN',
+        icon: Smartphone,
+      });
+    }
+    if (paymentConfig.klarna) {
+      list.push({
+        id: 'klarna',
+        label: 'Klarna',
+        sublabel: '4x sans frais',
+      });
+    }
+    if (paymentConfig.cod) {
+      list.push({
+        id: 'cod',
+        label: language === 'fr' ? 'À réception' : 'COD',
+        sublabel: language === 'fr' ? 'Espèces' : 'Cash',
+        icon: Truck,
+      });
+    }
+
+    return list;
+  }, [paymentConfig, language]);
+
   // Payment State
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'apple-pay' | 'klarna' | 'cod'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'apple-pay' | 'klarna' | 'cod' | 'wave' | 'om'>(
+    availablePaymentMethods[0]?.id || 'card'
+  );
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
   const [cardName, setCardName] = useState(user?.displayName || '');
   const [isProcessing, setIsProcessing] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+
+  // Auto-switch payment method if current is toggled off in admin
+  useEffect(() => {
+    if (availablePaymentMethods.length > 0) {
+      const isStillAvailable = availablePaymentMethods.some((m) => m.id === paymentMethod);
+      if (!isStillAvailable) {
+        setPaymentMethod(availablePaymentMethods[0].id);
+      }
+    }
+  }, [availablePaymentMethods, paymentMethod]);
 
   if (!isOpen) return null;
 
@@ -301,7 +389,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <p>{confirmedOrder.shippingAddress.city}, {confirmedOrder.shippingAddress.state} {confirmedOrder.shippingAddress.postalCode}, {confirmedOrder.shippingAddress.country}</p>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-sm font-semibold text-slate-950">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                  {language === 'fr' ? 'Mode de règlement' : 'Payment Method'}
+                </span>
+                <span className="font-semibold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg text-[11px]">
+                  {confirmedOrder.paymentMethod === 'card' && 'Carte Bancaire'}
+                  {confirmedOrder.paymentMethod === 'apple-pay' && ' Pay'}
+                  {confirmedOrder.paymentMethod === 'wave' && 'Wave Mobile Money'}
+                  {confirmedOrder.paymentMethod === 'om' && 'Mobile Money (OM/MTN)'}
+                  {confirmedOrder.paymentMethod === 'klarna' && 'Klarna 4x'}
+                  {confirmedOrder.paymentMethod === 'cod' && (language === 'fr' ? 'Paiement à réception' : 'Cash on Delivery')}
+                </span>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm font-semibold text-slate-950">
                 <span className="font-display font-bold">{language === 'fr' ? 'Total Payé (TTC & Port inclus)' : 'Total Paid (VAT & Courier Included)'}</span>
                 <span className="font-mono text-base font-bold text-blue-600">{formatPrice(confirmedOrder.total)}</span>
               </div>
@@ -684,59 +786,48 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
 
                   {/* Payment Options Selector */}
-                  <div className="grid grid-cols-4 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('card')}
-                      className={`p-3 rounded-2xl border text-xs font-medium flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${
-                        paymentMethod === 'card'
-                          ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      <span className="text-[11px] font-semibold">{language === 'fr' ? 'Carte' : 'Card'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('apple-pay')}
-                      className={`p-3 rounded-2xl border text-xs font-medium flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${
-                        paymentMethod === 'apple-pay'
-                          ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      <span className="font-semibold text-sm"> Pay</span>
-                      <span className="text-[11px]">1-Click</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('klarna')}
-                      className={`p-3 rounded-2xl border text-xs font-medium flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${
-                        paymentMethod === 'klarna'
-                          ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      <span className="font-bold text-xs">Klarna</span>
-                      <span className="text-[10px]">4x sans frais</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('cod')}
-                      className={`p-3 rounded-2xl border text-xs font-medium flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${
-                        paymentMethod === 'cod'
-                          ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      <Truck className="w-4 h-4" />
-                      <span className="text-[11px]">{language === 'fr' ? 'À réception' : 'COD'}</span>
-                    </button>
-                  </div>
+                  {availablePaymentMethods.length > 0 ? (
+                    <div className={`grid gap-2 ${
+                      availablePaymentMethods.length <= 2 
+                        ? 'grid-cols-2' 
+                        : availablePaymentMethods.length === 3 
+                        ? 'grid-cols-3' 
+                        : 'grid-cols-2 sm:grid-cols-4'
+                    }`}>
+                      {availablePaymentMethods.map((method) => {
+                        const Icon = method.icon;
+                        const isSelected = paymentMethod === method.id;
+                        return (
+                          <button
+                            key={method.id}
+                            type="button"
+                            onClick={() => setPaymentMethod(method.id as any)}
+                            className={`p-3 rounded-2xl border text-xs font-medium flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${
+                              isSelected
+                                ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
+                                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                            }`}
+                          >
+                            {method.isApplePay ? (
+                              <span className="font-semibold text-sm"> Pay</span>
+                            ) : Icon ? (
+                              <Icon className="w-4 h-4" />
+                            ) : null}
+                            <span className="text-[11px] font-semibold">{method.label}</span>
+                            <span className={`text-[9px] ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
+                              {method.sublabel}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 space-y-2">
+                      <p className="font-bold">{language === 'fr' ? 'Mise à jour des systèmes de paiement' : 'Payment Systems Maintenance'}</p>
+                      <p>{language === 'fr' ? 'Veuillez finaliser votre commande directement avec notre conciergerie sur WhatsApp.' : 'Please finalize your checkout order directly with our WhatsApp concierge.'}</p>
+                      <WhatsAppButton message={`Order Inquiry for ${items.length} items (Total: ${formatPrice(finalTotal)})`} label={language === 'fr' ? 'Commander via WhatsApp' : 'Order via WhatsApp'} />
+                    </div>
+                  )}
 
                   {/* Virtual Card Preview */}
                   {paymentMethod === 'card' && (
@@ -840,6 +931,54 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
                       <p className="font-semibold text-slate-950">{language === 'fr' ? 'Paiement à la livraison (Espèces ou Carte)' : 'Cash or Card on Courier Arrival'}</p>
                       <p>{language === 'fr' ? 'Payez directement auprès du livreur lors de la réception de votre colis. Sans supplément.' : 'You can pay our certified delivery courier directly at your address via contactless card terminal or cash. Zero surcharge.'}</p>
+                    </div>
+                  )}
+
+                  {paymentMethod === 'wave' && (
+                    <div className="p-5 bg-sky-50 rounded-2xl border border-sky-200 text-xs text-slate-700 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center font-black text-sm">
+                            W
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900 block">Wave Mobile Money</span>
+                            <span className="text-[10px] text-sky-700 font-medium">0% de frais • Instantané & Sécurisé</span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 border border-sky-300">
+                          QR & Push
+                        </span>
+                      </div>
+                      <p className="text-slate-600 text-[11px] leading-relaxed">
+                        {language === 'fr'
+                          ? `Après validation, un code QR ou une invite de paiement instantanée Wave de ${formatPrice(finalTotal)} s'ouvrira sur votre smartphone pour confirmer le transfert sécurisé.`
+                          : `Upon order confirmation, an instant Wave QR code or payment prompt for ${formatPrice(finalTotal)} will be sent to your phone for 1-tap confirmation.`}
+                      </p>
+                    </div>
+                  )}
+
+                  {paymentMethod === 'om' && (
+                    <div className="p-5 bg-orange-50 rounded-2xl border border-orange-200 text-xs text-slate-700 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-orange-500 to-yellow-500 text-white flex items-center justify-center font-bold text-xs">
+                            MoMo
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900 block">Orange Money & MTN MoMo</span>
+                            <span className="text-[10px] text-orange-700 font-medium">Paiement Mobile Sécurisé</span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-300">
+                          Code USSD / App
+                        </span>
+                      </div>
+                      <p className="text-slate-600 text-[11px] leading-relaxed">
+                        {language === 'fr'
+                          ? `Vous recevrez une notification de confirmation ou composez le code secret sur votre téléphone pour valider le montant de ${formatPrice(finalTotal)} sans délai.`
+                          : `You will receive a push authorization prompt or dial your security code to validate ${formatPrice(finalTotal)} with zero wait time.`}
+                      </p>
                     </div>
                   )}
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { X, ShieldCheck, Mail, Lock, User, ArrowRight, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
@@ -8,6 +8,8 @@ interface AuthModalProps {
   onClose: () => void;
   onLoginSuccess?: (user: any) => void;
   initialMode?: 'login' | 'register';
+  isPendingCheckout?: boolean;
+  onContinueAsGuest?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -15,6 +17,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onLoginSuccess,
   initialMode = 'login',
+  isPendingCheckout = false,
+  onContinueAsGuest,
 }) => {
   const { login, signInWithEmail, signUpWithEmail, user, providerErrorNotice, clearProviderError } = useAuth();
   const { language } = useLanguageCurrency();
@@ -26,6 +30,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [name, setName] = useState('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [acceptedAgeAndTerms, setAcceptedAgeAndTerms] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -65,6 +70,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
     if (mode === 'register' && !name) {
       setErrorMsg(isFr ? 'Veuillez saisir votre nom complet.' : 'Please enter your full name.');
+      return;
+    }
+    if (mode === 'register' && !acceptedAgeAndTerms) {
+      setErrorMsg(isFr 
+        ? 'Vous devez certifier avoir au moins 13 ans et accepter les Conditions Générales pour vous inscrire.' 
+        : 'You must certify you are at least 13 years old and accept the Terms & Privacy Policy to register.');
       return;
     }
 
@@ -115,9 +126,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <div>
               <h1 className="text-3xl font-display font-medium tracking-widest text-zinc-950">GLADYNS</h1>
-              <p className="text-[10px] uppercase font-black tracking-widest text-zinc-400 mt-0.5">Haute Joaillerie & Luxe</p>
+              <p className="text-[10px] uppercase font-black tracking-widest text-zinc-400 mt-0.5">{isFr ? 'Studio, Électronique & Innovation' : 'Studio, Electronics & Living Standards'}</p>
             </div>
           </div>
+
+          {/* Cart reservation banner if checking out */}
+          {isPendingCheckout && (
+            <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-blue-950 text-left flex items-start gap-2.5 shadow-2xs">
+              <ShoppingBag className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-bold text-[12px] text-blue-900">
+                  {isFr ? 'Vos articles sont précieusement conservés dans votre panier !' : 'Your items are safely reserved in your bag!'}
+                </p>
+                <p className="text-[11px] text-blue-700 leading-relaxed">
+                  {isFr
+                    ? 'Créez votre compte ou connectez-vous pour poursuivre immédiatement votre commande.'
+                    : 'Sign in or create your account to proceed immediately to checkout without losing your selections.'}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Segmented Auth Mode Switcher */}
           <div className="flex items-center p-1 bg-zinc-100 rounded-2xl border border-zinc-200/80">
@@ -154,7 +182,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <p className="text-xs text-zinc-500 leading-relaxed max-w-xs mx-auto">
               {mode === 'login'
                 ? (isFr ? 'Accédez à vos commandes, vos favoris et vos préférences de boutique.' : 'Access your orders, wishlist, and boutique preferences.')
-                : (isFr ? 'Rejoignez GLADYNS pour la livraison express mondiale et des privilèges VIP.' : 'Join GLADYNS for global express shipping and VIP privileges.')}
+                : (isFr ? 'Rejoignez GLADYNS pour la livraison express mondiale et le suivi en temps réel.' : 'Join GLADYNS for global express shipping and live order tracking.')}
             </p>
           </div>
 
@@ -263,9 +291,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
+            {mode === 'register' && (
+              <div className="pt-1">
+                <label className="flex items-start gap-2.5 text-[11px] text-zinc-600 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={acceptedAgeAndTerms}
+                    onChange={(e) => setAcceptedAgeAndTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+                    required
+                  />
+                  <span className="leading-snug">
+                    {isFr ? (
+                      <>
+                        J'atteste avoir <strong>au moins 13 ans</strong> et j'accepte les{' '}
+                        <span className="text-blue-600 underline font-medium">Conditions d'Utilisation</span> et la{' '}
+                        <span className="text-blue-600 underline font-medium">Politique de Confidentialité</span>.
+                      </>
+                    ) : (
+                      <>
+                        I certify that I am <strong>at least 13 years old</strong> and agree to the{' '}
+                        <span className="text-blue-600 underline font-medium">Terms of Service</span> and{' '}
+                        <span className="text-blue-600 underline font-medium">Privacy Policy</span>.
+                      </>
+                    )}
+                  </span>
+                </label>
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={isProcessing}
+              disabled={isProcessing || (mode === 'register' && !acceptedAgeAndTerms)}
               className="w-full h-12 mt-2 bg-zinc-950 hover:bg-zinc-800 text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
             >
               {isProcessing ? (
@@ -281,6 +338,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </>
               )}
             </button>
+
+            {isPendingCheckout && onContinueAsGuest && (
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={onContinueAsGuest}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-semibold underline underline-offset-2 cursor-pointer transition-colors"
+                >
+                  {isFr ? 'Ou continuer la commande en tant qu\'invité (sans mot de passe) →' : 'Or continue checkout as guest (no password needed) →'}
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Toggle Mode Link */}

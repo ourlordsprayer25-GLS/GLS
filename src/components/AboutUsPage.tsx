@@ -69,30 +69,30 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
   const pillars = [
     {
       icon: Award,
-      title: isFr ? 'Artisanat Multigénérationnel' : 'Multigenerational Craftsmanship',
+      title: isFr ? 'Ingénierie de Haute Précision' : 'High-Precision Engineering',
       desc: isFr
-        ? 'Chaque pièce est confectionnée à la main par des maîtres artisans héritiers d\'un savoir-faire séculaire.'
-        : 'Every garment is handcrafted by master artisans with decades of inherited heritage and technique.',
+        ? 'Chaque équipement est rigoureusement sélectionné et testé pour offrir des performances acoustiques et technologiques de pointe.'
+        : 'Every piece of equipment is meticulously calibrated and tested to deliver cutting-edge acoustic and technical performance.',
     },
     {
       icon: ShieldCheck,
-      title: isFr ? 'Micro-Séries Limitées' : 'Limited Micro-Batches',
+      title: isFr ? 'Standards Sans Compromis' : 'Uncompromising Standards',
       desc: isFr
-        ? 'Production éthique limitée de 50 à 150 pièces numérotées pour garantir l\'exclusivité et zéro gaspillage.'
-        : 'Strict micro-batch releases of 50 to 150 numbered units to guarantee exclusivity and eliminate waste.',
+        ? 'Sélection stricte d\'appareils certifiés garantissant longévité, fiabilité et zéro compromis sur la qualité.'
+        : 'Strict curation of certified devices guaranteeing endurance, operational reliability, and uncompromising quality.',
     },
     {
       icon: Globe,
-      title: isFr ? 'Fibres 100% Traçables' : '100% Traceable Fibers',
+      title: isFr ? 'Conception Durable & Certifiée' : 'Certified Sustainable Design',
       desc: isFr
-        ? 'Laines certifiées non-mulesed, cotons biologiques GOTS et cuirs à tannage végétal naturel.'
-        : 'Non-mulesed organic wools, GOTS certified organic cottons, and chrome-free vegetable leathers.',
+        ? 'Matériaux nobles, alliages d\'aluminium haute résistance et composants certifiés conformes aux normes environnementales.'
+        : 'Aerospace-grade aluminum alloys, durable engineering, and eco-certified components built to last.',
     },
     {
       icon: Heart,
       title: isFr ? 'Garantie GLADYNS 2 Ans' : '2-Year GLADYNS Warranty',
       desc: isFr
-        ? 'Prise en charge intégrale pour que vos pièces durent toute une vie.'
+        ? 'Prise en charge intégrale pour que vos équipements fonctionnent parfaitement au quotidien.'
         : 'Complimentary device and product repairs or replacements for 2 full years on all items.',
     },
   ];
@@ -136,8 +136,8 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
 
           <p className="text-sm sm:text-lg text-slate-300 font-sans max-w-2xl mx-auto leading-relaxed">
             {storeSettings?.aboutUs.content || (isFr
-              ? 'GLADYNS incarne l\'excellence du commerce moderne avec une sélection rigoureuse d\'appareils électroniques, d\'équipements audio et d\'articles de mode au standard le plus élevé.'
-              : 'GLADYNS redefines modern commerce through rigorous curation of high-precision audio, smart home appliances, and timeless wardrobe foundations.')}
+              ? 'GLADYNS incarne l\'excellence du commerce moderne avec une sélection rigoureuse d\'appareils électroniques, d\'équipements audio et d\'électroménager intelligent au standard le plus élevé.'
+              : 'GLADYNS is a modern multi-department store curating premium electronics, studio musical instruments, and autonomous smart home appliances. Every department represents uncompromising engineering, sustainable materials, and rigorous functional design.')}
           </p>
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
@@ -207,12 +207,12 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
                   {isFr ? `ESPACE DE CRÉATION ${storeName.toUpperCase()}` : `WELCOME TO ${storeName.toUpperCase()}`}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight text-white leading-tight">
-                  {storeSettings?.aboutUs?.subtitle || (isFr ? 'L\'Art de la Confection Éthique' : 'The Art of Modern European Craft')}
+                  {storeSettings?.aboutUs?.subtitle || (isFr ? 'Standards d\'Excellence & Ingénierie Moderne' : 'Curated Multi-Department House & Living Standards')}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
                   {storeSettings?.aboutUs?.content || (isFr
-                    ? 'Chaque pièce naît d\'une collaboration étroite avec nos artisans régionaux. De la sélection des cotons et laines vierges aux finitions manuelles, nos créations incarnent une vision sans compromis.'
-                    : 'Each acquisition emerges from a close partnership with regional craftsmen. From sourcing raw fibers to handmade buttonhole details, our collections uphold uncompromising precision.')}
+                    ? 'GLADYNS est un grand magasin moderne sélectionnant des équipements électroniques haut de gamme, des instruments de musique de studio et des appareils électroménagers autonomes. Chaque rayon représente une ingénierie sans compromis.'
+                    : 'GLADYNS is a modern multi-department store curating premium electronics, studio musical instruments, and autonomous smart home appliances. Every department represents uncompromising engineering, sustainable materials, and rigorous functional design.')}
                 </p>
 
                 {storeSettings?.aboutUs?.missionStatement && (
@@ -318,8 +318,8 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
                 {isFr
-                  ? 'Vérification méticuleuse de chaque produit audio, équipement électronique et article de mode avant expédition.'
-                  : 'Multi-point verification and operational testing of every electronic device and curated fashion piece.'}
+                  ? 'Vérification méticuleuse de chaque produit audio, équipement électronique et appareil électroménager avant expédition.'
+                  : 'Multi-point verification and operational testing of every electronic device, acoustic system, and appliance.'}
               </p>
             </div>
 

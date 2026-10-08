@@ -26,19 +26,20 @@
       })();
     </script>
     <title>GLADYNS ALL ACROSS</title>
-    <meta name="description" content="GLADYNS — Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel." />
+    <meta name="description" content="GLADYNS — Curated multi-department store featuring musical instruments, precision audio electronics, autonomous smart home appliances, and living standards." />
     <meta name="theme-color" content="#09090b" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="GLADYNS" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <!-- Open Graph / WhatsApp / Facebook Link Preview (Official GLADYNS Logo) -->
     <meta property="og:site_name" content="GLADYNS ALL ACROSS" />
     <meta property="og:title" content="GLADYNS ALL ACROSS" />
-    <meta property="og:description" content="GLADYNS — Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel." />
+    <meta property="og:description" content="GLADYNS — Curated multi-department store featuring musical instruments, precision audio electronics, autonomous smart home appliances, and living standards." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.gladyns.store" />
     <meta property="og:image" content="https://www.gladyns.store/og-banner.jpg" />
@@ -51,16 +52,22 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="GLADYNS ALL ACROSS" />
-    <meta name="twitter:description" content="GLADYNS — Curated multi-department store featuring musical instruments, precision audio electronics, smart home appliances, and timeless apparel." />
+    <meta name="twitter:description" content="GLADYNS — Curated multi-department store featuring musical instruments, precision audio electronics, autonomous smart home appliances, and living standards." />
     <meta name="twitter:image" content="https://www.gladyns.store/og-banner.jpg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Self-hosted, GDPR-compliant local web fonts loaded via src/index.css -->
     <!-- Official Google Identity Services SDK for Google One Tap -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body class="bg-slate-50/50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
-    <div id="root"></div>
+    <div id="root">
+      <div style="position:fixed;inset:0;background:#090b10;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;z-index:99999;">
+        <div style="width:84px;height:84px;border-radius:24px;background:#0f172a;border:1px solid rgba(59,130,246,0.35);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(37,99,235,0.3);position:relative;">
+          <img src="/assets/logo-icon.png" alt="GLADYNS" style="width:64px;height:64px;object-fit:contain;" />
+        </div>
+        <div style="margin-top:20px;font-weight:900;letter-spacing:0.28em;font-size:16px;text-transform:uppercase;">GLADYNS</div>
+        <div style="margin-top:6px;font-size:10px;color:#60a5fa;letter-spacing:0.2em;text-transform:uppercase;font-weight:700;">Loading Storefront...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

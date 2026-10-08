@@ -9,6 +9,8 @@ import {
   CheckCircle2,
   HelpCircle,
   Truck,
+  Copyright,
+  UserCheck,
 } from 'lucide-react';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 import { getWhatsAppLink, WhatsAppIcon } from './WhatsAppWidget';
@@ -65,6 +67,20 @@ export const TermsPage: React.FC<TermsPageProps> = ({
       content: storeSettings?.terms?.shippingPolicy || (isFr
         ? 'Expédition express mondiale avec livraison neutre en carbone offerte sur toutes les commandes éligibles. Le suivi interactif en 5 étapes est disponible en temps réel pour tous nos membres.'
         : 'Global express dispatch with complimentary carbon-neutral courier delivery on all qualifying orders. Interactive 5-stage tracking is available in real time for all patrons.'),
+    },
+    {
+      icon: Copyright,
+      title: isFr ? '6. Propriété Intellectuelle, Droits d\'Auteur & Signalement DMCA' : '6. Intellectual Property, DMCA & Copyright Policy',
+      content: isFr
+        ? 'GLADYNS respecte scrupuleusement la propriété intellectuelle d\'autrui. Conformément au Digital Millennium Copyright Act (17 U.S.C. § 512) et aux réglementations internationales, si vous estimez qu\'un contenu ou une image figurant sur notre plateforme porte atteinte à vos droits d\'auteur, veuillez adresser un avis de retrait motivé à notre agent désigné à contact@gladyns.store. Tout contenu présumé illicite ou contrefait fera l\'objet d\'une enquête diligente et d\'un retrait sous 24 à 48 heures.'
+        : 'GLADYNS strictly respects intellectual property rights in compliance with the Digital Millennium Copyright Act (17 U.S.C. § 512) and international copyright conventions. If you believe any image, asset, or material hosted on our platform infringes your copyright, please submit a formal takedown notice to our designated agent at contact@gladyns.store. All verified infringing content will be expeditiously reviewed and removed within 24 to 48 hours.',
+    },
+    {
+      icon: UserCheck,
+      title: isFr ? '7. Protection des Mineurs & Conformité COPPA' : '7. Minors Protection & COPPA Compliance (13+)',
+      content: isFr
+        ? 'Nos services, adhésions et transactions sont strictement réservés aux personnes âgées d\'au moins 13 ans (ou l\'âge de la majorité numérique selon votre juridiction). GLADYNS ne recueille sciemment aucune donnée personnelle auprès d\'enfants de moins de 13 ans sans autorisation parentale préalable conformément aux directives COPPA. Les parents ou tuteurs légaux peuvent contacter notre assistance à contact@gladyns.store pour solliciter la suppression immédiate de tout compte ouvert par un mineur non autorisé.'
+        : 'GLADYNS services, account creation, and purchases are strictly intended for individuals who are at least 13 years of age (or the legal age of majority in their jurisdiction). In full accordance with the Children\'s Online Privacy Protection Act (COPPA), we do not knowingly solicit or collect personal information from children under 13 without verifiable parental authorization. Parents or guardians may request immediate deletion of any unauthorized account by emailing contact@gladyns.store.',
     },
   ];
 

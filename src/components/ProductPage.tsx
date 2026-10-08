@@ -650,25 +650,19 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-slate-800">
-                          {['electronics', 'appliances', 'musical', 'computer-it', 'electronics-audio'].includes(product.category)
-                            ? (language === 'fr' ? 'Modèle / Spécification:' : 'Specification / Model:')
-                            : (language === 'fr' ? 'Taille / Format:' : 'Size:')}{' '}
+                          {language === 'fr' ? 'Configuration / Modèle:' : 'Specification / Configuration:'}{' '}
                           <span className="font-normal text-slate-600">{selectedSize.name}</span>
                         </span>
-                        {(isApparelCategory || isEquipmentCategory) && (
-                          <button
-                            type="button"
-                            onClick={() => setIsSizeChartOpen(true)}
-                            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 underline underline-offset-4 cursor-pointer font-medium"
-                          >
-                            <Ruler className="w-3.5 h-3.5" />
-                            <span>
-                              {['electronics', 'appliances', 'musical', 'computer-it', 'electronics-audio'].includes(product.category)
-                                ? (language === 'fr' ? 'Guide des spécifications' : 'Dimensions & Specs Guide')
-                                : (language === 'fr' ? 'Guide des tailles' : 'Size & Dimensions Guide')}
-                            </span>
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => setIsSizeChartOpen(true)}
+                          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 underline underline-offset-4 cursor-pointer font-medium"
+                        >
+                          <Ruler className="w-3.5 h-3.5" />
+                          <span>
+                            {language === 'fr' ? 'Guide des dimensions & specs' : 'Dimensions & Specs Guide'}
+                          </span>
+                        </button>
                       </div>
 
                       <div

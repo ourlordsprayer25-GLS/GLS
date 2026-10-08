@@ -26,7 +26,12 @@ import {
   ExternalLink,
   Eye,
   Store,
-  MessageSquare
+  MessageSquare,
+  CreditCard,
+  Smartphone,
+  Banknote,
+  Zap,
+  Check
 } from 'lucide-react';
 const defaultShopImg = '/assets/gladyns_store_preview.png';
 import { saveRealtimeSettings } from '../../services/supabaseService';
@@ -38,7 +43,7 @@ interface AdminSettingsProps {
 
 export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, setStoreSettings }) => {
   const [localSettings, setLocalSettings] = useState<StoreSettings>(storeSettings);
-  const [activeSubTab, setActiveSubTab] = useState<'about' | 'policies' | 'contact' | 'brand'>('about');
+  const [activeSubTab, setActiveSubTab] = useState<'about' | 'payments' | 'policies' | 'contact' | 'brand'>('about');
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
@@ -170,6 +175,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
       <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-3">
         {[
           { id: 'about', label: 'About Us & Shop Photo', icon: Info },
+          { id: 'payments', label: 'Payment Methods & Gateways', icon: CreditCard },
           { id: 'policies', label: 'Policy Conditions & Legal', icon: FileText },
           { id: 'contact', label: 'Contact Us & Store Locator', icon: MapPin },
           { id: 'brand', label: 'Brand Identity & Announcements', icon: Globe },
@@ -417,6 +423,270 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({ storeSettings, set
           </section>
         </div>
       )}
+
+      
+      {/* TAB: PAYMENT GATEWAYS & METHODS (ON / OFF) */}
+      {activeSubTab === 'payments' && (() => {
+        const paymentMethods = {
+          card: localSettings.paymentMethods?.card ?? true,
+          applePay: localSettings.paymentMethods?.applePay ?? true,
+          wave: localSettings.paymentMethods?.wave ?? true,
+          orangeMoney: localSettings.paymentMethods?.orangeMoney ?? true,
+          mtnMomo: localSettings.paymentMethods?.mtnMomo ?? true,
+          klarna: localSettings.paymentMethods?.klarna ?? true,
+          cod: localSettings.paymentMethods?.cod ?? true,
+        };
+
+        const toggleMethod = (key: keyof typeof paymentMethods) => {
+          setLocalSettings(prev => ({
+            ...prev,
+            paymentMethods: {
+              card: prev.paymentMethods?.card ?? true,
+              applePay: prev.paymentMethods?.applePay ?? true,
+              wave: prev.paymentMethods?.wave ?? true,
+              orangeMoney: prev.paymentMethods?.orangeMoney ?? true,
+              mtnMomo: prev.paymentMethods?.mtnMomo ?? true,
+              klarna: prev.paymentMethods?.klarna ?? true,
+              cod: prev.paymentMethods?.cod ?? true,
+              [key]: !paymentMethods[key]
+            }
+          }));
+        };
+
+        const setAll = (val: boolean) => {
+          setLocalSettings(prev => ({
+            ...prev,
+            paymentMethods: {
+              card: val || true, // Keep card safe
+              applePay: val,
+              wave: val,
+              orangeMoney: val,
+              mtnMomo: val,
+              klarna: val,
+              cod: val
+            }
+          }));
+        };
+
+        const methodsList = [
+          {
+            key: 'card' as const,
+            name: 'Carte Bancaire (Stripe)',
+            category: 'Paiement International & Cartes',
+            description: 'Acceptez Visa, Mastercard, AMEX et cartes internationales avec chiffrement SSL 256 bits et 3D Secure.',
+            icon: CreditCard,
+            color: 'bg-blue-50 text-blue-600 border-blue-200',
+            badge: 'Stripe 3D-Secure',
+            active: paymentMethods.card,
+          },
+          {
+            key: 'applePay' as const,
+            name: 'Apple Pay Express (1-Click)',
+            category: 'Paiement Biométrique iOS',
+            description: 'Paiement instantané en 1 clic via Touch ID / Face ID pour les utilisateurs iPhone, iPad et Mac Safari.',
+            icon: Smartphone,
+            color: 'bg-zinc-100 text-zinc-900 border-zinc-300',
+            badge: 'Apple Pay Biometric',
+            active: paymentMethods.applePay,
+          },
+          {
+            key: 'wave' as const,
+            name: 'Wave Mobile Money',
+            category: 'Mobile Money Régional (0% Frais)',
+            description: 'Paiement mobile instantané par QR Code ou numéro Wave en Côte d\'Ivoire et zone UEMOA.',
+            icon: Smartphone,
+            color: 'bg-sky-50 text-sky-600 border-sky-200',
+            badge: 'Wave Côte d\'Ivoire',
+            active: paymentMethods.wave,
+          },
+          {
+            key: 'orangeMoney' as const,
+            name: 'Orange Money (OM)',
+            category: 'Mobile Money Côte d\'Ivoire',
+            description: 'Règlement direct par compte Orange Money CI avec code de validation OTP sécurisé.',
+            icon: Smartphone,
+            color: 'bg-orange-50 text-orange-600 border-orange-200',
+            badge: 'Orange Money CI',
+            active: paymentMethods.orangeMoney,
+          },
+          {
+            key: 'mtnMomo' as const,
+            name: 'MTN Mobile Money (MoMo)',
+            category: 'Mobile Money Côte d\'Ivoire',
+            description: 'Paiement sans contact par portefeuille électronique MTN MoMo CI.',
+            icon: Smartphone,
+            color: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+            badge: 'MTN MoMo CI',
+            active: paymentMethods.mtnMomo,
+          },
+          {
+            key: 'klarna' as const,
+            name: 'Klarna (4x sans frais)',
+            category: 'Paiement Échelonné / BNPL',
+            description: 'Permettez à vos clients de régler en 4 échéances bi-hebdomadaires sans aucun intérêt ni frais cachés.',
+            icon: Sparkles,
+            color: 'bg-pink-50 text-pink-600 border-pink-200',
+            badge: 'Klarna 4x BNPL',
+            active: paymentMethods.klarna,
+          },
+          {
+            key: 'cod' as const,
+            name: 'Paiement à la Livraison (COD / Cash)',
+            category: 'Règlement à Réception',
+            description: 'Le client règle en espèces ou par terminal mobile directement auprès du livreur lors de la réception du colis.',
+            icon: Truck,
+            color: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+            badge: 'Cash / Terminal Courier',
+            active: paymentMethods.cod,
+          },
+        ];
+
+        const activeCount = Object.values(paymentMethods).filter(Boolean).length;
+
+        return (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            {/* Top Control Header Card */}
+            <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+              <div className="space-y-1 max-w-xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-zinc-950 font-display">
+                      Moyens de Paiement de la Boutique (Activer / Désactiver)
+                    </h3>
+                    <p className="text-[11px] text-zinc-500">
+                      Gérez les options de paiement visibles au passage en caisse. Tout moyen désactivé (OFF) est masqué immédiatement du panier client.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="text-[11px] font-mono font-bold bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-200">
+                  {activeCount} / {methodsList.length} Actif{activeCount > 1 ? 's' : ''} sur la boutique
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAll(true)}
+                  className="px-3.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
+                >
+                  Tout Activer (All ON)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAll(false)}
+                  className="px-3.5 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-bold transition-all border border-zinc-200 cursor-pointer"
+                >
+                  Carte Seule
+                </button>
+              </div>
+            </section>
+
+            {/* Methods Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {methodsList.map((m) => {
+                const Icon = m.icon;
+                return (
+                  <div
+                    key={m.key}
+                    className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-4 ${
+                      m.active
+                        ? 'bg-white border-blue-200 shadow-sm ring-1 ring-blue-500/10'
+                        : 'bg-zinc-50/70 border-zinc-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3.5">
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${m.color}`}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-sm text-zinc-950">
+                              {m.name}
+                            </h4>
+                          </div>
+                          <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">
+                            {m.category}
+                          </p>
+                          <p className="text-xs text-zinc-500 pt-1 leading-relaxed">
+                            {m.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Interactive ON / OFF Toggle Switch */}
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                        <input
+                          type="checkbox"
+                          checked={m.active}
+                          onChange={() => toggleMethod(m.key)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-zinc-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+                      </label>
+                    </div>
+
+                    {/* Bottom Status Row */}
+                    <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
+                      <span className="font-mono text-[10px] text-zinc-400">
+                        {m.badge}
+                      </span>
+                      {m.active ? (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Visible en Caisse (ON)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-zinc-500 bg-zinc-200/60 px-2.5 py-0.5 rounded-full border border-zinc-300">
+                          Masqué en Caisse (OFF)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Storefront Customer Preview Box */}
+            <section className="bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl p-6 border border-blue-500/20 shadow-md space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-300 uppercase tracking-widest">
+                  <Eye className="w-4 h-4 text-blue-400" />
+                  <span>Aperçu en Direct · Ce que voit le Client sur la Boutique</span>
+                </div>
+                <span className="text-[10px] text-blue-200/70 font-mono">
+                  Mise à jour en temps réel
+                </span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-3">
+                <p className="text-xs text-slate-400 font-medium">
+                  Boutons de règlement actifs affichés dans le formulaire de paiement client :
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {methodsList.filter(m => m.active).map(m => (
+                    <div
+                      key={m.key}
+                      className="px-3.5 py-2 rounded-xl bg-blue-600/30 border border-blue-400/40 text-white text-xs font-bold flex items-center gap-2 shadow-xs"
+                    >
+                      <Check className="w-3.5 h-3.5 text-blue-300" />
+                      <span>{m.name}</span>
+                    </div>
+                  ))}
+                  {methodsList.filter(m => m.active).length === 0 && (
+                    <div className="p-3 text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl w-full">
+                      ⚠️ Aucun moyen de paiement n'est activé. Activez au moins un moyen pour permettre les commandes clients.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+        );
+      })()}
 
       {/* TAB 2: POLICIES & LEGAL CONDITIONS */}
       {activeSubTab === 'policies' && (

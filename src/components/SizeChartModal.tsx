@@ -13,14 +13,14 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
   isOpen,
   onClose,
   productName,
-  category = 'apparel',
+  category = 'equipment',
 }) => {
   const { language } = useLanguageCurrency();
   const [unit, setUnit] = useState<'in' | 'cm'>('in');
 
   if (!isOpen) return null;
 
-  const isEquipment = category === 'musical' || category === 'electronics' || category === 'appliances';
+  const isEquipment = true; // GLADYNS is a multi-department electronics, audio & home appliance store
 
   const garmentMeasurements = {
     in: [
@@ -203,28 +203,19 @@ export const SizeChartModal: React.FC<SizeChartModalProps> = ({
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
                     <span>
-                      <strong>{language === 'fr' ? 'Silhouette Moderne : ' : 'Relaxed Modern Silhouette: '}</strong>
+                      <strong>{language === 'fr' ? 'Spécifications Techniques : ' : 'Technical Precision: '}</strong>
                       {language === 'fr' 
-                        ? 'Coupe ample et décontractée avec épaules légèrement tombantes. Choisissez votre taille habituelle.' 
-                        : 'This garment is cut with a relaxed drape and slightly dropped shoulders. Take your true size for the intended archival boxy fit.'}
+                        ? 'Chaque appareil est calibré selon des tolérances strictes avec connectique universelle certifiée.' 
+                        : 'Every device is engineered to strict mechanical and electronic tolerances with certified universal standards.'}
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
                     <span>
-                      <strong>{language === 'fr' ? 'Superposition : ' : 'Layering Fit: '}</strong>
+                      <strong>{language === 'fr' ? 'Garantie & Support : ' : 'Warranty & Compatibility: '}</strong>
                       {language === 'fr' 
-                        ? 'Si vous prévoyez de porter un pull épais en dessous, votre taille habituelle laisse une aisance parfaite.' 
-                        : 'If you plan to wear thick fisherman knitwear beneath, your normal size provides ample room without bunching.'}
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
-                    <span>
-                      <strong>{language === 'fr' ? 'Échanges Gratuits : ' : 'Free Size Exchanges: '}</strong>
-                      {language === 'fr' 
-                        ? 'Besoin d\'une autre taille ? Les échanges sont offerts et prépayés sous 30 jours.' 
-                        : 'Need a different size? We offer complimentary prepaid exchanges within 30 days.'}
+                        ? 'Garantie officielle GLADYNS 2 ans et assistance technique dédiée.' 
+                        : 'Covered under our full 2-Year Warranty with dedicated technical concierge support.'}
                     </span>
                   </li>
                 </>

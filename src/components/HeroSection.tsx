@@ -86,7 +86,7 @@ const buildFallbackSlides = (
     image: heroImg,
     badge: isFr ? 'Bienvenue' : 'Welcome',
     title: storeSettings?.storeName || (isFr ? 'Grand Magasin GLADYNS' : 'GLADYNS Department Store'),
-    subtitle: storeSettings?.storeDescription || (isFr ? 'Électronique, équipement audio, électroménager et mode raffinée.' : 'Curated electronics, music, home appliances & fashion.'),
+    subtitle: storeSettings?.storeDescription || (isFr ? 'Électronique, équipement audio, électroménager et standards d\'excellence.' : 'Curated electronics, music, smart home appliances & living standards.'),
     price: null,
     originalPrice: null,
     primaryCtaText: isFr ? 'Découvrir le catalogue' : 'Browse Catalog',

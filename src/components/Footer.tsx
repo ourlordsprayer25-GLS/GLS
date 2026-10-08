@@ -51,8 +51,8 @@ export const Footer: React.FC<FooterProps> = ({
 
     const shareTitle = storeSettings?.storeName || 'GLADYNS ALL ACROSS';
     const shareText = language === 'fr'
-      ? 'Découvrez GLADYNS ALL ACROSS — Instruments de musique, électronique haute fidélité, électroménager et mode intemporelle.'
-      : 'Discover GLADYNS ALL ACROSS — Musical instruments, precision audio electronics, home appliances, and timeless apparel.';
+      ? 'Découvrez GLADYNS ALL ACROSS — Instruments de musique, électronique haute fidélité, électroménager et standards d\'excellence.'
+      : 'Discover GLADYNS ALL ACROSS — Musical instruments, precision audio electronics, autonomous smart home appliances, and living standards.';
 
     if (navigator.share) {
       try {
@@ -94,9 +94,9 @@ export const Footer: React.FC<FooterProps> = ({
           
           {/* Brand Info */}
           <div className="space-y-2 max-w-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                {(storeSettings?.storeName || 'G')[0]}
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md shrink-0 border border-blue-500/30 bg-slate-900 shadow-blue-900/10">
+                <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-lg font-display font-bold tracking-tight text-white block uppercase">
                 {storeSettings?.storeName || 'GLADYNS'}
@@ -136,9 +136,15 @@ export const Footer: React.FC<FooterProps> = ({
                 {subscribed ? <Check className="w-3 h-3 text-white" /> : <ArrowUpRight className="w-3 h-3" />}
               </button>
             </form>
-            {subscribed && (
+            {subscribed ? (
               <p className="text-[10px] text-blue-400">
                 {language === 'fr' ? 'Inscription confirmée.' : 'Subscription confirmed.'}
+              </p>
+            ) : (
+              <p className="text-[9px] text-zinc-500">
+                {language === 'fr' 
+                  ? 'Désabonnement en 1 clic. Données protégées sans spam (CAN-SPAM & RGPD).' 
+                  : '1-click unsubscribe anytime. Zero spam policy (CAN-SPAM & GDPR compliant).'}
               </p>
             )}
           </div>
@@ -270,8 +276,20 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="pt-4 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-zinc-500">
           <p>© {new Date().getFullYear()} {storeSettings?.storeName || 'GLADYNS'}. {language === 'fr' ? 'Tous droits réservés.' : 'All rights reserved.'}</p>
           <div className="flex items-center gap-4">
-            <span className="hover:text-blue-400 cursor-pointer">{language === 'fr' ? 'Confidentialité' : 'Privacy Policy'}</span>
-            <span className="hover:text-blue-400 cursor-pointer">{language === 'fr' ? 'Mentions Légales' : 'Legal Notices'}</span>
+            <button 
+              type="button" 
+              onClick={() => onOpenTermsPage?.()} 
+              className="hover:text-blue-400 cursor-pointer transition-colors"
+            >
+              {language === 'fr' ? 'Confidentialité' : 'Privacy Policy'}
+            </button>
+            <button 
+              type="button" 
+              onClick={() => onOpenTermsPage?.()} 
+              className="hover:text-blue-400 cursor-pointer transition-colors"
+            >
+              {language === 'fr' ? 'Mentions Légales' : 'Legal Notices'}
+            </button>
           </div>
         </div>
       </div>

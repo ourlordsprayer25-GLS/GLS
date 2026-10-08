@@ -131,6 +131,8 @@ interface StorefrontViewProps {
   handleNavigateToProductFromNotification: (id: string) => void;
   handleOrderSuccess: (o: Order) => void;
   handleLoginSuccess: (u: UserProfile) => void;
+  pendingCheckoutAfterAuth?: boolean;
+  handleContinueAsGuest?: () => void;
 }
 
 export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
@@ -156,7 +158,8 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
     handleRemoveItem, handleProceedToCheckout,
     handleClearWishlist, handleMoveAllWishlistToBag, handleMarkAllNotificationsRead,
     handleMarkNotificationRead, handleDeleteNotification, handleClearAllNotifications,
-    handleNavigateToProductFromNotification, handleOrderSuccess, handleLoginSuccess
+    handleNavigateToProductFromNotification, handleOrderSuccess, handleLoginSuccess,
+    pendingCheckoutAfterAuth, handleContinueAsGuest
   } = props;
 
   const { formatPrice, language } = useLanguageCurrency();
@@ -177,8 +180,8 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
 
     const shareTitle = storeSettings?.storeName || 'GLADYNS ALL ACROSS';
     const shareText = language === 'fr'
-      ? 'Découvrez GLADYNS ALL ACROSS — Instruments de musique, électronique haute fidélité, électroménager et mode intemporelle.'
-      : 'Discover GLADYNS ALL ACROSS — Musical instruments, precision audio electronics, home appliances, and timeless apparel.';
+      ? 'Découvrez GLADYNS ALL ACROSS — Instruments de musique, électronique haute fidélité, électroménager et standards d\'excellence.'
+      : 'Discover GLADYNS ALL ACROSS — Musical instruments, precision audio electronics, autonomous smart home appliances, and living standards.';
 
     if (navigator.share) {
       try {
@@ -681,6 +684,7 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onOpenOrders={handleOpenOrders}
           user={user}
           onUpdateUser={setUser}
+          storeSettings={storeSettings}
         />
 
         <AuthModal
@@ -688,6 +692,8 @@ export const StorefrontView: React.FC<StorefrontViewProps> = (props) => {
           onClose={() => setIsAuthModalOpen(false)}
           onLoginSuccess={handleLoginSuccess}
           initialMode={authModalMode}
+          isPendingCheckout={pendingCheckoutAfterAuth}
+          onContinueAsGuest={handleContinueAsGuest}
         />
 
         <LanguageCurrencyModal />

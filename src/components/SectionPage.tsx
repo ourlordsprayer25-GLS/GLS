@@ -136,38 +136,38 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           title: language === 'fr' ? 'Offres Exclusives' : 'Hot Deals',
           breadcrumb: language === 'fr' ? 'Offres Exclusives' : 'Hot Deals',
           description: language === 'fr'
-            ? 'Tarifs archives et réductions saisonnières sur nos pièces intemporelles.'
-            : 'Archive pricing & seasonal reductions on permanent wardrobe objects.',
+            ? 'Tarifs préférentiels et réductions sur nos équipements électroniques, audio et maison.'
+            : 'Exclusive pricing & reductions on curated electronics, audio, and home appliances.',
           slides: [
             {
               id: 'deal-slide-1',
               image: LUXURY_FALLBACKS['hot-deals'][0],
-              badge: language === 'fr' ? 'Réductions Archives' : 'Archive Reductions',
-              title: language === 'fr' ? 'Sélection Archives Saisonnières' : 'Seasonal Archive Vault',
+              badge: language === 'fr' ? 'Offres Exceptionnelles' : 'Featured Deals',
+              title: language === 'fr' ? 'Sélection Électronique & Audio' : 'Curated Audio & Tech Deals',
               subtitle: language === 'fr'
-                ? 'Tarifs micro-séries limités sur manteaux structurés, sergé selvedge et mailles nobles.'
-                : 'Limited micro-batch pricing on tailored overcoats, raw selvedge twill, and knitwear.',
-              ctaText: language === 'fr' ? 'Explorer la Sélection' : 'Shop Vault',
+                ? 'Réductions directes sur les casques haute fidélité, chargeurs rapides et accessoires informatiques.'
+                : 'Direct reductions on high-fidelity headphones, fast chargers, and computing accessories.',
+              ctaText: language === 'fr' ? 'Explorer les Offres' : 'Shop Deals',
             },
             {
               id: 'deal-slide-2',
               image: LUXURY_FALLBACKS['hot-deals'][1],
-              badge: language === 'fr' ? 'Laine Double Face Italienne' : 'Italian Double-Faced Wool',
-              title: language === 'fr' ? 'Manteaux & Trenchs Architecturaux' : 'Architectural Trench & Overcoats',
+              badge: language === 'fr' ? 'Informatique & PC' : 'Enterprise Computing',
+              title: language === 'fr' ? 'PC Portables HP & Composants' : 'HP Business Laptops & Upgrades',
               subtitle: language === 'fr'
-                ? 'Coutures fendues non doublées confectionnées avec les filatures historiques de Biella, Italie.'
-                : 'Precision unlined split seams crafted with heritage wool mills in Biella, Italy.',
-              ctaText: language === 'fr' ? 'Voir les Manteaux' : 'Explore Outerwear Deals',
+                ? 'Ordinateurs HP EliteBook certifiés, barrettes de RAM haute vitesse et adaptateurs SATA.'
+                : 'Certified HP EliteBook laptops, high-speed RAM modules, and genuine power adapters.',
+              ctaText: language === 'fr' ? 'Voir l\'Informatique' : 'Explore Computing',
             },
             {
               id: 'deal-slide-3',
               image: LUXURY_FALLBACKS['hot-deals'][2],
-              badge: language === 'fr' ? 'Cuir Toscan de Voyage' : 'Tuscan Leather Carry',
-              title: language === 'fr' ? 'Sacs Week-End Brunis à la Main' : 'Hand-Burnished Cabin Weekenders',
+              badge: language === 'fr' ? 'Acoustique Studio' : 'Studio Acoustics',
+              title: language === 'fr' ? 'Casques & Enceintes Sans Fil' : 'Wireless Audio & Monitors',
               subtitle: language === 'fr'
-                ? 'Cuir pleine fleur au tannage végétal certifié, conçu pour se patiner avec le temps.'
-                : 'Full-grain certified vegetable-tanned leather designed to patinate with age.',
-              ctaText: language === 'fr' ? 'Voir la Maroquinerie' : 'View Leather Carry',
+                ? 'Enceintes nomades Marshall et casques Bose à réduction de bruit avec garantie officielle.'
+                : 'Marshall portable speakers and BOSE noise-cancelling headphones with full warranty.',
+              ctaText: language === 'fr' ? 'Voir l\'Audio' : 'View Audio Gear',
             },
           ] as Slide[],
         };
@@ -177,38 +177,38 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           title: language === 'fr' ? 'Nouveautés' : 'New Arrivals',
           breadcrumb: language === 'fr' ? 'Nouveautés' : 'New Arrivals',
           description: language === 'fr'
-            ? 'Dernières sorties capsules, nouvelles matières et nouveautés saisonnières.'
-            : 'Latest capsule drops, new fabrications, and seasonal additions.',
+            ? 'Dernières sorties en informatique, acoustique haute fidélité et technologies maison.'
+            : 'Latest additions in computing, high-fidelity acoustics, and smart home tech.',
           slides: [
             {
               id: 'new-slide-1',
               image: LUXURY_FALLBACKS['new-arrivals'][0],
-              badge: language === 'fr' ? 'Collection Automne / Hiver' : 'Autumn / Winter Release',
-              title: language === 'fr' ? 'Nouveautés de Saison' : 'New Season Additions',
+              badge: language === 'fr' ? 'Dernières Sorties' : 'New Release',
+              title: language === 'fr' ? 'Nouveautés Audio & Hi-Fi' : 'Acoustic Sound Innovations',
               subtitle: language === 'fr'
-                ? 'Discipline architecturale : pantalons en laine vierge, manteaux en sergé lourd et cachemire.'
-                : 'Architectural discipline in virgin wool trousers, heavy twill coats, and cashmere.',
+                ? 'Casques audio sans fil de nouvelle génération et récepteurs haute définition.'
+                : 'Next-generation wireless headphones and high-definition acoustic drivers.',
               ctaText: language === 'fr' ? 'Découvrir la Sortie' : 'Explore New Drop',
             },
             {
               id: 'new-slide-2',
               image: LUXURY_FALLBACKS['new-arrivals'][1],
-              badge: language === 'fr' ? 'Collection Vedette' : 'Featured Collection',
-              title: language === 'fr' ? 'Bases Structurées du Quotidien' : 'Structured Everyday Foundations',
+              badge: language === 'fr' ? 'Bureautique Pro' : 'Enterprise Gear',
+              title: language === 'fr' ? 'Stations de Travail & Périphériques' : 'Workstations & Peripherals',
               subtitle: language === 'fr'
-                ? 'Sergé selvedge japonais avec finitions gansées et boutons en corozo naturel.'
-                : 'Japanese selvedge twill with clean-finished bound seams and corozo hardware.',
-              ctaText: language === 'fr' ? 'Explorer les Essentiels' : 'Discover Foundations',
+                ? 'Souris ergonomiques de précision, hubs multi-ports et chargeurs universels rapides.'
+                : 'Precision wireless input devices, multi-port docking hubs, and universal power bricks.',
+              ctaText: language === 'fr' ? 'Explorer l\'Informatique' : 'Discover Computing',
             },
             {
               id: 'new-slide-3',
               image: LUXURY_FALLBACKS['new-arrivals'][2],
-              badge: language === 'fr' ? 'Maille Fine de Précision' : 'Fine Gauge Knitwear',
-              title: language === 'fr' ? 'Mailles Côtelées en Mérinos' : 'Tasmanian Merino Ribbed Knits',
+              badge: language === 'fr' ? 'Charge Rapide' : 'Fast Power Tech',
+              title: language === 'fr' ? 'Blocs de Recharge GaN 120W' : 'GaN 120W Rapid Chargers',
               subtitle: language === 'fr'
-                ? 'Côtes anglaises jauge 7 conçues pour la thermorégulation et une silhouette impeccable.'
-                : '7-gauge fisherman rib engineered for thermoregulation and enduring shape.',
-              ctaText: language === 'fr' ? 'Voir la Maille' : 'Shop Knitwear',
+                ? 'Technologie de recharge rapide sécurisée pour ordinateurs portables et smartphones.'
+                : 'High-wattage thermal-controlled charging for modern laptops, phones, and gear.',
+              ctaText: language === 'fr' ? 'Voir les Chargeurs' : 'Shop Power Tech',
             },
           ] as Slide[],
         };
@@ -218,8 +218,8 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           title: language === 'fr' ? 'Meilleures Ventes' : 'Best Sellers',
           breadcrumb: language === 'fr' ? 'Meilleures Ventes' : 'Best Sellers',
           description: language === 'fr'
-            ? 'Les pièces les plus prisées de notre catalogue, plébiscitées par la communauté GLADYNS.'
-            : 'The most coveted objects from our archive, as curated by the GLADYNS community.',
+            ? 'Les produits les plus plébiscités : informatique, son de référence et accessoires certifiés.'
+            : 'Our most in-demand equipment: enterprise computing, reference sound, and certified tech.',
           slides: [
             {
               id: 'best-slide-1',
@@ -227,28 +227,28 @@ export const SectionPage: React.FC<SectionPageProps> = ({
               badge: language === 'fr' ? 'Les Mieux Notés' : 'Highest Rated',
               title: language === 'fr' ? 'Favoris de la Communauté' : 'Community Favorites',
               subtitle: language === 'fr'
-                ? 'La sélection définitive des créations emblématiques de la signature GLADYNS.'
-                : 'The definitive selection of pieces that have defined the GLADYNS aesthetic.',
+                ? 'La sélection définitive des produits électroniques plébiscités par nos membres.'
+                : 'The definitive selection of top-rated electronics and audio equipment.',
               ctaText: language === 'fr' ? 'Voir les Bestsellers' : 'Shop Bestsellers',
             },
             {
               id: 'best-slide-2',
               image: LUXURY_FALLBACKS['bestsellers'][1],
-              badge: language === 'fr' ? 'Grand Classique' : 'Perennial Classic',
-              title: language === 'fr' ? 'Le Trench en Laine Noble' : 'The Wool Trench Coat',
+              badge: language === 'fr' ? 'Son Référence' : 'Reference Audio',
+              title: language === 'fr' ? 'Casques Audio Bose Ultra' : 'Bose Ultra Acoustic Series',
               subtitle: language === 'fr'
-                ? 'Notre manteau le plus recherché, taillé pour une longévité absolue et une silhouette pure.'
-                : 'Our most sought-after outerwear piece, crafted for longevity and silhouette.',
-              ctaText: language === 'fr' ? 'Découvrir le Classique' : 'View Classic',
+                ? 'Réduction active du bruit de pointe, spatialisation audio et confort d\'écoute absolu.'
+                : 'Class-leading active noise cancellation, spatial acoustic immersion, and ergonomic design.',
+              ctaText: language === 'fr' ? 'Découvrir Bose' : 'View Bose',
             },
             {
               id: 'best-slide-3',
               image: LUXURY_FALLBACKS['bestsellers'][2],
-              badge: language === 'fr' ? 'Coup de Cœur Boutique' : 'Boutique Favorite',
-              title: language === 'fr' ? 'Veste de Travail en Sergé Lourd' : 'Structured Twill Chore Jacket',
+              badge: language === 'fr' ? 'Informatique Pro' : 'Business Series',
+              title: language === 'fr' ? 'PC HP EliteBook & Accessoires' : 'HP EliteBook Laptops',
               subtitle: language === 'fr'
-                ? 'Une pièce de base polyvalente et durable qui figure au sommet de nos commandes.'
-                : 'A versatile foundation piece that continues to lead our seasonal requests.',
+                ? 'Performances professionnelles garanties, châssis aluminium durable et autonomie prolongée.'
+                : 'Reliable business computing performance, durable aluminum chassis, and all-day battery life.',
               ctaText: language === 'fr' ? 'Commander Maintenant' : 'Shop Now',
             },
           ] as Slide[],
@@ -259,8 +259,8 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           title: language === 'fr' ? 'Acheter par Rayon' : 'Shop by Department',
           breadcrumb: language === 'fr' ? 'Rayons' : 'Departments',
           description: language === 'fr'
-            ? 'Explorez nos univers : Instruments de Musique, Électronique & Audio, Électroménager et Mode.'
-            : 'Explore our collections categorized by department: Musical Instruments, Electronics, Home Appliances, and Apparel.',
+            ? 'Explorez nos univers : Instruments de Musique, Électronique & Audio, Informatique et Électroménager.'
+            : 'Explore our collections categorized by department: Musical Instruments, Electronics, Computing, and Home Appliances.',
           slides: [
             {
               id: 'cat-slide-1',
@@ -268,8 +268,8 @@ export const SectionPage: React.FC<SectionPageProps> = ({
               badge: language === 'fr' ? 'Vitrine Multi-Rayons' : 'Multi-Department Showcase',
               title: language === 'fr' ? 'Tous les Rayons du Magasin' : 'All Store Departments',
               subtitle: language === 'fr'
-                ? 'Collections indépendantes : Instruments de musique, Hi-Fi & Studio, Maison connectée et Mode.'
-                : 'Independent collections across Musical Instruments, Electronics & Audio, Home Appliances, and Apparel.',
+                ? 'Collections indépendantes : Instruments de musique, Hi-Fi & Studio, Informatique et Électroménager.'
+                : 'Independent collections across Musical Instruments, Electronics & Audio, Computing, and Home Appliances.',
               ctaText: language === 'fr' ? 'Parcourir les Rayons' : 'Browse All Departments',
             },
             {
@@ -311,17 +311,17 @@ export const SectionPage: React.FC<SectionPageProps> = ({
           title: language === 'fr' ? 'Collection Sélective' : 'Curated Collection',
           breadcrumb: language === 'fr' ? 'Toutes les Pièces' : 'All Pieces',
           description: language === 'fr'
-            ? 'L’inventaire complet de pièces d’exception, vestiaire architectural et maroquinerie.'
-            : 'The complete seasonal inventory of architectural garments and travel carry.',
+            ? 'L’inventaire complet de produits technologiques, son de studio et équipement certifié.'
+            : 'The complete inventory of precision technology, studio sound, and certified appliances.',
           slides: [
             {
               id: 'col-slide-1',
               image: LUXURY_FALLBACKS['collection'][0],
               badge: language === 'fr' ? 'Les Archives Complètes' : 'The Complete Archive',
-              title: language === 'fr' ? 'Vestiaire Architectural Intemporel' : 'Enduring Wardrobe Architecture',
+              title: language === 'fr' ? 'Standards de Maison & Ingénierie' : 'Curated House & Living Standards',
               subtitle: language === 'fr'
-                ? 'Chaque création est confectionnée dans des matières pérennes, à l’épreuve du temps.'
-                : 'Every object is designed with permanent materials, zero trends, and lifetime repairs.',
+                ? 'Chaque équipement est sélectionné avec des critères stricts de durabilité et d\'ingénierie.'
+                : 'Every device is chosen for endurance, functional integrity, and lifetime performance.',
               ctaText: language === 'fr' ? 'Toute la Collection' : 'Browse Full Collection',
             },
             {

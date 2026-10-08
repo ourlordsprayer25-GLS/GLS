@@ -102,8 +102,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       ? `Découvrez "${product.name}" chez GLADYNS — ${formatPrice(product.price)}. Qualité supérieure et garantie officielle.\n${currentUrl}`
       : `Discover "${product.name}" at GLADYNS Maison — ${formatPrice(product.price)}. Curated quality with complimentary warranty.\n${currentUrl}`)
     : (language === 'fr'
-      ? `Découvrez GLADYNS — Électronique haut de gamme, systèmes audio, électroménager intelligent et mode intemporelle.\n${currentUrl}`
-      : `Explore GLADYNS Maison — Haute electronics, studio audio, smart home technology, and timeless apparel.\n${currentUrl}`);
+      ? `Découvrez GLADYNS — Électronique haut de gamme, systèmes audio, électroménager intelligent et standards d'excellence.\n${currentUrl}`
+      : `Explore GLADYNS Maison — Haute electronics, studio audio, smart home technology, and living standards.\n${currentUrl}`);
 
   // 1. Copy link
   const handleCopyLink = () => {

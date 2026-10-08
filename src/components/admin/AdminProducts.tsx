@@ -79,12 +79,12 @@ const SPEC_PRESETS: Record<string, { label: string; value: string }[]> = {
     { label: 'Energy Rating', value: 'Class A+++ Efficiency' },
     { label: 'Warranty Duration', value: '2 Years Manufacturer Warranty' },
   ],
-  fashion: [
-    { label: 'Material & Fabric', value: '100% Organic Combed Cotton' },
-    { label: 'Silhouette & Fit', value: 'Tailored Regular Fit' },
-    { label: 'Gender / Cut', value: 'Unisex' },
-    { label: 'Country of Origin', value: 'Made in Portugal' },
-    { label: 'Care Instructions', value: 'Machine Wash Cold / Dry Clean' },
+  lifestyle: [
+    { label: 'Form Factor', value: 'Precision Engineered Standard' },
+    { label: 'Materials & Finish', value: 'Aerospace-Grade Aluminum & Reinforced Polymer' },
+    { label: 'Compatibility', value: 'Universal Standard' },
+    { label: 'Country of Origin', value: 'Global Certified Partner' },
+    { label: 'Care Instructions', value: 'Wipe with dry microfiber cloth' },
   ],
 };
 
@@ -354,16 +354,16 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
     }));
   };
 
-  const handleApplySizePreset = (type: 'none' | 'clothing' | 'shoes' | 'tech' | 'fragrance') => {
+  const handleApplySizePreset = (type: 'none' | 'tiers' | 'storage' | 'audio' | 'voltage') => {
     if (type === 'none') {
       setFormData(prev => ({ ...prev, sizes: [] }));
       return;
     }
     let names: string[] = [];
-    if (type === 'clothing') names = ['XS', 'S', 'M', 'L', 'XL', '2XL'];
-    if (type === 'shoes') names = ['38', '39', '40', '41', '42', '43', '44', '45'];
-    if (type === 'tech') names = ['64GB', '128GB', '256GB', '512GB', '1TB'];
-    if (type === 'fragrance') names = ['30ml', '50ml', '100ml'];
+    if (type === 'tiers') names = ['Standard Edition', 'Pro Edition', 'Master Kit'];
+    if (type === 'storage') names = ['128GB SSD', '256GB SSD', '512GB NVMe', '1TB NVMe', '2TB NVMe'];
+    if (type === 'audio') names = ['Solo Unit', 'Stereo Pair', 'Studio Master Package'];
+    if (type === 'voltage') names = ['65W GaN', '100W Fast Charge', '120W Rapid High-Output'];
 
     setFormData(prev => ({
       ...prev,
@@ -1312,31 +1312,31 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleApplySizePreset('clothing')}
+                      onClick={() => handleApplySizePreset('tiers')}
                       className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 rounded-lg text-xs font-bold transition-all"
                     >
-                      👔 Clothing (XS - 2XL)
+                      ⚙️ Hardware Editions (Standard / Pro / Master)
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleApplySizePreset('shoes')}
-                      className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/60 rounded-lg text-xs font-bold transition-all"
-                    >
-                      👟 Shoes (EU 38 - 45)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleApplySizePreset('tech')}
+                      onClick={() => handleApplySizePreset('storage')}
                       className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 rounded-lg text-xs font-bold transition-all"
                     >
-                      💾 Storage / Tech (64GB - 1TB)
+                      💾 Storage / SSD (128GB - 2TB)
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleApplySizePreset('fragrance')}
+                      onClick={() => handleApplySizePreset('audio')}
+                      className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/60 rounded-lg text-xs font-bold transition-all"
+                    >
+                      🎧 Audio Edition (Solo / Stereo / Studio)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApplySizePreset('voltage')}
                       className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/60 rounded-lg text-xs font-bold transition-all"
                     >
-                      🧴 Volume (30ml - 100ml)
+                      ⚡ Charging Power (65W - 120W)
                     </button>
                   </div>
                 </div>
@@ -1521,10 +1521,10 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleApplySpecPreset('fashion')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      onClick={() => handleApplySpecPreset('lifestyle')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer"
                     >
-                      <span>👔 Apparel Template</span>
+                      <span>🛠️ Lifestyle & Hardware Template</span>
                     </button>
                   </div>
                 </div>

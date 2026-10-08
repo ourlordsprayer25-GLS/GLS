@@ -127,7 +127,7 @@ export interface Order {
   discount: number;
   tax: number;
   total: number;
-  paymentMethod: 'card' | 'apple-pay' | 'klarna' | 'cod';
+  paymentMethod: 'card' | 'apple-pay' | 'klarna' | 'cod' | 'wave' | 'om';
   status: 'placed' | 'confirmed' | 'processing' | 'shipping' | 'shipped' | 'delivered' | 'cancelled';
   trackingNumber: string;
   customerId?: string;
@@ -236,6 +236,15 @@ export interface StoreSettings {
     subtitle: string;
     tagLabel: string;
     itemCount: number;
+  };
+  paymentMethods?: {
+    card: boolean;
+    applePay: boolean;
+    wave: boolean;
+    orangeMoney: boolean;
+    mtnMomo: boolean;
+    klarna: boolean;
+    cod: boolean;
   };
   sections: StoreSectionConfig[];
 }

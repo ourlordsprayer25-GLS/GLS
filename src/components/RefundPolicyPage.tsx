@@ -366,8 +366,8 @@ export const RefundPolicyPage: React.FC<RefundPolicyPageProps> = ({
 
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans">
                 {policy?.exceptions || (isFr
-                  ? `Conformément aux normes européennes, les pièces confectionnées sur-mesure à la commande (gravures personnelles, initiales brodées) et les articles intimes dont le scellé de protection sanitaire a été rompu ne peuvent pas faire l'objet d'un retour, sauf en cas de défaut de fabrication avéré couvert par notre garantie de 2 ans ${storeName}.`
-                  : `In accordance with European trade laws, bespoke custom creations (custom monograms, personalized sizing) and intimate apparel with opened hygiene seals cannot be returned, except in case of a verified defect covered by our 2-Year ${storeName} Warranty.`)}
+                  ? `Conformément aux normes, les articles personnalisés (gravures spécifiques) et les logiciels ou consommables déballés ne peuvent pas faire l'objet d'un retour, sauf en cas de défaut de fabrication avéré couvert par notre garantie de 2 ans ${storeName}.`
+                  : `In accordance with trade regulations, customized items, personalized engravings, and unsealed software or consumable media cannot be returned, except in case of a verified defect covered by our 2-Year ${storeName} Warranty.`)}
               </p>
             </div>
           </div>
@@ -387,8 +387,8 @@ export const RefundPolicyPage: React.FC<RefundPolicyPageProps> = ({
                 </h3>
                 <p className="text-xs text-slate-300 font-sans leading-relaxed">
                   {isFr
-                    ? `Notre Conciergerie ${storeName} est disponible 6j/7 pour vous aider à imprimer votre étiquette, organiser un enlèvement ou échanger une taille.`
-                    : `Our ${storeName} Concierge is available 6 days a week to help generate labels, schedule courier pickups, or process size exchanges.`}
+                    ? `Notre Conciergerie ${storeName} est disponible 6j/7 pour vous aider à imprimer votre étiquette, organiser un enlèvement ou remplacer un article.`
+                    : `Our ${storeName} Concierge is available 6 days a week to help generate labels, schedule courier pickups, or process replacements.`}
                 </p>
               </div>
 

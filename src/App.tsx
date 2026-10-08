@@ -51,7 +51,7 @@ const getGuestId = () => {
 
 const DEFAULT_STORE_SETTINGS: StoreSettings = {
   storeName: 'GLADYNS MARKETPLACE',
-  storeDescription: 'Boutique Officielle GLADYNS - Électronique, Audio, Mode et Accessoires de qualité certifiée.',
+  storeDescription: 'Boutique Officielle GLADYNS — Électronique, Audio, Électroménager et Innovations de qualité certifiée.',
   contactEmail: 'contact@gladyns.store',
   contactPhone: '+225 05 00 61 99 23',
   contactAddress: 'Habitat Extension, E 24, Abidjan, Côte d\'Ivoire',
@@ -65,7 +65,7 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
   aboutUs: {
     title: 'About GLADYNS Department Store',
     subtitle: 'Curated Multi-Department House & Living Standards',
-    content: 'GLADYNS is a modern multi-department store curating premium electronics, studio musical instruments, autonomous smart home appliances, and timeless wardrobe foundations. Every department represents uncompromising engineering, sustainable materials, and rigorous functional design.',
+    content: 'GLADYNS is a modern multi-department store curating premium electronics, studio musical instruments, and autonomous smart home appliances. Every department represents uncompromising engineering, sustainable materials, and rigorous functional design.',
     image: '/assets/gladyns_store_preview.png',
     secondaryImage: '',
     foundedYear: '2026',
@@ -79,7 +79,7 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
     warrantyTitle: '2. Warranty & Quality Guarantee',
     warrantyPolicy: 'All curated items, studio equipment, and appliances come with our warranty and quality guarantee. In the event of functional, material, or hardware issues, we repair or replace your item in accordance with our guarantee policy.',
     returnTitle: '3. Return & Refund Policy',
-    returnPolicy: 'You have a dedicated return period from delivery to return any unworn item with original tags. Prepaid return labels can be generated directly from your live Order Pipeline dashboard.',
+    returnPolicy: 'You have a dedicated return period from delivery to return any item in its original condition and packaging. Prepaid return labels can be generated directly from your live Order Pipeline dashboard.',
     privacyPolicy: 'GLADYNS is committed to absolute personal data privacy adhering strictly to EU GDPR standards. Payment processing is secured using 256-bit SSL encryption, and financial credentials are never stored on our servers.',
     shippingPolicy: 'Global express dispatch with complimentary carbon-neutral courier delivery on all qualifying orders. Live 5-stage tracking is available for all member acquisitions.',
   },
@@ -87,29 +87,38 @@ const DEFAULT_STORE_SETTINGS: StoreSettings = {
     title: 'Return & Refund Policy',
     lastUpdated: 'September 2025',
     returnWindowDays: '30',
-    overview: 'At GLADYNS, we stand behind the exceptional quality and artisanal construction of every piece. If your acquisition does not fully meet your expectations, we provide a seamless 30-day return window with 100% complimentary return shipping.',
+    overview: 'At GLADYNS, we stand behind the exceptional quality and precision construction of every piece. If your acquisition does not fully meet your expectations, we provide a seamless 30-day return window with 100% complimentary return shipping.',
     eligibility: 'Items must be returned in their original condition with all GLADYNS security tags, packaging, and presentation boxes intact.',
     stepByStepProcess: 'Initiate your return with one click in your Order Pipeline or contact our Concierge. Print your complimentary prepaid carbon-neutral shipping label, pack your items, and drop off at any authorized regional point. Upon swift verification by our team, your refund is processed immediately.',
     processingTime: 'Refunds are issued to your original payment method (Credit Card, PayPal, Apple Pay) within 24 to 48 hours of inspection. Funds typically reflect in your account within 2-5 business days depending on your financial institution.',
     returnShipping: 'Complimentary on all orders. GLADYNS covers all courier and return shipping charges worldwide.',
-    exceptions: 'Custom-tailored bespoke creations, personalized engraved pieces, and intimate garments with broken sanitary seals cannot be returned unless a manufacturing imperfection exists.',
+    exceptions: 'Custom-configured items, personalized engraved pieces, and unsealed software or consumable accessories cannot be returned unless a manufacturing defect exists.',
   },
   announcementBar: {
     enabled: true,
     text: 'GLOBAL EXPRESS DISPATCH ACTIVE — CARBON NEUTRAL COURIER ON ALL DEPARTMENTS',
   },
   heroContent: {
-    title: 'ELECTRONICS, MUSIC, APPLIANCES & ATELIER',
-    subtitle: 'Curated studio analog synthesizers, planar acoustics, smart living tech, and timeless apparel.',
+    title: 'ELECTRONICS, INSTRUMENTS, APPLIANCES & INNOVATION',
+    subtitle: 'Curated studio analog synthesizers, planar acoustics, smart living tech, and precision equipment.',
     buttonText: 'EXPLORE CATALOG',
     image: '',
   },
   moreToLoveSection: {
     enabled: true,
     title: 'More to Love',
-    subtitle: 'Explore curated alternatives featuring pristine cuts and high-fashion engineering from our global archive.',
+    subtitle: 'Explore curated alternatives featuring precision engineering and superior craft from our global archive.',
     tagLabel: 'ARCHIVAL DISCOVERIES',
     itemCount: 4,
+  },
+  paymentMethods: {
+    card: true,
+    applePay: true,
+    wave: true,
+    orangeMoney: true,
+    mtnMomo: true,
+    klarna: true,
+    cod: true,
   },
   sections: [
     { id: 'announcement', name: 'Announcement Bar', subtitle: 'Top promotional ticker', enabled: true, position: 1, type: 'announcement' },
@@ -788,16 +797,44 @@ function AppContent() {
   // Mobile Navigation Sidebar State
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Wishlist State with Cloud / Supabase persistence
-  const [wishlistIds, setWishlistIds] = useState<string[]>([]);
+  // Wishlist State with LocalStorage + Cloud / Supabase persistence
+  const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('gladyns_wishlist_ids');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  });
   const isWishlistInitRef = useRef(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('gladyns_wishlist_ids', JSON.stringify(wishlistIds));
+    } catch (e) {}
+  }, [wishlistIds]);
 
   useEffect(() => {
     const currentUid = user?.id || getGuestId();
     fetchRealtimeWishlist(currentUid).then((loadedIds) => {
-      if (Array.isArray(loadedIds)) {
-        setWishlistIds(loadedIds);
-      }
+      setWishlistIds((prevIds) => {
+        if (prevIds.length > 0) {
+          if (!Array.isArray(loadedIds) || loadedIds.length === 0) {
+            saveRealtimeWishlist(currentUid, prevIds);
+            return prevIds;
+          }
+          const merged = Array.from(new Set([...prevIds, ...loadedIds]));
+          saveRealtimeWishlist(currentUid, merged);
+          return merged;
+        } else {
+          if (Array.isArray(loadedIds) && loadedIds.length > 0) {
+            return loadedIds;
+          }
+          return prevIds;
+        }
+      });
       isWishlistInitRef.current = true;
     });
   }, [user?.id]);
@@ -808,16 +845,65 @@ function AppContent() {
     saveRealtimeWishlist(currentUid, wishlistIds);
   }, [wishlistIds, user?.id]);
 
-  // Cart State with Cloud / Supabase persistence
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  // Cart State with LocalStorage + Cloud / Supabase persistence
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('gladyns_cart_items');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  });
   const isCartInitRef = useRef(false);
 
+  // Keep cart synced to localStorage on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem('gladyns_cart_items', JSON.stringify(cartItems));
+    } catch (e) {}
+  }, [cartItems]);
+
+  // Load and merge cloud cart when user identity changes without ever wiping guest items
   useEffect(() => {
     const currentUid = user?.id || getGuestId();
     fetchRealtimeCart(currentUid).then((loadedCart) => {
-      if (Array.isArray(loadedCart)) {
-        setCartItems(loadedCart);
-      }
+      setCartItems((prevItems) => {
+        // If customer had items in local cart (as guest or current session)
+        if (prevItems.length > 0) {
+          if (!Array.isArray(loadedCart) || loadedCart.length === 0) {
+            // Remote has nothing (e.g. newly registered user): save all current items to their remote account!
+            saveRealtimeCart(currentUid, prevItems);
+            return prevItems;
+          }
+          // Merge items so that nothing is lost
+          const mergedMap = new Map<string, CartItem>();
+          loadedCart.forEach((item) => {
+            if (item && item.id) mergedMap.set(item.id, item);
+          });
+          prevItems.forEach((item) => {
+            if (mergedMap.has(item.id)) {
+              const existing = mergedMap.get(item.id)!;
+              mergedMap.set(item.id, {
+                ...item,
+                quantity: Math.max(existing.quantity, item.quantity),
+              });
+            } else {
+              mergedMap.set(item.id, item);
+            }
+          });
+          const mergedList = Array.from(mergedMap.values());
+          saveRealtimeCart(currentUid, mergedList);
+          return mergedList;
+        } else {
+          // If local was empty, adopt remote items if any
+          if (Array.isArray(loadedCart) && loadedCart.length > 0) {
+            return loadedCart;
+          }
+          return prevItems;
+        }
+      });
       isCartInitRef.current = true;
     });
   }, [user?.id]);
@@ -1231,10 +1317,53 @@ function AppContent() {
   const handleOpenWishlistPage = () => { setIsNotificationsOpen(false); navigate('/wishlist'); };
   const handleOpenAuth = (mode: 'login' | 'register' = 'login') => { setAuthModalMode(mode); setIsAuthModalOpen(true); };
 
+  // Pending Checkout State across Registration / Login
+  const [pendingCheckoutAfterAuth, setPendingCheckoutAfterAuth] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('gladyns_pending_checkout') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const handleContinueAsGuest = useCallback(() => {
+    setPendingCheckoutAfterAuth(false);
+    try {
+      sessionStorage.removeItem('gladyns_pending_checkout');
+    } catch (e) {}
+    setIsAuthModalOpen(false);
+    setIsCartPageOpen(false);
+    setIsCheckoutOpen(true);
+  }, []);
+
   const handleLoginSuccess = (newUser: UserProfile) => {
     setUser(newUser);
     setNotifications([{ id: `notif-auth-${Date.now()}`, title: `Welcome, ${newUser.firstName}`, message: `Account synchronized.`, timestamp: Date.now(), read: false, type: 'promo' }]);
+
+    const wasPending = pendingCheckoutAfterAuth || sessionStorage.getItem('gladyns_pending_checkout') === 'true';
+    if (wasPending) {
+      setPendingCheckoutAfterAuth(false);
+      try { sessionStorage.removeItem('gladyns_pending_checkout'); } catch (e) {}
+      setIsAuthModalOpen(false);
+      setIsCartPageOpen(false);
+      setTimeout(() => {
+        setIsCheckoutOpen(true);
+      }, 100);
+    }
   };
+
+  // Automatically resume checkout when user authenticates via OAuth or external provider
+  useEffect(() => {
+    if ((authUser || user) && (pendingCheckoutAfterAuth || sessionStorage.getItem('gladyns_pending_checkout') === 'true')) {
+      setPendingCheckoutAfterAuth(false);
+      try { sessionStorage.removeItem('gladyns_pending_checkout'); } catch (e) {}
+      setIsAuthModalOpen(false);
+      setIsCartPageOpen(false);
+      setTimeout(() => {
+        setIsCheckoutOpen(true);
+      }, 150);
+    }
+  }, [authUser, user, pendingCheckoutAfterAuth]);
 
   const handleLogout = async () => {
     await authLogout(); setUser(null); setCartItems([]); setWishlistIds([]);
@@ -1367,7 +1496,23 @@ function AppContent() {
     });
   }, [customerNotifications, isInitialBootLoading, triggerSystemNotification]);
 
-  const handleProceedToCheckout = () => { if (!authUser) { authLogin(); return; } setIsCheckoutOpen(true); };
+  const handleProceedToCheckout = () => {
+    if (cartItems.length === 0) {
+      handleOpenCartPage();
+      return;
+    }
+    // If not authenticated, open registration/login modal while remembering checkout intent
+    if (!authUser && !user) {
+      setPendingCheckoutAfterAuth(true);
+      try {
+        sessionStorage.setItem('gladyns_pending_checkout', 'true');
+      } catch (e) {}
+      handleOpenAuth('register');
+      return;
+    }
+    setIsCartPageOpen(false);
+    setIsCheckoutOpen(true);
+  };
 
   return (
     <>
@@ -1424,7 +1569,8 @@ function AppContent() {
             handleRemoveItem, handleProceedToCheckout,
             handleClearWishlist, handleMoveAllWishlistToBag, handleMarkAllNotificationsRead,
             handleMarkNotificationRead, handleDeleteNotification, handleClearAllNotifications,
-            handleNavigateToProductFromNotification, handleOrderSuccess, handleLoginSuccess
+            handleNavigateToProductFromNotification, handleOrderSuccess, handleLoginSuccess,
+            pendingCheckoutAfterAuth, handleContinueAsGuest
           }}
         />
       )}
