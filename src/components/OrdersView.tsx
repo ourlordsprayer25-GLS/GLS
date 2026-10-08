@@ -417,10 +417,6 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                           <span>{isFr ? 'Livraison' : 'Shipping'} ({order.shippingMethod === 'express' ? 'DHL Express' : (isFr ? 'Standard Neutre en Carbone' : 'Standard Carbon-Neutral')})</span>
                           <span>{order.shippingCost === 0 ? (isFr ? 'Offerte' : 'Free') : formatPrice(order.shippingCost)}</span>
                         </div>
-                        <div className="flex justify-between text-zinc-600">
-                          <span>{isFr ? 'Taxe estimée' : 'Estimated Tax'}</span>
-                          <span>{formatPrice(order.tax)}</span>
-                        </div>
                         <div className="flex justify-between text-sm font-bold text-zinc-950 pt-2 border-t border-zinc-200 font-sans">
                           <span>{isFr ? 'Total payé' : 'Total Paid'}</span>
                           <span className="font-mono">{formatPrice(order.total)}</span>

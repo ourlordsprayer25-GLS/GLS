@@ -210,8 +210,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const EXPRESS_DELIVERY_FEE_USD = 3500 / 605;
   const standardShippingCost = discountedSubtotal >= 150 ? 0 : STANDARD_DELIVERY_FEE_USD;
   const shippingCost = shippingMethod === 'standard' ? standardShippingCost : EXPRESS_DELIVERY_FEE_USD;
-  const estimatedTax = +(discountedSubtotal * 0.08).toFixed(2);
-  const finalTotal = +(discountedSubtotal + shippingCost + estimatedTax).toFixed(2);
+  const estimatedTax = 0;
+  const finalTotal = +(discountedSubtotal + shippingCost).toFixed(2);
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,7 +246,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         shippingCost,
         subtotal,
         discount: discountAmount,
-        tax: estimatedTax,
+        tax: 0,
         total: finalTotal,
         paymentMethod,
         status: 'confirmed',
@@ -336,18 +336,45 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </p>
             </div>
 
-            {/* Receipt Summary Card */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-6 text-left max-w-xl mx-auto space-y-4">
-              <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-100">
-                <div>
-                  <span className="text-slate-400 text-[11px] block">{language === 'fr' ? 'Numéro de suivi' : 'Carrier Tracking'}</span>
-                  <span className="font-mono font-bold text-slate-950">{confirmedOrder.trackingNumber}</span>
+            {/* Receipt Summary Card with Boutique Showroom Banner from About Us */}
+            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden text-left max-w-xl mx-auto">
+              {/* Boutique Showroom Hero Banner */}
+              <div className="relative h-28 sm:h-36 bg-slate-950 overflow-hidden flex items-end p-4 sm:p-5">
+                <img
+                  src={storeSettings?.aboutUs?.image || storeSettings?.aboutUs?.secondaryImage || '/assets/gladyns_store_preview.png'}
+                  alt={storeSettings?.storeName || 'GLADYNS Marketplace'}
+                  className="absolute inset-0 w-full h-full object-cover opacity-65"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-transparent" />
+                
+                <div className="relative z-10 text-white">
+                  <h3 className="text-lg sm:text-xl font-serif font-bold tracking-tight drop-shadow-md">
+                    {storeSettings?.storeName || storeSettings?.aboutUs?.title || 'GLADYNS Marketplace'}
+                  </h3>
+                  <p className="text-[11px] text-slate-200 flex items-center gap-1 mt-0.5 drop-shadow-sm font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>{storeSettings?.aboutUs?.atelierLocation || storeSettings?.contactAddress || 'ABIDJAN ADJAME ivory coast'}</span>
+                  </p>
                 </div>
-                <div className="text-right">
-                  <span className="text-slate-400 text-[11px] block">{language === 'fr' ? 'Livraison estimée' : 'Estimated Arrival'}</span>
-                  <span className="font-semibold text-slate-950">{confirmedOrder.estimatedDelivery}</span>
+
+                <div className="absolute top-3.5 right-3.5 z-10">
+                  <span className="bg-[#00B074] text-white font-extrabold text-[11px] px-3 py-1 rounded-lg tracking-wider shadow-md uppercase">
+                    PAID
+                  </span>
                 </div>
               </div>
+
+              <div className="p-5 sm:p-6 space-y-4">
+                <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-100">
+                  <div>
+                    <span className="text-slate-400 text-[11px] block">{language === 'fr' ? 'Numéro de suivi' : 'Carrier Tracking'}</span>
+                    <span className="font-mono font-bold text-slate-950">{confirmedOrder.trackingNumber}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-400 text-[11px] block">{language === 'fr' ? 'Livraison estimée' : 'Estimated Arrival'}</span>
+                    <span className="font-semibold text-slate-950">{confirmedOrder.estimatedDelivery}</span>
+                  </div>
+                </div>
 
               {/* Items List */}
               <div className="space-y-3">
@@ -404,10 +431,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
 
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-sm font-semibold text-slate-950">
-                <span className="font-display font-bold">{language === 'fr' ? 'Total Payé (TTC & Port inclus)' : 'Total Paid (VAT & Courier Included)'}</span>
+                <span className="font-display font-bold">{language === 'fr' ? 'Total Payé (Port inclus)' : 'Total Paid (Courier Included)'}</span>
                 <span className="font-mono text-base font-bold text-blue-600">{formatPrice(confirmedOrder.total)}</span>
               </div>
             </div>
+          </div>
 
             {/* Dual CTAs & WhatsApp Support */}
             <div className="space-y-3 pt-2">
@@ -1058,11 +1086,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       formatPrice(shippingCost)
                     )}
                   </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span>{language === 'fr' ? 'Taxes estimées (8%)' : 'Estimated Tax (8%)'}</span>
-                  <span className="font-mono tabular-nums text-slate-950">{formatPrice(estimatedTax)}</span>
                 </div>
 
                 <div className="flex justify-between text-base font-semibold text-slate-950 pt-2.5 border-t border-slate-200">

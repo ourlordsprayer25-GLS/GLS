@@ -53,12 +53,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
   if (!order) return null;
 
-  // Resolve Store Info with Brand Fallbacks
-  const storeName = storeSettings?.storeName || 'GLADYNS Atelier & Living';
-  const storeAddress = storeSettings?.contactAddress || 'Habitat Extension, E 24, Abidjan, Côte d\'Ivoire';
+  // Resolve Store Info with Brand Fallbacks from About Us & Store Settings
+  const storeName = storeSettings?.storeName || storeSettings?.aboutUs?.title || 'GLADYNS Marketplace';
+  const storeAddress = storeSettings?.aboutUs?.atelierLocation || storeSettings?.contactAddress || 'ABIDJAN ADJAME ivory coast';
   const storePhone = storeSettings?.contactPhone || storeSettings?.whatsappNumber || '+225 05 00 61 99 23';
   const storeEmail = storeSettings?.contactEmail || 'contact@gladyns.store';
   const storeDomain = 'gladyns.store';
+
+  // Live Boutique Photo from Admin About Us settings
+  const shopBannerImage = storeSettings?.aboutUs?.image || storeSettings?.aboutUs?.secondaryImage || '/assets/gladyns_store_preview.png';
 
   // Format Receipt & Invoice identifiers
   const cleanOrderNum = (order.orderNumber || order.id).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
@@ -217,11 +220,20 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   <title>${officialReceiptId} - ${storeName}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 32px 16px; }
-    .receipt-card { max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; }
-    .hero { background: #1e3a8a; color: #ffffff; padding: 28px; position: relative; }
-    .hero h1 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; }
-    .hero p { margin: 0; font-size: 13px; opacity: 0.9; }
-    .paid-badge { position: absolute; top: 28px; right: 28px; background: #10b981; color: #ffffff; font-weight: 900; font-size: 12px; padding: 6px 14px; border-radius: 6px; letter-spacing: 1px; }
+    .receipt-card { max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; }
+    .hero { 
+      background-image: linear-gradient(to top, rgba(2, 6, 23, 0.95), rgba(2, 6, 23, 0.4)), url('${shopBannerImage}');
+      background-size: cover;
+      background-position: center;
+      color: #ffffff; 
+      padding: 36px 28px 24px 28px; 
+      position: relative; 
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+    }
+    .hero h1 { margin: 0 0 6px 0; font-size: 26px; font-weight: 800; font-family: serif, -apple-system, sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.6); }
+    .hero p { margin: 0; font-size: 13px; opacity: 0.95; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+    .paid-badge { position: absolute; top: 24px; right: 24px; background: #00B074; color: #ffffff; font-weight: 900; font-size: 12px; padding: 6px 14px; border-radius: 8px; letter-spacing: 1px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); text-transform: uppercase; }
     .content { padding: 28px; }
     .banner { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
     .avatar { width: 44px; height: 44px; border-radius: 50%; background: #2563eb; color: #ffffff; font-weight: 800; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; margin-right: 14px; }
@@ -281,8 +293,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
       </table>
       <div style="text-align: right; margin-bottom: 24px;">
         <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Subtotal: ${formatPrice(order.subtotal || order.total)}</div>
-        <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Shipping: ${order.shippingCost ? formatPrice(order.shippingCost) : 'Gratuit'}</div>
-        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Tax / VAT (8%): ${order.tax ? formatPrice(order.tax) : '0'}</div>
+        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Shipping: ${order.shippingCost ? formatPrice(order.shippingCost) : 'Gratuit'}</div>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 8px 0;" />
         <div style="font-size: 14px; font-weight: 800; color: #0f172a;">Total Tendered: <span class="total-price">${formatPrice(order.total)}</span></div>
       </div>
@@ -432,7 +443,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>{isFr ? 'Facture Taxe' : 'Tax Invoice'}</span>
+              <span>{isFr ? 'Facture Officielle' : 'Official Invoice'}</span>
             </button>
 
             {/* 3. Gift Receipt */}
@@ -473,21 +484,21 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             {activeTemplate === 'commercial' && (
               <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden space-y-6">
                 
-                {/* Hero Header with living room ambiance & PAID badge */}
-                <div className="relative h-36 sm:h-44 bg-slate-900 overflow-hidden flex items-end p-5 sm:p-7">
+                {/* Hero Header with boutique showroom photo from About Us & PAID badge */}
+                <div className="relative h-36 sm:h-44 bg-slate-950 overflow-hidden flex items-end p-5 sm:p-7">
                   <img
-                    src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1200&auto=format&fit=crop"
+                    src={shopBannerImage}
                     alt={storeName}
-                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                    className="absolute inset-0 w-full h-full object-cover opacity-65"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent" />
                   
                   {/* Store Name & Address */}
                   <div className="relative z-10 text-white">
-                    <h2 className="text-xl sm:text-2xl font-black tracking-tight drop-shadow-sm">
+                    <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-tight drop-shadow-md">
                       {storeName}
                     </h2>
-                    <p className="text-xs text-slate-300 flex items-center gap-1 mt-1 drop-shadow-xs">
+                    <p className="text-xs text-slate-200 flex items-center gap-1.5 mt-1 drop-shadow-sm font-medium">
                       <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                       <span>{storeAddress}</span>
                     </p>
@@ -495,8 +506,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
                   {/* PAID Badge */}
                   <div className="absolute top-5 right-5 z-10">
-                    <span className="bg-emerald-500 text-white font-black text-xs px-3.5 py-1 rounded-md tracking-wider shadow-sm uppercase">
-                      {tender.badge}
+                    <span className="bg-[#00B074] text-white font-extrabold text-xs px-3.5 py-1.5 rounded-lg tracking-wider shadow-md uppercase">
+                      {tender.badge || 'PAID'}
                     </span>
                   </div>
                 </div>
@@ -700,10 +711,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                         <span>{isFr ? 'Sous-total' : 'Subtotal'}</span>
                         <span className="font-mono font-semibold">{formatPrice(order.subtotal || order.total)}</span>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-slate-600">
-                        <span>{isFr ? 'Taxes de vente / TVA (8%)' : 'Sales Tax / VAT (8%)'}</span>
-                        <span className="font-mono font-semibold">{formatPrice(order.tax || 0)}</span>
-                      </div>
                       <div className="flex items-center justify-between text-xs text-slate-600 pb-2 border-b border-slate-200">
                         <span>{isFr ? 'Expédition & Livraison' : 'Shipping & Delivery'}</span>
                         <span className="font-mono font-semibold">{order.shippingCost ? formatPrice(order.shippingCost) : (isFr ? 'Offert' : 'Free')}</span>
@@ -716,7 +723,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                             {isFr ? 'Total Réglé' : 'Total Tendered'}
                           </span>
                           <span className="text-[10px] text-slate-400 block">
-                            {isFr ? 'Toutes taxes applicables comprises' : 'Includes all applicable taxes'}
+                            {isFr ? 'Expédition et service compris' : 'Shipping and fulfillment included'}
                           </span>
                         </div>
                         <span className="text-2xl sm:text-3xl font-black font-mono text-blue-600">
@@ -815,7 +822,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
                   <div className="sm:text-right">
                     <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wider text-blue-900">
-                      {isFr ? 'FACTURE TAXE' : 'TAX INVOICE'}
+                      {isFr ? 'FACTURE OFFICIELLE' : 'OFFICIAL INVOICE'}
                     </h3>
                     <p className="font-mono text-xs font-bold text-slate-700 mt-1">
                       INVOICE #{taxInvoiceId}
@@ -901,10 +908,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                   <div className="flex justify-between text-slate-600">
                     <span>Subtotal:</span>
                     <span className="font-mono font-semibold">{formatPrice(order.subtotal || order.total)}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>VAT / Tax (8%):</span>
-                    <span className="font-mono font-semibold">{formatPrice(order.tax || 0)}</span>
                   </div>
                   <div className="flex justify-between text-slate-600 pb-2 border-b-2 border-slate-900">
                     <span>Shipping:</span>
@@ -1096,10 +1099,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                   <div className="flex justify-between">
                     <span>SUBTOTAL:</span>
                     <span>{formatPrice(order.subtotal || order.total)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>TAX (8%):</span>
-                    <span>{formatPrice(order.tax || 0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>SHIPPING:</span>

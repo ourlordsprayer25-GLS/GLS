@@ -712,10 +712,6 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                           <span>{isFr ? 'Livraison Neutre en Carbone' : 'Carbon-Neutral Shipping'}</span>
                           <span>{order.shippingCost === 0 ? (isFr ? 'Offerte' : 'Complimentary') : formatPrice(order.shippingCost)}</span>
                         </div>
-                        <div className="flex justify-between text-zinc-600">
-                          <span>{isFr ? 'Taxe estimée' : 'Estimated Tax'}</span>
-                          <span>{formatPrice(order.tax)}</span>
-                        </div>
                         <div className="pt-2 border-t border-zinc-200 flex justify-between font-bold text-zinc-950 text-sm">
                           <span className="font-sans">{isFr ? 'Total Payé' : 'Total Paid'}</span>
                           <span>{formatPrice(order.total)}</span>
