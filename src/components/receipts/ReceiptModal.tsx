@@ -6,6 +6,7 @@ import {
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { getWhatsAppLink } from '../WhatsAppWidget';
 import JsBarcode from 'jsbarcode';
+import { printOrSaveReceiptPdf } from '../../services/receiptPrintService';
 import { 
   Printer, 
   Download, 
@@ -211,137 +212,69 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     window.open(url, '_blank');
   };
 
-  // HTML Download helper
-  const handleDownloadHtml = () => {
-    const html = `<!DOCTYPE html>
-<html lang="${isFr ? 'fr' : 'en'}">
-<head>
-  <meta charset="utf-8" />
-  <title>${officialReceiptId} - ${storeName}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 32px 16px; }
-    .receipt-card { max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; }
-    .hero { 
-      background-image: linear-gradient(to top, rgba(2, 6, 23, 0.95), rgba(2, 6, 23, 0.4)), url('${shopBannerImage}');
-      background-size: cover;
-      background-position: center;
-      color: #ffffff; 
-      padding: 36px 28px 24px 28px; 
-      position: relative; 
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-    }
-    .hero h1 { margin: 0 0 6px 0; font-size: 26px; font-weight: 800; font-family: serif, -apple-system, sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.6); }
-    .hero p { margin: 0; font-size: 13px; opacity: 0.95; display: flex; align-items: center; gap: 4px; font-weight: 500; }
-    .paid-badge { position: absolute; top: 24px; right: 24px; background: #00B074; color: #ffffff; font-weight: 900; font-size: 12px; padding: 6px 14px; border-radius: 8px; letter-spacing: 1px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); text-transform: uppercase; }
-    .content { padding: 28px; }
-    .banner { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
-    .avatar { width: 44px; height: 44px; border-radius: 50%; background: #2563eb; color: #ffffff; font-weight: 800; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; margin-right: 14px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin-bottom: 24px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .box { border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    th { text-align: left; font-size: 11px; text-transform: uppercase; color: #64748b; padding: 10px 12px; background: #f8fafc; }
-    td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-    .total-price { color: #2563eb; font-size: 26px; font-weight: 900; }
-    .footer { border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 12px; color: #64748b; }
-  </style>
-</head>
-<body>
-  <div class="receipt-card">
-    <div class="hero">
-      <div class="paid-badge">${tender.badge}</div>
-      <h1>${storeName}</h1>
-      <p>📍 ${storeAddress}</p>
-    </div>
-    <div class="content">
-      <div class="banner">
-        <div style="display: flex; align-items: center;">
-          <div class="avatar">${initialLetter}</div>
-          <div>
-            <div style="font-size: 10px; font-weight: 800; color: #2563eb; text-transform: uppercase;">CUSTOMER RECEIPT FOR</div>
-            <div style="font-size: 17px; font-weight: 800;">${fullName}</div>
-            <div style="font-size: 12px; color: #64748b;">${customerEmail} · ${customerPhone}</div>
-          </div>
-        </div>
-        <div style="text-align: right;">
-          <div style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">OFFICIAL RECEIPT #</div>
-          <div style="font-size: 15px; font-weight: 900; color: #2563eb; font-family: monospace;">${officialReceiptId}</div>
-          <div style="font-size: 12px; color: #64748b;">${formattedDate}</div>
-        </div>
-      </div>
-      <div class="grid-4">
-        <div><small style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 700;">ORDER REF</small><div style="font-weight: 800; font-family: monospace;">${orderRefId}</div></div>
-        <div><small style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 700;">TXN ID</small><div style="font-weight: 700; font-family: monospace;">${transactionId}</div></div>
-        <div><small style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 700;">AUTH CODE</small><div style="font-weight: 700; font-family: monospace;">${authCode}</div></div>
-        <div><small style="color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: 700;">PAYMENT TENDER</small><div style="font-weight: 700;">${tender.label}</div></div>
-      </div>
-      <table>
-        <thead>
-          <tr><th>Product Description</th><th style="text-align: center;">Qty</th><th style="text-align: right;">Unit Price</th><th style="text-align: right;">Line Total</th></tr>
-        </thead>
-        <tbody>
-          ${order.items.map(it => `
-            <tr>
-              <td><strong>${it.product.name}</strong><br /><small style="color:#64748b; font-family:monospace;">SKU: ${it.product.id}</small></td>
-              <td style="text-align: center;">${it.quantity}</td>
-              <td style="text-align: right; font-family: monospace;">${formatPrice(it.product.price)}</td>
-              <td style="text-align: right; font-weight: bold; font-family: monospace;">${formatPrice(it.product.price * it.quantity)}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      <div style="text-align: right; margin-bottom: 24px;">
-        <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Subtotal: ${formatPrice(order.subtotal || order.total)}</div>
-        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Shipping: ${order.shippingCost ? formatPrice(order.shippingCost) : 'Gratuit'}</div>
-        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 8px 0;" />
-        <div style="font-size: 14px; font-weight: 800; color: #0f172a;">Total Tendered: <span class="total-price">${formatPrice(order.total)}</span></div>
-      </div>
-      <div class="footer">
-        <p style="text-align: center; font-weight: 700; color: #1e3a8a;">❤️ THANKS FOR SHOPPING WITH US, ${fullName.toUpperCase()}!</p>
-        <p style="text-align: center; font-size: 11px;">Receipt #${officialReceiptId} · ${storeAddress} · ${storePhone}</p>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
-
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `GLADYNS_${activeTemplate.toUpperCase()}_${cleanOrderNum}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // Print or Save as PDF helper using clean isolated document
+  const handlePrintOrDownloadReceipt = () => {
+    printOrSaveReceiptPdf(order, {
+      template: activeTemplate as any,
+      storeSettings,
+      formatPrice,
+      language,
+    });
   };
 
   return (
     <div 
-      className="fixed inset-0 z-[120] overflow-y-auto bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+      className="receipt-modal-backdrop fixed inset-0 z-[120] overflow-y-auto bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
       onClick={onClose}
     >
       {/* Clean Print Media CSS */}
       <style>{`
         @media print {
+          html, body {
+            overflow: visible !important;
+            height: auto !important;
+            background: #ffffff !important;
+          }
           body * {
             visibility: hidden !important;
+          }
+          .receipt-modal-backdrop {
+            position: static !important;
+            overflow: visible !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          .receipt-modal-card {
+            position: static !important;
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+            box-shadow: none !important;
+            border: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .receipt-modal-body {
+            overflow: visible !important;
+            padding: 0 !important;
+            height: auto !important;
+            background: #ffffff !important;
           }
           #gladyns-printable-receipt, #gladyns-printable-receipt * {
             visibility: visible !important;
           }
           #gladyns-printable-receipt {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
+            position: static !important;
             width: 100% !important;
+            max-width: 100% !important;
             margin: 0 !important;
-            padding: 20px !important;
+            padding: 0 !important;
             background: #ffffff !important;
             box-shadow: none !important;
             border: none !important;
-            z-index: 999999 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           .no-print {
             display: none !important;
@@ -351,7 +284,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
       {/* Main Modal Card */}
       <div 
-        className="relative w-full max-w-3xl max-h-[92vh] bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+        className="receipt-modal-card relative w-full max-w-3xl max-h-[92vh] bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Control Bar (Hidden on print) */}
@@ -378,20 +311,22 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           <div className="flex items-center gap-2">
             {/* Print Button */}
             <button
-              onClick={() => window.print()}
+              onClick={handlePrintOrDownloadReceipt}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+              title={isFr ? "Imprimer le document complet" : "Print complete receipt"}
             >
               <Printer className="w-3.5 h-3.5" />
               <span>{isFr ? 'Imprimer' : 'Print'}</span>
             </button>
 
-            {/* Download Button */}
+            {/* Save as PDF Button */}
             <button
-              onClick={handleDownloadHtml}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              onClick={handlePrintOrDownloadReceipt}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              title={isFr ? "Enregistrer au format PDF" : "Save as PDF"}
             >
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isFr ? 'Télécharger' : 'Download'}</span>
+              <span className="hidden sm:inline">{isFr ? 'Enregistrer PDF' : 'Save as PDF'}</span>
             </button>
 
             {/* WhatsApp Share */}
@@ -475,7 +410,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
         </div>
 
         {/* Scrollable Receipt Body */}
-        <div className="overflow-y-auto p-4 sm:p-8 bg-slate-50/50 flex-1">
+        <div className="receipt-modal-body overflow-y-auto p-4 sm:p-8 bg-slate-50/50 flex-1">
           <div id="gladyns-printable-receipt" className="max-w-2xl mx-auto">
             
             {/* ========================================================================= */}

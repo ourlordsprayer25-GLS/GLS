@@ -3,6 +3,7 @@ import { Order, StoreSettings } from '../../types/store';
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { getWhatsAppLink } from '../WhatsAppWidget';
 import { ReceiptModal } from '../receipts/ReceiptModal';
+import { printOrSaveReceiptPdf } from '../../services/receiptPrintService';
 import { 
   FileText, 
   Search, 
@@ -357,172 +358,14 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
     document.body.removeChild(link);
   };
 
-  // Real Standalone HTML Invoice Download according to ACTIVE TEMPLATE
-  const handleDownloadInvoiceHtml = (order: Order) => {
-    const invoiceId = getInvoiceId(order);
-    const { date, time } = formatDateTime(order.date);
-    const pInfo = resolvePaymentInfo(order);
-
-    let templateTitle = isFr ? 'Facture Commerciale' : 'Commercial Invoice';
-    let filenamePrefix = 'Facture';
-
-    if (receiptTemplate === 'gift') {
-      templateTitle = isFr ? 'Reçu Cadeau Officiel (Sans Prix)' : 'Official Gift Receipt (No Prices)';
-      filenamePrefix = 'Recu_Cadeau';
-    } else if (receiptTemplate === 'delivery') {
-      templateTitle = isFr ? 'Bordereau de Livraison & Expédition' : 'Delivery Slip & Waybill';
-      filenamePrefix = 'Bordereau_Livraison';
-    } else if (receiptTemplate === 'pos') {
-      templateTitle = isFr ? 'Ticket de Caisse POS (80mm)' : 'POS Register Slip (80mm)';
-      filenamePrefix = 'Ticket_POS';
-    }
-
-    const itemsRows = order.items.map(item => `
-      <tr>
-        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9;">
-          <strong style="color: #0f172a; font-size: 13px; font-family: 'Playfair Display', Georgia, serif;">${item.product.name}</strong><br/>
-          <span style="font-size: 11px; color: #64748b; letter-spacing: 0.5px;">${item.selectedColor?.name || 'Standard'} · ${item.selectedSize?.name || 'Unique'} · Qté: ${item.quantity}</span>
-        </td>
-        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 13px; color: #334155; font-weight: 700;">
-          ${item.quantity}
-        </td>
-        ${receiptTemplate !== 'gift' ? `
-        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; font-size: 13px; font-weight: 800; color: #0f172a; font-family: monospace;">
-          ${formatPrice(item.product.price * item.quantity)}
-        </td>
-        ` : `
-        <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; font-size: 11px; font-weight: 800; color: #d97706;">
-          ★ ${isFr ? 'Certifié GLADYNS' : 'GLADYNS Certified'}
-        </td>
-        `}
-      </tr>
-    `).join('');
-
-    const htmlContent = `<!DOCTYPE html>
-<html lang="${isFr ? 'fr' : 'en'}">
-<head>
-  <meta charset="utf-8">
-  <title>${templateTitle} - ${invoiceId} - ${storeName}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #fbf9f5; color: #0f172a; margin: 0; padding: 40px 20px; }
-    .invoice-card { max-width: ${receiptTemplate === 'pos' ? '400px' : '720px'}; margin: 0 auto; background: #ffffff; border-radius: 24px; box-shadow: 0 15px 40px rgba(180, 130, 60, 0.08); border: 2px solid #e7dfd1; overflow: hidden; position: relative; }
-    .gold-header { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #ffffff; padding: 36px 40px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #d4af37; }
-    .store-name { font-size: 22px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin: 0; color: #fef08a; font-family: Georgia, serif; }
-    .store-sub { font-size: 11px; color: #a1a1aa; margin-top: 6px; letter-spacing: 1px; }
-    .inv-badge { text-align: right; }
-    .inv-title { font-size: 22px; font-weight: 900; font-family: monospace; color: #fbbf24; margin: 0; }
-    .inv-date { font-size: 12px; color: #a1a1aa; margin-top: 4px; }
-    .body-content { padding: 36px 40px; }
-    .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
-    .info-box { background: #faf8f5; border: 1px solid #ede8e1; border-radius: 16px; padding: 18px; }
-    .section-label { font-size: 9px; font-weight: 900; color: #b45309; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-    .info-box p { margin: 3px 0; font-size: 13px; color: #27272a; }
-    .info-box strong { color: #09090b; }
-    table { width: 100%; border-collapse: collapse; margin-top: 18px; margin-bottom: 24px; border: 1px solid #ede8e1; border-radius: 16px; overflow: hidden; }
-    th { background: #f5f2eb; padding: 12px 16px; font-size: 10px; font-weight: 800; color: #78350f; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 2px solid #e7dfd1; }
-    .total-banner { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #ffffff; border-radius: 16px; padding: 22px; text-align: right; margin-top: 24px; border: 1px solid #d4af37; }
-    .total-title { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #fef08a; letter-spacing: 2px; }
-    .total-amount { font-size: 32px; font-weight: 900; font-family: monospace; color: #fbbf24; margin-top: 6px; }
-    .gift-notice { background: #fefce8; border: 1.5px solid #fef08a; border-radius: 16px; padding: 20px; color: #854d0e; font-size: 12px; line-height: 1.6; margin-top: 24px; }
-    .seal-footer { text-align: center; padding: 28px 40px; border-top: 1px dashed #d4af37; font-size: 12px; color: #71717a; background: #faf8f5; }
-    .btn-print { display: inline-block; background: #18181b; color: #fef08a; text-decoration: none; padding: 12px 28px; border-radius: 12px; font-weight: 800; font-size: 12px; margin-top: 18px; cursor: pointer; border: 1px solid #d4af37; }
-    @media print {
-      body { background: #ffffff; padding: 0; }
-      .invoice-card { box-shadow: none; border: 1px solid #e2e8f0; max-width: 100%; }
-      .btn-print { display: none; }
-    }
-  </style>
-</head>
-<body>
-  <div class="invoice-card">
-    <div class="gold-header">
-      <div>
-        <h1 class="store-name">${storeName}</h1>
-        <div class="store-sub">${storeAddress}</div>
-        <div class="store-sub">${storeDomain} · ${storePhone}</div>
-      </div>
-      <div class="inv-badge">
-        <h2 class="inv-title">${receiptTemplate === 'gift' ? `GIFT-${order.orderNumber}` : invoiceId}</h2>
-        <div class="inv-date">${isFr ? 'Date :' : 'Date:'} ${date} ${time !== '—' ? '· ' + time : ''}</div>
-        <div style="margin-top: 10px;">
-          <span style="background: ${receiptTemplate === 'gift' ? '#d97706' : pInfo.isSettled ? '#059669' : '#d97706'}; color: white; padding: 5px 12px; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">
-            ${receiptTemplate === 'gift' ? (isFr ? '🎁 Reçu Cadeau' : '🎁 Gift Receipt') : pInfo.statusLabel}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="body-content">
-      <div class="grid-info">
-        <div class="info-box">
-          <div class="section-label">${isFr ? 'Destinataire (Client)' : 'Recipient / Customer'}</div>
-          <p><strong>${order.shippingAddress.firstName} ${order.shippingAddress.lastName}</strong></p>
-          <p>${order.shippingAddress.street}</p>
-          <p>${order.shippingAddress.city}, ${order.shippingAddress.country || 'Côte d\'Ivoire'}</p>
-          <p>${order.shippingAddress.phone || ''}</p>
-        </div>
-        <div class="info-box" style="text-align: right;">
-          <div class="section-label">${isFr ? 'Règlement & Commande' : 'Order & Channel'}</div>
-          ${receiptTemplate !== 'gift' ? `
-            <p><strong>${isFr ? 'Mode :' : 'Method:'} ${pInfo.label}</strong></p>
-          ` : `
-            <p><strong>🎁 ${isFr ? 'Reçu sans indication de prix' : 'Price Hidden for Gifting'}</strong></p>
-          `}
-          <p>${isFr ? 'N° Commande :' : 'Order #:'} <code>${order.orderNumber}</code></p>
-          <p>${isFr ? 'Livraison :' : 'Fulfillment:'} <strong>${order.status.toUpperCase()}</strong></p>
-        </div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th style="text-align: left;">${isFr ? 'Article de Haute Facture' : 'Curated Item Description'}</th>
-            <th style="text-align: center;">${isFr ? 'Quantité' : 'Qty'}</th>
-            <th style="text-align: right;">${receiptTemplate === 'gift' ? (isFr ? 'Authenticité' : 'Warranty') : (isFr ? 'Total' : 'Total')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${itemsRows}
-        </tbody>
-      </table>
-
-      ${receiptTemplate !== 'gift' ? `
-      <div class="total-banner">
-        <div class="total-title">${isFr ? 'Montant Total Règlement' : 'Total Settled Amount'}</div>
-        <div class="total-amount">${formatPrice(order.total)}</div>
-        <div style="font-size: 11px; color: ${pInfo.isSettled ? '#34d399' : '#fde047'}; font-weight: 700; margin-top: 6px;">
-          ✓ ${pInfo.statusLabel}
-        </div>
-      </div>
-      ` : `
-      <div class="gift-notice">
-        <strong style="color: #78350f;">🎁 ${isFr ? 'Garantie & Certificat d\'Échange sous 30 Jours :' : '30-Day Gift Exchange Guarantee:'}</strong><br/>
-        ${isFr 
-          ? `Ce reçu cadeau certifie l'authenticité de vos créations chez ${storeName}. Il permet au destinataire de procéder à un échange de taille/couleur ou de solliciter le service client dans un délai de 30 jours, sans aucune divulgation de prix.`
-          : `This gift receipt certifies the authenticity of your acquisition from ${storeName}. It allows the recipient to exchange size/color or request service support within 30 days without disclosing item values.`}
-      </div>
-      `}
-    </div>
-
-    <div class="seal-footer">
-      <p style="margin: 0; font-style: italic; font-family: Georgia, serif;">« ${isFr ? `Maison ${storeName} · Authenticité et Qualité d'Exception Garanties.` : `House of ${storeName} · Exceptional Craftsmanship & Quality Guaranteed.`} »</p>
-      <div style="margin-top: 14px;">
-        <button class="btn-print" onclick="window.print()">${isFr ? 'Imprimer ce document de prestige (PDF)' : 'Print Prestige Document (PDF)'}</button>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
-
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${filenamePrefix}_${invoiceId}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  // Print or Save as PDF using clean isolated window
+  const handlePrintOrDownloadReceipt = (order: Order) => {
+    printOrSaveReceiptPdf(order, {
+      template: receiptTemplate as any,
+      storeSettings,
+      formatPrice,
+      language,
+    });
   };
 
   // WhatsApp receipt share message adjusted for ACTIVE TEMPLATE
@@ -552,33 +395,6 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Clean Print CSS: Shows ONLY the active receipt without any website chrome */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-          #admin-printable-receipt, #admin-printable-receipt * {
-            visibility: visible !important;
-          }
-          #admin-printable-receipt {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 24px !important;
-            background: white !important;
-            box-shadow: none !important;
-            border: none !important;
-            z-index: 99999 !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-
       {/* Header Bar with Store Logo & Identity */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200/80 shadow-xs">
         <div className="flex items-center gap-3.5">
@@ -949,19 +765,16 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                           <Truck className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setTimeout(() => window.print(), 250);
-                          }}
+                          onClick={() => handlePrintOrDownloadReceipt(order)}
                           className="p-2 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Imprimer le reçu" : "Print receipt"}
+                          title={isFr ? "Imprimer le reçu (PDF)" : "Print receipt (PDF)"}
                         >
                           <Printer className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => handleDownloadInvoiceHtml(order)}
-                          className="p-2 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Télécharger la facture HTML / PDF" : "Download invoice HTML / PDF"}
+                          onClick={() => handlePrintOrDownloadReceipt(order)}
+                          className="p-2 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all cursor-pointer" 
+                          title={isFr ? "Enregistrer au format PDF" : "Save as PDF"}
                         >
                           <Download className="w-4 h-4" />
                         </button>

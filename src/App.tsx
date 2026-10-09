@@ -40,6 +40,7 @@ import {
   fetchRealtimeUserProfile,
 } from './services/supabaseService';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { getAdminActiveSession } from './services/adminAuthService';
 const getGuestId = () => {
   let gid = localStorage.getItem('guest_id');
   if (!gid) {
@@ -579,13 +580,21 @@ function AppContent() {
 
   // Effect that checks for changes in the orders state and triggers a new notification if status transitions
   useEffect(() => {
+    const currentUserId = user?.id || getGuestId();
+    const isOwnerOrAdmin = isAdminPageOpen || getAdminActiveSession() !== null;
+
     orders.forEach((order) => {
       const prevStatus = lastKnownStatusesRef.current[order.id];
 
       // If the order existed and its status has transitioned
       if (prevStatus !== undefined && prevStatus !== order.status) {
-        // Play premium chime sound for auditory feedback
-        playPremiumChime();
+        const isMyOrder = order.customerId && (order.customerId === currentUserId || order.customerId === user?.id);
+
+        // Security & Privacy: ONLY alert if this order belongs to the current user OR user is the store owner/admin
+        if (!isMyOrder && !isOwnerOrAdmin) {
+          lastKnownStatusesRef.current[order.id] = order.status;
+          return;
+        }
 
         let title = '';
         let message = '';
@@ -626,36 +635,46 @@ function AppContent() {
           type: 'order',
           linkTarget: order.orderNumber,
           customerId: order.customerId,
+          isAdminOnly: !isMyOrder && isOwnerOrAdmin,
         };
 
         // Prepend the transition notification
         setNotifications((prev) => [transitionNotif, ...prev]);
 
-        // Trigger real-time email notifications to the logged in customer's email
-        if (user && user.email) {
+        // Trigger real-time transactional email ONLY to the customer who placed the order
+        if (isMyOrder && user && user.email) {
           dispatchOrderStatusEmail(user.email, order.orderNumber, order.status.toUpperCase(), message);
         }
 
-        // Trigger native system banner (drops from device header, stays in background)
-        triggerSystemNotification(title, {
-          body: message,
-          tag: `order-${order.id}`,
-          data: { url: '/orders' },
-        });
+        // Only pop up system background banner & audio chime for the actual customer who owns this order
+        if (isMyOrder) {
+          playPremiumChime();
+          triggerSystemNotification(title, {
+            body: message,
+            tag: `order-${order.id}`,
+            data: { url: '/orders' },
+          });
 
-        // Pop up the real-time top notification toast
-        setActiveToast({
-          id: transitionNotif.id,
-          title: transitionNotif.title,
-          message: transitionNotif.message,
-          orderNumber: order.orderNumber,
-        });
+          setActiveToast({
+            id: transitionNotif.id,
+            title: transitionNotif.title,
+            message: transitionNotif.message,
+            orderNumber: order.orderNumber,
+          });
+        } else if (isOwnerOrAdmin) {
+          setActiveToast({
+            id: transitionNotif.id,
+            title: `Admin: ${title}`,
+            message,
+            orderNumber: order.orderNumber,
+          });
+        }
       }
 
       // Record the new status in ref
       lastKnownStatusesRef.current[order.id] = order.status;
     });
-  }, [orders]);
+  }, [orders, user, isAdminPageOpen, formatPrice, triggerSystemNotification, dispatchOrderStatusEmail]);
 
   // Ref & localStorage tracking for already alerted product IDs so page refresh NEVER re-triggers arrival alerts
   const alertedProductIdsRef = useRef<Set<string> | null>(null);
@@ -721,14 +740,7 @@ function AppContent() {
 
         setNotifications((prev) => [arrivalNotif, ...prev]);
         addRealtimeNotification(arrivalNotif);
-        playPremiumChime();
-        triggerSystemNotification(title, {
-          body: `Now available in store for ${formatPrice(product.price)}. Tap to view!`,
-          tag: `new-product-${product.id}`,
-          icon: product.primaryImage || '/pwa-192x192.png',
-          image: product.primaryImage || product.images?.[0],
-          data: { url: `/product/${product.id}` },
-        });
+        // Subtle in-app toast only for active visitors; do not blast background OS notification
         setActiveToast({
           id: arrivalNotif.id,
           title: arrivalNotif.title,
@@ -738,40 +750,44 @@ function AppContent() {
       }
     });
 
-    // Check low stock
-    products.forEach((product) => {
-      const stock = product.stockLevel !== undefined ? product.stockLevel : 10;
-      const isLow = stock < 5;
-      const alreadyAlerted = lowStockAlertedRef.current[product.id];
+    // Check low stock - STRICTLY FOR STORE OWNER / ADMIN ONLY
+    const isOwnerOrAdmin = isAdminPageOpen || getAdminActiveSession() !== null;
+    if (isOwnerOrAdmin) {
+      products.forEach((product) => {
+        const stock = product.stockLevel !== undefined ? product.stockLevel : 10;
+        const isLow = stock < 5;
+        const alreadyAlerted = lowStockAlertedRef.current[product.id];
 
-      if (isLow && !alreadyAlerted) {
-        lowStockAlertedRef.current[product.id] = true;
+        if (isLow && !alreadyAlerted) {
+          lowStockAlertedRef.current[product.id] = true;
 
-        const title = `Low Stock Alert: ${product.name}`;
-        const message = `Inventory for "${product.name}" has fallen below the 5-item threshold (Current: ${stock} units remaining). Immediate restock recommended.`;
+          const title = `Low Stock Alert: ${product.name}`;
+          const message = `Inventory for "${product.name}" has fallen below the 5-item threshold (Current: ${stock} units remaining). Immediate restock recommended.`;
 
-        const stockNotif: StoreNotification = {
-          id: `notif-stock-${product.id}-${Date.now()}`,
-          title,
-          message,
-          timestamp: Date.now(),
-          read: false,
-          type: 'restock',
-          linkTarget: product.id,
-        };
+          const stockNotif: StoreNotification = {
+            id: `notif-stock-${product.id}-${Date.now()}`,
+            title,
+            message,
+            timestamp: Date.now(),
+            read: false,
+            type: 'restock',
+            linkTarget: product.id,
+            isAdminOnly: true, // NEVER show to customers
+          };
 
-        setNotifications((prev) => [stockNotif, ...prev]);
-        playPremiumChime();
-        triggerSystemNotification(title, {
-          body: message,
-          tag: `stock-${product.id}`,
-          data: { url: '/admin' },
-        });
-      } else if (!isLow && alreadyAlerted) {
-        lowStockAlertedRef.current[product.id] = false;
-      }
-    });
-  }, [products]);
+          setNotifications((prev) => [stockNotif, ...prev]);
+          playPremiumChime();
+          triggerSystemNotification(title, {
+            body: message,
+            tag: `stock-${product.id}`,
+            data: { url: '/admin' },
+          });
+        } else if (!isLow && alreadyAlerted) {
+          lowStockAlertedRef.current[product.id] = false;
+        }
+      });
+    }
+  }, [products, isInitialBootLoading, isReady, formatPrice, isAdminPageOpen, triggerSystemNotification]);
 
   // Dedicated Pages: Orders Page & Patron Profile Page & Section Sliding Hero Pages
   const [isOrdersPageOpen, setIsOrdersPageOpen] = useState(false);
@@ -1395,16 +1411,16 @@ function AppContent() {
         }
       }
 
-      if (!['drop', 'promo', 'wishlist', 'order', 'product', 'restock'].includes(n.type)) return;
+      if (!['drop', 'promo', 'wishlist', 'order', 'product'].includes(n.type)) return;
 
       // Filter out notifications for products that have been deleted or no longer exist in catalog
-      if ((n.type === 'product' || n.type === 'restock' || n.type === 'drop') && n.linkTarget && products.length > 0) {
+      if ((n.type === 'product' || n.type === 'drop') && n.linkTarget && products.length > 0) {
         const productExists = products.some(p => p.id === n.linkTarget || p.slug === n.linkTarget);
         if (!productExists) return;
       }
 
       // Filter out stale broadcast alerts older than 7 days so visitors don't see ancient notifications from weeks ago
-      if (['drop', 'promo', 'product', 'restock'].includes(n.type) && n.timestamp) {
+      if (['drop', 'promo', 'product'].includes(n.type) && n.timestamp) {
         const timeMs = typeof n.timestamp === 'number' ? n.timestamp : new Date(n.timestamp).getTime();
         const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
         if (!isNaN(timeMs) && timeMs < sevenDaysAgo) return;
@@ -1425,7 +1441,7 @@ function AppContent() {
         : n.title || n.id;
 
       // Deduplicate arrival/drop/promo notices for the same product to prevent double entries
-      const dedupeKey = (n.type === 'product' || n.type === 'restock' || n.type === 'drop') && n.linkTarget
+      const dedupeKey = (n.type === 'product' || n.type === 'drop') && n.linkTarget
         ? `product-notice-${n.linkTarget}`
         : n.type === 'order' && n.linkTarget
         ? `order-${n.linkTarget}-${statusKey}`
@@ -1469,6 +1485,8 @@ function AppContent() {
       return;
     }
 
+    const currentUserId = user?.id || getGuestId();
+
     // Fire audio chime and toast whenever a newly arrived notification reaches the customer
     customerNotifications.forEach((n) => {
       if (!n.read && !alertedCustomerNotifIdsRef.current.has(n.id)) {
@@ -1476,25 +1494,33 @@ function AppContent() {
         try {
           sessionStorage.setItem('gls_alerted_notif_ids', JSON.stringify(Array.from(alertedCustomerNotifIdsRef.current)));
         } catch (e) {}
-        playNotificationSound();
+
         const notifImg = n.image || (n.linkTarget ? products.find(p => p.id === n.linkTarget || p.slug === n.linkTarget)?.primaryImage : undefined);
 
+        // In-app visual toast for active browsing
         setActiveToast({
           id: n.id,
           title: formatCurrencyInText(n.title),
           message: formatCurrencyInText(n.message),
           image: notifImg,
         });
-        triggerSystemNotification(formatCurrencyInText(n.title), {
-          body: formatCurrencyInText(n.message),
-          tag: n.id,
-          icon: notifImg || '/pwa-192x192.png',
-          image: notifImg,
-          data: { url: n.linkTarget ? (n.type === 'order' ? '/orders' : `/product/${n.linkTarget}`) : '/orders' },
-        });
+
+        // ONLY trigger OS background notification & audio chime if this is the customer's OWN order!
+        // Never blast background system notifications to visitors for general browse/catalog events
+        const isMyOrderNotif = n.type === 'order' && n.customerId && (n.customerId === currentUserId || n.customerId === user?.id);
+        if (isMyOrderNotif) {
+          playNotificationSound();
+          triggerSystemNotification(formatCurrencyInText(n.title), {
+            body: formatCurrencyInText(n.message),
+            tag: n.id,
+            icon: notifImg || '/pwa-192x192.png',
+            image: notifImg,
+            data: { url: '/orders' },
+          });
+        }
       }
     });
-  }, [customerNotifications, isInitialBootLoading, triggerSystemNotification]);
+  }, [customerNotifications, isInitialBootLoading, user, triggerSystemNotification]);
 
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {
