@@ -46,6 +46,7 @@ import { AdminSections } from './AdminSections';
 import { AdminDashboardCharts } from './AdminDashboardCharts';
 import { AdminInventoryForecasting } from './AdminInventoryForecasting';
 import { NotificationDrawer } from '../NotificationDrawer';
+import { PWAInstallButton } from '../PWAInstallButton';
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { Plus, FileText } from 'lucide-react';
 import { AdminLogin } from './AdminLogin';
@@ -812,6 +813,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 )}
               </button>
             </div>
+
+            {/* PWA Install Action */}
+            <PWAInstallButton />
 
             {/* Admin Currency & Language Switcher Controls */}
             <div className="hidden sm:flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">

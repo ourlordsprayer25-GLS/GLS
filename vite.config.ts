@@ -122,6 +122,47 @@ export default defineConfig(() => {
               purpose: 'maskable',
             },
           ],
+          shortcuts: [
+            {
+              name: 'Admin Dashboard',
+              short_name: 'Admin',
+              description: 'Manage products, orders, inventory and settings',
+              url: '/admin',
+              icons: [
+                {
+                  src: '/pwa-192x192.png',
+                  sizes: '192x192',
+                  type: 'image/png',
+                },
+              ],
+            },
+            {
+              name: 'Store Catalog',
+              short_name: 'Store',
+              description: 'Browse curated collections and products',
+              url: '/',
+              icons: [
+                {
+                  src: '/pwa-192x192.png',
+                  sizes: '192x192',
+                  type: 'image/png',
+                },
+              ],
+            },
+            {
+              name: 'Order Pipeline',
+              short_name: 'Orders',
+              description: 'Track and review customer orders',
+              url: '/orders',
+              icons: [
+                {
+                  src: '/pwa-192x192.png',
+                  sizes: '192x192',
+                  type: 'image/png',
+                },
+              ],
+            },
+          ],
         },
         workbox: {
           maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
