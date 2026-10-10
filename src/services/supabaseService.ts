@@ -758,6 +758,27 @@ export async function updateRealtimeOrderStatus(orderId: string, status: Order['
   }
 }
 
+export async function updateRealtimeOrderReview(orderId: string, receiptReviewed: boolean) {
+  const receiptReviewedAt = Date.now();
+  try {
+    await localFetch('/api/sync/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: orderId, receiptReviewed, receiptReviewedAt }),
+    });
+  } catch (err) {
+    console.warn('Server order review sync error:', err);
+  }
+
+  if (isSupabaseConfigured && isLiveSyncEnabled()) {
+    try {
+      await supabase.from('orders').update({ receiptReviewed, receiptReviewedAt }).eq('id', orderId);
+    } catch (err) {
+      console.error('Supabase update order review error:', err);
+    }
+  }
+}
+
 export async function deleteRealtimeOrder(orderId: string) {
   try {
     await localFetch(`/api/sync/orders/${orderId}`, {

@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Order, StoreSettings } from '../../types/store';
+import { Order, StoreSettings, StoreNotification } from '../../types/store';
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { getWhatsAppLink } from '../WhatsAppWidget';
 import { ReceiptModal } from '../receipts/ReceiptModal';
-import { printOrSaveReceiptPdf } from '../../services/receiptPrintService';
+import { printReceipt, downloadReceiptFile } from '../../services/receiptPrintService';
+import { updateRealtimeOrderReview, addRealtimeNotification } from '../../services/supabaseService';
 import { 
   FileText, 
   Search, 
@@ -23,38 +24,57 @@ import {
   MessageSquare,
   Receipt,
   Truck,
-  Building,
   Clock,
-  AlertTriangle,
   Gift,
-  QrCode,
-  Scissors,
-  Sparkles,
-  Award,
-  Crown,
-  Share2
+  Mail,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 
 interface AdminReceiptsProps {
   orders: Order[];
+  setOrders?: React.Dispatch<React.SetStateAction<Order[]>>;
+  setNotifications?: React.Dispatch<React.SetStateAction<StoreNotification[]>>;
   storeSettings?: StoreSettings;
+  initialSearchQuery?: string;
 }
 
-export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSettings }) => {
+export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ 
+  orders, 
+  setOrders, 
+  setNotifications, 
+  storeSettings,
+  initialSearchQuery
+}) => {
   const { formatPrice, language } = useLanguageCurrency();
   const isFr = language === 'fr';
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterTab, setFilterTab] = useState<'all' | 'cod' | 'card' | 'wave' | 'delivered' | 'cancelled'>('all');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
+  const [filterTab, setFilterTab] = useState<'all' | 'pending_review' | 'reviewed' | 'delivered' | 'cod' | 'card' | 'wave' | 'cancelled'>('all');
   const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc'>('date_desc');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [copiedInvoiceId, setCopiedInvoiceId] = useState<string | null>(null);
+  const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
+  const [actionToast, setActionToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
   
-  // Multiple Luxury Receipt Templates Switcher
+  // Luxury Receipt Template
   const [receiptTemplate, setReceiptTemplate] = useState<'standard' | 'gift' | 'delivery' | 'pos'>('standard');
-  const [colorTheme, setColorTheme] = useState<'gold' | 'emerald' | 'obsidian'>('gold');
 
-  // Store profile resolution (100% Genuine, Zero Mock)
+  React.useEffect(() => {
+    if (initialSearchQuery !== undefined) {
+      setSearchQuery(initialSearchQuery);
+    }
+  }, [initialSearchQuery]);
+
+  // Auto-dismiss toast
+  React.useEffect(() => {
+    if (actionToast) {
+      const t = setTimeout(() => setActionToast(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [actionToast]);
+
+  // Store profile resolution
   const storeName = storeSettings?.storeName || 'GLADYNS MARKETPLACE';
   const storeAddress = storeSettings?.contactAddress || "Habitat Extension, E 24, Abidjan, Côte d'Ivoire";
   const storePhone = storeSettings?.contactPhone || storeSettings?.whatsappNumber || '+225 05 00 61 99 23';
@@ -67,7 +87,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
     return `INV-${raw.slice(-8).toUpperCase()}`;
   };
 
-  // Accurate genuine Payment Method & Status Resolver
+  // Accurate Payment Method & Status Resolver
   const resolvePaymentInfo = (order: Order) => {
     const raw = (order.paymentMethod || '').trim().toLowerCase();
     const isDelivered = order.status === 'delivered';
@@ -145,68 +165,41 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       };
     }
 
-    // 5. Apple Pay
-    if (raw === 'apple-pay') {
-      return {
-        code: 'APPLEPAY',
-        label: 'Apple Pay',
-        channelName: 'Apple Pay Biométrique',
-        icon: Smartphone,
-        color: 'bg-slate-50 text-slate-800 border-slate-200',
-        badgeBg: 'bg-slate-100 text-slate-900',
-        isSettled: !isCancelled,
-        statusLabel: isCancelled ? (isFr ? 'Annulé' : 'Cancelled') : (isFr ? 'Payé via Apple Pay' : 'Paid via Apple Pay'),
-        statusColor: isCancelled ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        statusDot: isCancelled ? 'bg-rose-500' : 'bg-emerald-500'
-      };
-    }
-
-    // 6. Online Credit / Debit Card
+    // Default: Credit / Debit Card
     return {
       code: 'CARD',
-      label: isFr ? 'Carte Bancaire (En ligne)' : 'Credit / Debit Card (Online)',
-      channelName: isFr ? 'Paiement sécurisé par carte' : 'Secured Card Transaction',
+      label: isFr ? 'Carte Bancaire (Visa / Mastercard)' : 'Credit Card (Visa / Mastercard)',
+      channelName: 'Passerelle Bancaire Sécurisée 3D-Secure',
       icon: CreditCard,
       color: 'bg-blue-50 text-blue-800 border-blue-200',
       badgeBg: 'bg-blue-100 text-blue-900',
       isSettled: !isCancelled,
-      statusLabel: isCancelled ? (isFr ? 'Annulé' : 'Cancelled') : (isFr ? 'Payé par carte' : 'Paid by Card'),
+      statusLabel: isCancelled ? (isFr ? 'Annulé' : 'Cancelled') : (isFr ? 'Encaissé en ligne' : 'Paid Online'),
       statusColor: isCancelled ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200',
       statusDot: isCancelled ? 'bg-rose-500' : 'bg-emerald-500'
     };
   };
 
-  // Format real date and time
-  const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return { date: isFr ? 'Date inconnue' : 'Unknown date', time: '—' };
+  // Format date & time
+  const formatDateTime = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
-      if (isNaN(d.getTime())) {
-        return { date: dateStr, time: '—' };
-      }
-      const locale = isFr ? 'fr-FR' : 'en-US';
-      const date = d.toLocaleDateString(locale, {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-      const time = d.toLocaleTimeString(locale, {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      return { date, time };
-    } catch {
-      return { date: dateStr, time: '—' };
+      if (isNaN(d.getTime())) return { date: dateStr, time: '' };
+      return {
+        date: d.toLocaleDateString(isFr ? 'fr-FR' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
+        time: d.toLocaleTimeString(isFr ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })
+      };
+    } catch (e) {
+      return { date: dateStr, time: '' };
     }
   };
 
-  // Copy invoice number
-  const handleCopy = (text: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  // Copy invoice reference
+  const handleCopy = (text: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     navigator.clipboard.writeText(text);
     setCopiedInvoiceId(text);
-    setTimeout(() => setCopiedInvoiceId(null), 2500);
+    setTimeout(() => setCopiedInvoiceId(null), 2000);
   };
 
   // Filtered & Sorted orders
@@ -235,8 +228,10 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
 
         const info = resolvePaymentInfo(order);
 
+        if (filterTab === 'pending_review') return !order.receiptReviewed;
+        if (filterTab === 'reviewed') return !!order.receiptReviewed;
         if (filterTab === 'cod') return info.code === 'COD';
-        if (filterTab === 'card') return info.code === 'CARD' || info.code === 'APPLEPAY';
+        if (filterTab === 'card') return info.code === 'CARD';
         if (filterTab === 'wave') return info.code === 'WAVE' || info.code === 'OM' || info.code === 'MTN';
         if (filterTab === 'delivered') return order.status === 'delivered';
         if (filterTab === 'cancelled') return order.status === 'cancelled';
@@ -253,7 +248,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       });
   }, [orders, searchQuery, filterTab, sortBy, isFr]);
 
-  // Overall Financial Metrics Calculated from REAL order data
+  // Aggregate Metrics
   const metrics = useMemo(() => {
     let totalVolume = 0;
     let settledVolume = 0;
@@ -262,8 +257,16 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
     let cardCount = 0;
     let waveCount = 0;
     let settledCount = 0;
+    let pendingReviewCount = 0;
+    let reviewedCount = 0;
 
     orders.forEach(o => {
+      if (o.receiptReviewed) {
+        reviewedCount++;
+      } else {
+        pendingReviewCount++;
+      }
+
       if (o.status === 'cancelled') return;
       totalVolume += o.total;
       const info = resolvePaymentInfo(o);
@@ -295,11 +298,167 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       codCount,
       cardCount,
       waveCount,
+      pendingReviewCount,
+      reviewedCount,
       avgTicket: orders.length > 0 ? totalVolume / orders.length : 0
     };
   }, [orders, isFr]);
 
-  // Real CSV Ledger Export
+  // Toggle Receipt Review Status & Notify Customer
+  const handleToggleReview = async (order: Order) => {
+    const nextReviewed = !order.receiptReviewed;
+    
+    // 1. Update server & Supabase
+    await updateRealtimeOrderReview(order.id, nextReviewed);
+
+    // 2. Update local state
+    if (setOrders) {
+      setOrders(prev => prev.map(o => o.id === order.id ? { 
+        ...o, 
+        receiptReviewed: nextReviewed, 
+        receiptReviewedAt: Date.now() 
+      } : o));
+    }
+
+    // 3. Dispatch customer notification when reviewed
+    if (nextReviewed) {
+      const notif: StoreNotification = {
+        id: `notif-receipt-${order.id}-${Date.now()}`,
+        title: isFr 
+          ? `Reçu Officiel Disponible : #${order.orderNumber}` 
+          : `Official Receipt Ready: #${order.orderNumber}`,
+        message: isFr 
+          ? `Votre reçu d'achat officiel pour la commande #${order.orderNumber} a été validé et est prêt à être téléchargé.` 
+          : `Your certified purchase receipt for Order #${order.orderNumber} has been verified and released for download.`,
+        timestamp: Date.now(),
+        read: false,
+        type: 'order',
+        linkTarget: order.orderNumber,
+        customerId: order.customerId,
+      };
+
+      await addRealtimeNotification(notif);
+      if (setNotifications) {
+        setNotifications(prev => [notif, ...prev]);
+      }
+
+      setActionToast({
+        message: isFr 
+          ? `Reçu #${order.orderNumber} validé avec succès ! Notification envoyée au client.` 
+          : `Receipt #${order.orderNumber} reviewed! Customer notification dispatched.`,
+        type: 'success'
+      });
+    } else {
+      setActionToast({
+        message: isFr 
+          ? `Validation du reçu #${order.orderNumber} révoquée.` 
+          : `Receipt #${order.orderNumber} review revoked.`,
+        type: 'info'
+      });
+    }
+  };
+
+  // Direct File Download (Never opens print dialog)
+  const handleDirectDownload = (order: Order) => {
+    downloadReceiptFile(order, {
+      template: receiptTemplate as any,
+      storeSettings,
+      formatPrice,
+      language,
+    });
+    setActionToast({
+      message: isFr 
+        ? `Téléchargement du reçu #${order.orderNumber} en cours...` 
+        : `Downloading receipt file for #${order.orderNumber}...`,
+      type: 'success'
+    });
+  };
+
+  // Native Print Launcher (Can print multiple orders in succession without locking)
+  const handlePrint = (order: Order) => {
+    printReceipt(order, {
+      template: receiptTemplate as any,
+      storeSettings,
+      formatPrice,
+      language,
+    });
+  };
+
+  // Send Receipt via Email
+  const handleEmailReceipt = async (order: Order) => {
+    const customerEmail = order.shippingAddress?.email;
+    if (!customerEmail) {
+      setActionToast({
+        message: isFr 
+          ? 'Aucune adresse email renseignée pour ce client.' 
+          : 'No email address found for this order.',
+        type: 'error'
+      });
+      return;
+    }
+
+    setSendingEmailId(order.id);
+    const customerName = `${order.shippingAddress?.firstName || ''} ${order.shippingAddress?.lastName || ''}`.trim() || 'Client';
+    const totalStr = formatPrice(order.total);
+    const paymentInfo = resolvePaymentInfo(order);
+
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toEmail: customerEmail,
+          subject: `GLADYNS — Reçu Officiel d'Achat #${order.orderNumber}`,
+          customerName,
+          orderNumber: order.orderNumber,
+          statusText: order.status === 'delivered' ? 'Livré (Reçu Certifié)' : 'Validé',
+          detailsText: `Facture Réf. ${getInvoiceId(order)} · Total: ${totalStr} · Règlement: ${paymentInfo.label} (${paymentInfo.statusLabel})`,
+        }),
+      });
+
+      if (res.ok) {
+        setActionToast({
+          message: isFr 
+            ? `Reçu transmis par email à ${customerEmail} !` 
+            : `Receipt emailed to ${customerEmail}!`,
+          type: 'success'
+        });
+      } else {
+        throw new Error('Email failed');
+      }
+    } catch (e) {
+      // Fallback: mailto
+      const subject = encodeURIComponent(`GLADYNS — Reçu Officiel #${order.orderNumber}`);
+      const body = encodeURIComponent(
+        `Bonjour ${customerName},\n\nVotre reçu officiel pour la commande #${order.orderNumber} est disponible.\nMontant: ${totalStr}\nStatut: ${paymentInfo.statusLabel}\n\nConsultez votre reçu en ligne sur https://${storeDomain}\n\nMerci de votre confiance,\nGLADYNS`
+      );
+      window.open(`mailto:${customerEmail}?subject=${subject}&body=${body}`, '_blank');
+      setActionToast({
+        message: isFr 
+          ? `Application email ouverte pour ${customerEmail}` 
+          : `Opened email client for ${customerEmail}`,
+        type: 'info'
+      });
+    } finally {
+      setSendingEmailId(null);
+    }
+  };
+
+  // WhatsApp receipt share message
+  const getReceiptWhatsAppUrl = (order: Order) => {
+    const inv = getInvoiceId(order);
+    const clientName = `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`.trim();
+    const pInfo = resolvePaymentInfo(order);
+
+    let text = isFr 
+      ? `Bonjour ${clientName},\nVoici le reçu officiel de votre commande chez ${storeName}.\n\n📄 Réf. Facture : ${inv}\n📦 N° Commande : ${order.orderNumber}\n💰 Montant Total : ${formatPrice(order.total)}\n💳 Mode de paiement : ${pInfo.label}\n📌 Statut : ${pInfo.statusLabel}\n🚚 Adresse : ${order.shippingAddress.street}, ${order.shippingAddress.city}\n\nConsultez et téléchargez votre reçu en ligne sur : https://${storeDomain}\n\nMerci pour votre confiance !`
+      : `Hello ${clientName},\nHere is your official purchase receipt from ${storeName}.\n\n📄 Invoice Ref: ${inv}\n📦 Order #: ${order.orderNumber}\n💰 Total Amount: ${formatPrice(order.total)}\n💳 Payment: ${pInfo.label}\n📌 Status: ${pInfo.statusLabel}\n🚚 Address: ${order.shippingAddress.street}, ${order.shippingAddress.city}\n\nDownload your receipt online at: https://${storeDomain}\n\nThank you for choosing ${storeDomain}!`;
+
+    const phone = order.shippingAddress.phone?.replace(/[^0-9+]/g, '') || storePhone;
+    return getWhatsAppLink(text, phone);
+  };
+
+  // Export CSV Ledger
   const handleExportLedger = () => {
     const headers = [
       'Invoice Number',
@@ -312,8 +471,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       'City',
       'Country',
       'Payment Method',
-      'Settlement Status',
-      'Items Count',
+      'Receipt Reviewed',
       'Total Amount'
     ];
 
@@ -327,8 +485,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
       const country = `"${o.shippingAddress.country || ''}"`;
       const info = resolvePaymentInfo(o);
       const pMethod = `"${info.label}"`;
-      const sStatus = `"${info.statusLabel}"`;
-      const itemsCount = o.items.reduce((s, it) => s + it.quantity, 0);
+      const isReviewed = o.receiptReviewed ? 'YES' : 'NO';
       const total = o.total;
 
       return [
@@ -342,8 +499,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
         city,
         country,
         pMethod,
-        sStatus,
-        itemsCount,
+        isReviewed,
         total
       ].join(',');
     });
@@ -358,44 +514,19 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
     document.body.removeChild(link);
   };
 
-  // Print or Save as PDF using clean isolated window
-  const handlePrintOrDownloadReceipt = (order: Order) => {
-    printOrSaveReceiptPdf(order, {
-      template: receiptTemplate as any,
-      storeSettings,
-      formatPrice,
-      language,
-    });
-  };
-
-  // WhatsApp receipt share message adjusted for ACTIVE TEMPLATE
-  const getReceiptWhatsAppUrl = (order: Order) => {
-    const inv = getInvoiceId(order);
-    const clientName = `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`.trim();
-    const pInfo = resolvePaymentInfo(order);
-
-    let text = '';
-    if (receiptTemplate === 'gift') {
-      text = isFr
-        ? `🎁 Bonjour ${clientName},\nVoici votre reçu cadeau officiel pour la commande ${order.orderNumber} chez ${storeName}.\n\nCe reçu sans mention de prix certifie l'authenticité de vos pièces et permet tout échange de taille sous 30 jours.\n\nMerci pour votre confiance sur ${storeDomain} !`
-        : `🎁 Hello ${clientName},\nHere is your official Gift Receipt for order ${order.orderNumber} from ${storeName}.\n\nThis receipt hides prices and allows size exchange or warranty support within 30 days.\n\nThank you for choosing ${storeDomain}!`;
-    } else if (receiptTemplate === 'delivery') {
-      text = isFr
-        ? `🚚 *BORDEREAU DE LIVRAISON GLADYNS*\nN° Commande : ${order.orderNumber}\nClient : ${clientName}\nTéléphone : ${order.shippingAddress.phone || 'Non renseigné'}\nAdresse : ${order.shippingAddress.street}, ${order.shippingAddress.city}\n\n📌 Modalité : ${pInfo.label}\n💰 Montant : ${pInfo.code === 'COD' && order.status !== 'delivered' ? `ENCAISSER EN CASH : ${formatPrice(order.total)}` : 'DÉJÀ RÉGLÉ EN LIGNE'}`
-        : `🚚 *GLADYNS DELIVERY WAYBILL*\nOrder #: ${order.orderNumber}\nCustomer: ${clientName}\nPhone: ${order.shippingAddress.phone || 'N/A'}\nAddress: ${order.shippingAddress.street}, ${order.shippingAddress.city}\n\n📌 Directives: ${pInfo.code === 'COD' && order.status !== 'delivered' ? `COLLECT CASH: ${formatPrice(order.total)}` : 'ALREADY PAID ONLINE'}`;
-    } else {
-      text = isFr 
-        ? `Bonjour ${clientName},\nVoici le reçu officiel de votre commande chez ${storeName}.\n\n📄 Réf. Facture : ${inv}\n📦 N° Commande : ${order.orderNumber}\n💰 Montant Total : ${formatPrice(order.total)}\n💳 Mode de paiement : ${pInfo.label}\n📌 Statut : ${pInfo.statusLabel}\n🚚 Adresse de livraison : ${order.shippingAddress.street}, ${order.shippingAddress.city}\n\nMerci pour votre confiance sur ${storeDomain} !`
-        : `Hello ${clientName},\nHere is your official purchase receipt from ${storeName}.\n\n📄 Invoice Ref: ${inv}\n📦 Order #: ${order.orderNumber}\n💰 Total Amount: ${formatPrice(order.total)}\n💳 Payment: ${pInfo.label}\n📌 Status: ${pInfo.statusLabel}\n🚚 Delivery Address: ${order.shippingAddress.street}, ${order.shippingAddress.city}\n\nThank you for choosing ${storeDomain}!`;
-    }
-
-    const phone = order.shippingAddress.phone?.replace(/[^0-9+]/g, '') || storePhone;
-    return getWhatsAppLink(text, phone);
-  };
-
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header Bar with Store Logo & Identity */}
+      {/* Toast Feedback */}
+      {actionToast && (
+        <div className={`fixed bottom-6 right-6 z-[999] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-bold text-white transition-all transform animate-in slide-in-from-bottom-3 ${
+          actionToast.type === 'success' ? 'bg-emerald-600' : actionToast.type === 'error' ? 'bg-rose-600' : 'bg-zinc-900'
+        }`}>
+          {actionToast.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <span>{actionToast.message}</span>
+        </div>
+      )}
+
+      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-zinc-200/80 shadow-xs">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-zinc-950 flex items-center justify-center p-1.5 shadow-md border border-amber-500/30 shrink-0 ring-2 ring-amber-400/20">
@@ -419,8 +550,8 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
             </div>
             <p className="text-xs text-zinc-500 mt-0.5 font-sans">
               {isFr 
-                ? `Maison de Commerce ${storeName} · Reçus d'exception, facturation & bordereaux d'expédition.` 
-                : `House of ${storeName} · Official accounting invoices, gift cards, and courier delivery slips.`}
+                ? `Maison de Commerce ${storeName} · Reçus d'exception, validation & transmission client.` 
+                : `House of ${storeName} · Official accounting receipts, administrative review & delivery.`}
             </p>
           </div>
         </div>
@@ -432,14 +563,14 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
             title={isFr ? 'Exporter toutes les lignes au format CSV' : 'Export ledger rows to CSV'}
           >
             <Download className="w-4 h-4 text-blue-600" />
-            <span>{isFr ? 'Exporter le Grand Livre (CSV)' : 'Export Ledger (CSV)'}</span>
+            <span>{isFr ? 'Exporter CSV' : 'Export CSV'}</span>
           </button>
         </div>
       </div>
 
-      {/* Top 4 KPI Metrics Cards based on REAL transaction data */}
+      {/* KPI Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Total Invoiced Volume */}
+        {/* Metric 1: Total Volume */}
         <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-blue-400/60 transition-colors">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
@@ -450,7 +581,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
             </p>
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-600">
               <Package className="w-3.5 h-3.5 text-blue-500" />
-              <span>{metrics.totalCount} {isFr ? 'commandes passées' : 'total orders'}</span>
+              <span>{metrics.totalCount} {isFr ? 'reçus au total' : 'total receipts'}</span>
             </div>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-amber-50 text-blue-600 flex items-center justify-center">
@@ -477,41 +608,41 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
           </div>
         </div>
 
-        {/* Metric 3: Pending Cash on Delivery (COD) */}
-        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-blue-400/60 transition-colors">
+        {/* Metric 3: Pending Review Count */}
+        <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-400/60 transition-colors">
           <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-              {isFr ? 'À Encaisser à la Livraison' : 'Due on Delivery (COD)'}
+            <span className="text-[10px] font-black uppercase tracking-widest text-amber-600">
+              {isFr ? 'En Attente de Validation' : 'Pending Admin Review'}
             </span>
-            <p className="text-2xl font-black text-blue-600 font-mono tracking-tight">
-              {formatPrice(metrics.pendingCodVolume)}
+            <p className="text-2xl font-black text-amber-600 font-mono tracking-tight">
+              {metrics.pendingReviewCount}
             </p>
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-700">
-              <Truck className="w-3.5 h-3.5" />
-              <span>{metrics.codCount} {isFr ? 'en livraison cash' : 'cash-on-delivery orders'}</span>
+              <Clock className="w-3.5 h-3.5" />
+              <span>{isFr ? 'À réviser pour visibilité' : 'Require review for release'}</span>
             </div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-blue-600 flex items-center justify-center">
-            <Banknote className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <Clock className="w-6 h-6" />
           </div>
         </div>
 
-        {/* Metric 4: Average Order Ticket */}
+        {/* Metric 4: Reviewed & Released */}
         <div className="bg-white p-5 rounded-3xl border border-zinc-200/80 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-blue-400/60 transition-colors">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-              {isFr ? 'Panier Moyen' : 'Average Receipt Value'}
+              {isFr ? 'Reçus Validés & Visibles' : 'Reviewed & Released'}
             </span>
-            <p className="text-2xl font-black text-zinc-950 font-mono tracking-tight">
-              {formatPrice(metrics.avgTicket)}
+            <p className="text-2xl font-black text-emerald-700 font-mono tracking-tight">
+              {metrics.reviewedCount}
             </p>
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span>{storeDomain}</span>
+              <span>{isFr ? 'Accessibles aux clients' : 'Accessible by patrons'}</span>
             </div>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Award className="w-6 h-6 text-blue-600" />
+            <ShieldCheck className="w-6 h-6 text-blue-600" />
           </div>
         </div>
       </div>
@@ -562,37 +693,37 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 border-t border-zinc-100 text-xs">
           {[
-            { id: 'all', label: isFr ? 'Toutes les factures' : 'All Receipts', count: orders.length },
-            { id: 'cod', label: isFr ? 'Paiement à la livraison (Cash)' : 'Cash on Delivery (COD)', count: metrics.codCount },
-            { id: 'delivered', label: isFr ? 'Encaissées / Livrées' : 'Delivered & Settled', count: orders.filter(o => o.status === 'delivered').length },
+            { id: 'all', label: isFr ? 'Tous les reçus' : 'All Receipts', count: orders.length },
+            { id: 'pending_review', label: isFr ? 'En attente de validation' : 'Pending Review', count: metrics.pendingReviewCount, highlight: true },
+            { id: 'reviewed', label: isFr ? 'Validés & Publiés' : 'Reviewed & Released', count: metrics.reviewedCount },
+            { id: 'delivered', label: isFr ? 'Commandes Livrées' : 'Delivered Orders', count: orders.filter(o => o.status === 'delivered').length },
+            { id: 'cod', label: isFr ? 'Paiement à la livraison' : 'Cash on Delivery', count: metrics.codCount },
             { id: 'card', label: isFr ? 'Cartes Bancaires' : 'Credit Card', count: metrics.cardCount },
-            { id: 'wave', label: 'Wave & Mobile Money', count: metrics.waveCount },
-            { id: 'cancelled', label: isFr ? 'Annulées' : 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length },
-          ].map((tab) => {
-            const isActive = filterTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setFilterTab(tab.id as any)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-zinc-950 text-white shadow-xs'
-                    : 'bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/70'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-                  isActive ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-200 text-zinc-600'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
+            { id: 'wave', label: 'Mobile Money', count: metrics.waveCount },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setFilterTab(tab.id as any)}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                filterTab === tab.id
+                  ? 'bg-zinc-950 text-white shadow-xs'
+                  : tab.highlight && tab.count > 0
+                  ? 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'
+                  : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-600'
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                filterTab === tab.id ? 'bg-zinc-800 text-zinc-300' : 'bg-zinc-200/80 text-zinc-600'
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Receipts Table Container */}
+      {/* Receipts Table */}
       <div className="bg-white rounded-3xl border border-zinc-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -611,10 +742,10 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                   {isFr ? 'Mode de Règlement' : 'Payment Method'}
                 </th>
                 <th className="px-6 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">
-                  {isFr ? 'Montant & Statut' : 'Amount & Status'}
+                  {isFr ? 'Montant & Validation' : 'Amount & Review'}
                 </th>
                 <th className="px-6 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest text-right">
-                  {isFr ? 'Actions' : 'Actions'}
+                  {isFr ? 'Actions Reçu' : 'Receipt Actions'}
                 </th>
               </tr>
             </thead>
@@ -625,6 +756,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                 const { date, time } = formatDateTime(order.date);
                 const PaymentIcon = paymentInfo.icon;
                 const isCopied = copiedInvoiceId === invId;
+                const isReviewed = !!order.receiptReviewed;
 
                 return (
                   <tr 
@@ -635,12 +767,14 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     {/* Column 1: Document */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-zinc-100 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-zinc-600 transition-colors shrink-0 shadow-xs">
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors shrink-0 shadow-xs ${
+                          isReviewed ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                        }`}>
                           <FileText className="w-5 h-5" />
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="font-mono text-xs font-black text-zinc-950 group-hover:text-amber-700 transition-colors">
+                            <span className="font-mono text-xs font-black text-zinc-950 group-hover:text-blue-700 transition-colors">
                               {invId}
                             </span>
                             <button
@@ -648,21 +782,18 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                               className="p-1 text-zinc-400 hover:text-zinc-900 rounded-md transition-colors"
                               title={isFr ? "Copier le numéro de facture" : "Copy invoice number"}
                             >
-                              {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                              {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                             </button>
                           </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[11px] text-zinc-500 font-medium">{date}</span>
-                            {time !== '—' && (
-                              <>
-                                <span className="text-zinc-300">·</span>
-                                <span className="text-[10px] text-zinc-400 font-mono">{time}</span>
-                              </>
-                            )}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] font-medium text-zinc-500 font-mono">
+                              {order.orderNumber}
+                            </span>
+                            <span className="text-zinc-300">·</span>
+                            <span className="text-[11px] text-zinc-400">
+                              {date} {time && `(${time})`}
+                            </span>
                           </div>
-                          <p className="text-[10px] text-zinc-400 font-mono mt-0.5">
-                            Ref: #{order.orderNumber}
-                          </p>
                         </div>
                       </div>
                     </td>
@@ -670,25 +801,19 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                     {/* Column 2: Customer */}
                     <td className="px-6 py-4">
                       <div className="space-y-0.5">
-                        <p className="text-xs font-bold text-zinc-950">
-                          {order.shippingAddress.firstName} {order.shippingAddress.lastName}
+                        <p className="text-xs font-bold text-zinc-900">
+                          {order.shippingAddress?.firstName || 'Client'} {order.shippingAddress?.lastName || ''}
                         </p>
-                        <p className="text-[11px] text-zinc-500 font-mono">
-                          {order.shippingAddress.email}
+                        <p className="text-[11px] text-zinc-500">
+                          {order.shippingAddress?.phone || order.shippingAddress?.email || 'N/A'}
                         </p>
-                        <div className="flex items-center gap-2 text-[10px] text-zinc-400">
-                          <span>{order.shippingAddress.city || (isFr ? 'Abidjan' : 'Abidjan')}</span>
-                          {order.shippingAddress.phone && (
-                            <>
-                              <span>·</span>
-                              <span className="font-mono text-zinc-600 font-medium">{order.shippingAddress.phone}</span>
-                            </>
-                          )}
-                        </div>
+                        <p className="text-[10px] text-zinc-400">
+                          {order.shippingAddress?.city}, {order.shippingAddress?.country}
+                        </p>
                       </div>
                     </td>
 
-                    {/* Column 3: Items Thumbnails stack */}
+                    {/* Column 3: Items */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="flex -space-x-2 overflow-hidden">
@@ -716,74 +841,91 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
                       </div>
                     </td>
 
-                    {/* Column 5: Total & Status */}
+                    {/* Column 5: Total & Review Status */}
                     <td className="px-6 py-4 text-right">
                       <div className="space-y-1">
                         <p className="text-sm font-black text-zinc-950 font-mono">
                           {formatPrice(order.total)}
                         </p>
-                        <div className="flex items-center justify-end gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full ${paymentInfo.statusDot}`} />
-                          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${paymentInfo.statusColor}`}>
-                            {paymentInfo.statusLabel}
-                          </span>
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          {isReviewed ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-md shadow-2xs">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span>{isFr ? 'Validé & Publié' : 'Reviewed & Live'}</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md shadow-2xs">
+                              <Clock className="w-3 h-3 text-amber-600" />
+                              <span>{isFr ? 'En attente de revue' : 'Pending Review'}</span>
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
 
                     {/* Column 6: Quick Actions */}
                     <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
-                        <button 
-                          onClick={() => {
-                            setReceiptTemplate('standard');
-                            setSelectedOrder(order);
-                          }}
-                          className="p-2 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Afficher le reçu complet" : "View full receipt"}
+                      <div className="flex items-center justify-end gap-1 flex-wrap">
+                        {/* Review / Release Toggle Button */}
+                        <button
+                          onClick={() => handleToggleReview(order)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs ${
+                            isReviewed
+                              ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border border-zinc-200'
+                              : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                          }`}
+                          title={isReviewed 
+                            ? (isFr ? 'Révoquer la validation du reçu' : 'Revoke receipt review') 
+                            : (isFr ? 'Valider et rendre visible pour le client' : 'Review and release receipt to customer')}
                         >
-                          <Eye className="w-4 h-4" />
+                          {isReviewed ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                          <span>{isReviewed ? (isFr ? 'Validé' : 'Reviewed') : (isFr ? 'Valider le reçu' : 'Review Receipt')}</span>
                         </button>
+
+                        {/* Direct File Download */}
                         <button 
-                          onClick={() => {
-                            setReceiptTemplate('gift');
-                            setSelectedOrder(order);
-                          }}
-                          className="p-2 text-zinc-500 hover:text-blue-600 hover:bg-amber-50 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Reçu Cadeau (Sans prix)" : "Gift Receipt (No prices)"}
-                        >
-                          <Gift className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setReceiptTemplate('delivery');
-                            setSelectedOrder(order);
-                          }}
+                          onClick={() => handleDirectDownload(order)}
                           className="p-2 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Bordereau de livraison" : "Delivery Slip"}
-                        >
-                          <Truck className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handlePrintOrDownloadReceipt(order)}
-                          className="p-2 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Imprimer le reçu (PDF)" : "Print receipt (PDF)"}
-                        >
-                          <Printer className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handlePrintOrDownloadReceipt(order)}
-                          className="p-2 text-zinc-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Enregistrer au format PDF" : "Save as PDF"}
+                          title={isFr ? "Télécharger le reçu directement (Fichier)" : "Download receipt file directly"}
                         >
                           <Download className="w-4 h-4" />
                         </button>
+
+                        {/* Print Receipt */}
+                        <button 
+                          onClick={() => handlePrint(order)}
+                          className="p-2 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 rounded-xl transition-all cursor-pointer" 
+                          title={isFr ? "Imprimer le reçu" : "Print receipt"}
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
+
+                        {/* Send via Email */}
+                        <button 
+                          onClick={() => handleEmailReceipt(order)}
+                          disabled={sendingEmailId === order.id}
+                          className="p-2 text-zinc-500 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all cursor-pointer disabled:opacity-50" 
+                          title={isFr ? "Envoyer le reçu par Email" : "Email receipt to customer"}
+                        >
+                          {sendingEmailId === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                        </button>
+
+                        {/* Send via WhatsApp */}
                         <button 
                           onClick={() => window.open(getReceiptWhatsAppUrl(order), '_blank')}
                           className="p-2 text-zinc-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer" 
-                          title={isFr ? "Envoyer via WhatsApp" : "Send via WhatsApp"}
+                          title={isFr ? "Envoyer le reçu via WhatsApp" : "Send receipt via WhatsApp"}
                         >
                           <MessageSquare className="w-4 h-4" />
+                        </button>
+
+                        {/* Full Preview */}
+                        <button 
+                          onClick={() => setSelectedOrder(order)}
+                          className="p-2 text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 rounded-xl transition-all cursor-pointer" 
+                          title={isFr ? "Aperçu interactif du reçu" : "Preview receipt"}
+                        >
+                          <Eye className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -823,7 +965,7 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({ orders, storeSetti
         )}
       </div>
 
-      {/* Modern Blue & White Receipt Modal with 4 Reference Formats */}
+      {/* Modern Receipt Modal */}
       {selectedOrder && (
         <ReceiptModal
           order={selectedOrder}

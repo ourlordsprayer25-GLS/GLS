@@ -2,12 +2,13 @@ import { Order, StoreSettings } from '../types/store';
 
 export type ReceiptTemplateType = 'commercial' | 'invoice' | 'gift' | 'pos' | 'delivery' | 'standard';
 
-interface PrintReceiptOptions {
+export interface PrintReceiptOptions {
   template?: ReceiptTemplateType;
   storeSettings?: StoreSettings;
   formatPrice?: (price: number) => string;
   language?: string;
   autoPrint?: boolean;
+  mode?: 'print' | 'download';
 }
 
 export function generateReceiptHtml(
@@ -532,27 +533,59 @@ export function generateReceiptHtml(
     </div>
   </div>
 
+  ${options.mode !== 'download' && options.autoPrint !== false ? `
   <script>
-    // Trigger native browser print / Save as PDF immediately
-    window.addEventListener('DOMContentLoaded', function() {
+    function triggerReceiptPrint() {
       setTimeout(function() {
-        window.print();
-      }, 350);
-    });
+        try {
+          window.focus();
+          window.print();
+        } catch(e) {}
+      }, 300);
+    }
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      triggerReceiptPrint();
+    } else {
+      window.addEventListener('DOMContentLoaded', triggerReceiptPrint);
+      window.addEventListener('load', triggerReceiptPrint);
+    }
   </script>
+  ` : ''}
 </body>
 </html>`;
 }
 
 /**
- * Universal print & Save as PDF launcher.
- * Opens an isolated print window with zero layout clipping or CSS conflicts.
+ * Direct file download launcher.
+ * Downloads the complete, standalone branded receipt document directly to device without opening print dialog.
  */
-export function printOrSaveReceiptPdf(
+export function downloadReceiptFile(
   order: Order,
   options: PrintReceiptOptions = {}
 ): void {
-  const html = generateReceiptHtml(order, options);
+  const html = generateReceiptHtml(order, { ...options, mode: 'download', autoPrint: false });
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const cleanOrderNum = (order.orderNumber || order.id).replace(/[^a-zA-Z0-9_-]/g, '');
+  a.href = url;
+  a.download = `GLADYNS_Receipt_${cleanOrderNum}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+/**
+ * Universal print launcher.
+ * Opens an isolated print window with zero layout clipping or CSS conflicts.
+ * Reliably prints multiple orders in succession without getting stuck.
+ */
+export function printReceipt(
+  order: Order,
+  options: PrintReceiptOptions = {}
+): void {
+  const html = generateReceiptHtml(order, { ...options, mode: 'print' });
 
   // 1. Try opening clean new window
   const printWindow = window.open('', '_blank');
@@ -564,18 +597,19 @@ export function printOrSaveReceiptPdf(
   }
 
   // 2. Fallback: If popup blocker blocked the window, use a hidden iframe
-  let iframe = document.getElementById('gladyns-print-frame') as HTMLIFrameElement;
-  if (!iframe) {
-    iframe = document.createElement('iframe');
-    iframe.id = 'gladyns-print-frame';
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    document.body.appendChild(iframe);
-  }
+  // Always remove prior iframe so subsequent orders print cleanly
+  const existingFrame = document.getElementById('gladyns-print-frame');
+  if (existingFrame) existingFrame.remove();
+
+  const iframe = document.createElement('iframe');
+  iframe.id = 'gladyns-print-frame';
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
 
   const doc = iframe.contentWindow?.document;
   if (doc) {
@@ -588,3 +622,5 @@ export function printOrSaveReceiptPdf(
     }, 400);
   }
 }
+
+export const printOrSaveReceiptPdf = printReceipt;

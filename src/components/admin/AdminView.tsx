@@ -95,7 +95,16 @@ export const AdminView: React.FC<AdminViewProps> = ({
   setStoreSettings,
   onBackToStore,
 }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'tracker' | 'orders' | 'products' | 'inventory' | 'categories' | 'brands' | 'reviews' | 'sections' | 'receipts' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'customers' | 'tracker' | 'orders' | 'products' | 'inventory' | 'categories' | 'brands' | 'reviews' | 'sections' | 'receipts' | 'settings'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab') as any;
+      if (tabParam && ['dashboard', 'customers', 'tracker', 'orders', 'products', 'inventory', 'categories', 'brands', 'reviews', 'sections', 'receipts', 'settings'].includes(tabParam)) {
+        return tabParam;
+      }
+    }
+    return 'dashboard';
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
@@ -163,10 +172,47 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchFilter, setSearchFilter] = useState<'all' | 'products' | 'orders' | 'customers'>('all');
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [productSearchQuery, setProductSearchQuery] = useState('');
-  const [orderSearchQuery, setOrderSearchQuery] = useState('');
-  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+  const [productSearchQuery, setProductSearchQuery] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('product') || '';
+    }
+    return '';
+  });
+  const [orderSearchQuery, setOrderSearchQuery] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('order') || '';
+    }
+    return '';
+  });
+  const [customerSearchQuery, setCustomerSearchQuery] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('customer') || '';
+    }
+    return '';
+  });
   const [noticeToast, setNoticeToast] = useState<{ message: string; type?: 'info' | 'warning' } | null>(null);
+
+  // Sync state if URL changes externally
+  useEffect(() => {
+    const handleUrlSync = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab') as any;
+      if (tabParam && ['dashboard', 'customers', 'tracker', 'orders', 'products', 'inventory', 'categories', 'brands', 'reviews', 'sections', 'receipts', 'settings'].includes(tabParam)) {
+        setActiveTab(tabParam);
+      }
+      const ord = params.get('order');
+      if (ord !== null) setOrderSearchQuery(ord);
+      const prod = params.get('product');
+      if (prod !== null) setProductSearchQuery(prod);
+      const cust = params.get('customer');
+      if (cust !== null) setCustomerSearchQuery(cust);
+    };
+    window.addEventListener('popstate', handleUrlSync);
+    return () => window.removeEventListener('popstate', handleUrlSync);
+  }, []);
 
   // Local Sandbox Mode State & Handlers
   const [liveSyncMode, setLiveSyncModeState] = useState<'isolated' | 'live'>(() => getLiveSyncMode());
@@ -815,7 +861,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
             </div>
 
             {/* PWA Install Action */}
-            <PWAInstallButton />
+            <PWAInstallButton mode="admin" />
 
             {/* Admin Currency & Language Switcher Controls */}
             <div className="hidden sm:flex items-center gap-1 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
@@ -1094,7 +1140,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           )}
 
           {activeTab === 'customers' && (
-            <AdminCustomers users={users} setUsers={setUsers} orders={orders} />
+            <AdminCustomers users={users} setUsers={setUsers} orders={orders} initialSearchQuery={customerSearchQuery} />
           )}
 
           {activeTab === 'tracker' && (
@@ -1102,7 +1148,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           )}
 
           {activeTab === 'orders' && (
-            <AdminOrders orders={orders} setOrders={setOrders} />
+            <AdminOrders orders={orders} setOrders={setOrders} initialSearchQuery={orderSearchQuery} />
           )}
 
           {activeTab === 'products' && (
@@ -1112,6 +1158,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               categories={categories}
               brands={brands}
               onNewProductAdded={handleNewProductAdded}
+              initialSearchQuery={productSearchQuery}
             />
           )}
 
@@ -1139,7 +1186,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
           )}
 
           {activeTab === 'receipts' && (
-            <AdminReceipts orders={orders} storeSettings={storeSettings} />
+            <AdminReceipts 
+              orders={orders} 
+              setOrders={setOrders}
+              setNotifications={setNotifications}
+              storeSettings={storeSettings} 
+              initialSearchQuery={orderSearchQuery}
+            />
           )}
 
           {activeTab === 'settings' && (

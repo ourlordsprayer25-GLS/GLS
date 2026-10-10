@@ -329,13 +329,15 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                           <Truck className="w-3.5 h-3.5" />
                           <span>{isFr ? 'Suivre le colis' : 'Track Package'}</span>
                         </button>
-                        <button
-                          onClick={() => setInvoiceModalOrder(order)}
-                          className="px-3 py-1.5 bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>{isFr ? 'Facture GLADYNS' : 'View GLADYNS Invoice'}</span>
-                        </button>
+                        {order.status === 'delivered' && order.receiptReviewed === true && (
+                          <button
+                            onClick={() => setInvoiceModalOrder(order)}
+                            className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/90 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-blue-600" />
+                            <span>{isFr ? 'Reçu officiel' : 'Official Receipt'}</span>
+                          </button>
+                        )}
                       </div>
                     </div>
 

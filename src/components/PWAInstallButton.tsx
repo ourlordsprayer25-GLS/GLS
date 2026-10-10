@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { Download, Sparkles, Smartphone, X } from 'lucide-react';
+import { Download, Sparkles, Smartphone, X, ShieldCheck } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
 
-export const PWAInstallButton: React.FC = () => {
+interface PWAInstallButtonProps {
+  mode?: 'store' | 'admin';
+}
+
+export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ mode = 'store' }) => {
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const { language } = useLanguageCurrency();
+
+  const isAdmin = mode === 'admin' || (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin'));
 
   // If already running as standalone or not installable on current browser, hide the button
   if (isInstalled) {
@@ -18,10 +24,19 @@ export const PWAInstallButton: React.FC = () => {
     return (
       <button
         onClick={install}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs"
+        className={
+          isAdmin
+            ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs border border-emerald-500/40"
+            : "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs"
+        }
+        title={isAdmin ? "Install GLADYNS Admin App" : "Install GLADYNS App"}
       >
         <Download className="w-3.5 h-3.5" />
-        <span>{language === 'fr' ? 'Installer l\'App' : 'Install App'}</span>
+        <span>
+          {isAdmin
+            ? (language === 'fr' ? 'Installer l\'App Admin' : 'Install Admin App')
+            : (language === 'fr' ? 'Installer l\'App' : 'Install App')}
+        </span>
       </button>
     );
   }
@@ -32,10 +47,18 @@ export const PWAInstallButton: React.FC = () => {
       <>
         <button
           onClick={() => setShowIOSGuide(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs border border-zinc-800"
+          className={
+            isAdmin
+              ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-emerald-400 text-[11px] font-bold transition-all cursor-pointer shadow-xs border border-emerald-500/30"
+              : "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs border border-zinc-800"
+          }
         >
-          <Smartphone className="w-3.5 h-3.5 text-blue-400" />
-          <span>{language === 'fr' ? 'Installer sur iOS' : 'Install on iOS'}</span>
+          {isAdmin ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Smartphone className="w-3.5 h-3.5 text-blue-400" />}
+          <span>
+            {isAdmin
+              ? (language === 'fr' ? 'Installer Admin sur iOS' : 'Install Admin on iOS')
+              : (language === 'fr' ? 'Installer sur iOS' : 'Install on iOS')}
+          </span>
         </button>
 
         {showIOSGuide && (
@@ -43,9 +66,11 @@ export const PWAInstallButton: React.FC = () => {
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-zinc-200 text-slate-800 space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-zinc-100">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
+                  {isAdmin ? <ShieldCheck className="w-4 h-4 text-emerald-600" /> : <Sparkles className="w-4 h-4 text-blue-600" />}
                   <span className="font-display font-bold text-sm text-zinc-950">
-                    {language === 'fr' ? 'Installer GLADYNS' : 'Install GLADYNS'}
+                    {isAdmin
+                      ? (language === 'fr' ? 'Installer GLADYNS Admin' : 'Install GLADYNS Admin')
+                      : (language === 'fr' ? 'Installer GLADYNS' : 'Install GLADYNS')}
                   </span>
                 </div>
                 <button
@@ -59,9 +84,13 @@ export const PWAInstallButton: React.FC = () => {
 
               <div className="text-xs space-y-3 leading-relaxed text-zinc-600 font-medium">
                 <p>
-                  {language === 'fr'
-                    ? 'Ajoutez GLADYNS à votre écran d\'accueil pour une expérience fluide et des notifications d\'expédition instantanées :'
-                    : 'Add GLADYNS to your home screen for seamless catalog browsing and instant shipping status notifications:'}
+                  {isAdmin
+                    ? (language === 'fr'
+                        ? 'Ajoutez GLADYNS Admin à votre écran d\'accueil pour gérer les commandes, stocks et clients en plein écran :'
+                        : 'Add GLADYNS Admin to your home screen for full-screen management of orders, inventory, and customer activity:')
+                    : (language === 'fr'
+                        ? 'Ajoutez GLADYNS à votre écran d\'accueil pour une expérience fluide et des notifications d\'expédition instantanées :'
+                        : 'Add GLADYNS to your home screen for seamless catalog browsing and instant shipping status notifications:')}
                 </p>
                 <div className="bg-[#FAF9F6] p-3 rounded-xl border border-zinc-200/60 space-y-2">
                   <p>
@@ -75,7 +104,11 @@ export const PWAInstallButton: React.FC = () => {
 
               <button
                 onClick={() => setShowIOSGuide(false)}
-                className="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white hover:bg-blue-500 transition cursor-pointer"
+                className={
+                  isAdmin
+                    ? "w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 transition cursor-pointer"
+                    : "w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white hover:bg-blue-500 transition cursor-pointer"
+                }
               >
                 {language === 'fr' ? 'Compris' : 'Understood'}
               </button>

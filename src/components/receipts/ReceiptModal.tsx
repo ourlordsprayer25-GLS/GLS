@@ -6,7 +6,7 @@ import {
 import { useLanguageCurrency } from '../../context/LanguageCurrencyContext';
 import { getWhatsAppLink } from '../WhatsAppWidget';
 import JsBarcode from 'jsbarcode';
-import { printOrSaveReceiptPdf } from '../../services/receiptPrintService';
+import { printReceipt, downloadReceiptFile } from '../../services/receiptPrintService';
 import { 
   Printer, 
   Download, 
@@ -212,9 +212,19 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     window.open(url, '_blank');
   };
 
-  // Print or Save as PDF helper using clean isolated document
-  const handlePrintOrDownloadReceipt = () => {
-    printOrSaveReceiptPdf(order, {
+  // Print helper using clean isolated document
+  const handlePrintReceipt = () => {
+    printReceipt(order, {
+      template: activeTemplate as any,
+      storeSettings,
+      formatPrice,
+      language,
+    });
+  };
+
+  // Direct file download helper
+  const handleDownloadReceipt = () => {
+    downloadReceiptFile(order, {
       template: activeTemplate as any,
       storeSettings,
       formatPrice,
@@ -311,7 +321,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           <div className="flex items-center gap-2">
             {/* Print Button */}
             <button
-              onClick={handlePrintOrDownloadReceipt}
+              onClick={handlePrintReceipt}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
               title={isFr ? "Imprimer le document complet" : "Print complete receipt"}
             >
@@ -319,14 +329,14 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               <span>{isFr ? 'Imprimer' : 'Print'}</span>
             </button>
 
-            {/* Save as PDF Button */}
+            {/* Direct Download Button */}
             <button
-              onClick={handlePrintOrDownloadReceipt}
+              onClick={handleDownloadReceipt}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
-              title={isFr ? "Enregistrer au format PDF" : "Save as PDF"}
+              title={isFr ? "Télécharger le reçu directement" : "Download receipt file"}
             >
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isFr ? 'Enregistrer PDF' : 'Save as PDF'}</span>
+              <span className="hidden sm:inline">{isFr ? 'Télécharger' : 'Download'}</span>
             </button>
 
             {/* WhatsApp Share */}

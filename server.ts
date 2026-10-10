@@ -219,6 +219,15 @@ function broadcastSyncEvent(eventType: string, payload: any) {
 }
 
 function injectOGMetaTags(html: string, url: string, products: any[]): string {
+  if (url.startsWith('/admin')) {
+    let adminHtml = html;
+    adminHtml = adminHtml.replace(/<link[^>]*id=["']app-manifest["'][^>]*>/i, '<link id="app-manifest" rel="manifest" href="/manifest-admin.webmanifest" />');
+    adminHtml = adminHtml.replace(/<title>.*?<\/title>/gi, '<title>GLADYNS Admin Console</title>');
+    adminHtml = adminHtml.replace(/<meta\s+name=["']theme-color["']\s+content=["'][^"']*["']\s*\/?>/gi, '<meta name="theme-color" content="#090b10" />');
+    adminHtml = adminHtml.replace(/<meta\s+name=["']apple-mobile-web-app-title["']\s+content=["'][^"']*["']\s*\/?>/gi, '<meta name="apple-mobile-web-app-title" content="GLADYNS Admin" />');
+    return adminHtml;
+  }
+
   if (url.startsWith('/product/')) {
     const prodId = url.replace('/product/', '').split('?')[0];
     const product = products.find(p => p.id === prodId || p.slug === prodId);
@@ -531,7 +540,7 @@ async function startServer() {
     }
     const idx = dbState.orders.findIndex(o => o.id === order.id);
     if (idx >= 0) {
-      dbState.orders[idx] = order;
+      dbState.orders[idx] = { ...dbState.orders[idx], ...order };
     } else {
       dbState.orders.unshift(order);
     }

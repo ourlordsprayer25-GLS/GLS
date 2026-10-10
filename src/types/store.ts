@@ -137,6 +137,8 @@ export interface Order {
   cancelledAt?: string;
   cancelReason?: string;
   returnRequested?: boolean;
+  receiptReviewed?: boolean;
+  receiptReviewedAt?: number;
 }
 
 export interface UserAddress extends ShippingAddress {

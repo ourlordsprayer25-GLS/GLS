@@ -54,6 +54,23 @@
     <meta name="twitter:title" content="GLADYNS ALL ACROSS" />
     <meta name="twitter:description" content="GLADYNS — Curated multi-department store featuring musical instruments, precision audio electronics, autonomous smart home appliances, and living standards." />
     <meta name="twitter:image" content="https://www.gladyns.store/og-banner.jpg" />
+    <!-- PWA Dynamic Web App Manifest (Auto-switched for Storefront vs Admin) -->
+    <link id="app-manifest" rel="manifest" href="/manifest-store.webmanifest" />
+    <script>
+      (function() {
+        if (typeof window !== 'undefined') {
+          if (window.location.pathname.startsWith('/admin')) {
+            var mLink = document.getElementById('app-manifest');
+            if (mLink) mLink.setAttribute('href', '/manifest-admin.webmanifest');
+          }
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function() {});
+            });
+          }
+        }
+      })();
+    </script>
     <!-- Self-hosted, GDPR-compliant local web fonts loaded via src/index.css -->
     <!-- Official Google Identity Services SDK for Google One Tap -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>

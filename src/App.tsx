@@ -333,6 +333,63 @@ function AppContent() {
   // User Profile State with Cloud / Supabase persistence
   const [user, setUser] = useState<UserProfile | null>(null);
 
+  // Dedicated Pages: Orders Page & Patron Profile Page & Section Sliding Hero Pages
+  const [isOrdersPageOpen, setIsOrdersPageOpen] = useState(false);
+  const [isProfilePageOpen, setIsProfilePageOpen] = useState(false);
+  const [profileTab, setProfileTab] = useState<'profile' | 'addresses' | 'loyalty'>('profile');
+  const [activeSectionPage, setActiveSectionPage] = useState<SectionType | null>(null);
+  const [sectionPageCategory, setSectionPageCategory] = useState<string>('all');
+  const [isCategoriesPageOpen, setIsCategoriesPageOpen] = useState(false);
+  const [isBrandPageOpen, setIsBrandPageOpen] = useState(false);
+  const [isAboutUsPageOpen, setIsAboutUsPageOpen] = useState(false);
+  const [isTermsPageOpen, setIsTermsPageOpen] = useState(false);
+  const [isRefundPolicyPageOpen, setIsRefundPolicyPageOpen] = useState(false);
+  const [isStoreLocatorPageOpen, setIsStoreLocatorPageOpen] = useState(false);
+  const [isCollectionsPageOpen, setIsCollectionsPageOpen] = useState(false);
+  const [isAdminPageOpen, setIsAdminPageOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname.startsWith('/admin') || window.location.hash === '#admin';
+    }
+    return false;
+  });
+  const [isCartPageOpen, setIsCartPageOpen] = useState(false);
+  const [isWishlistPageOpen, setIsWishlistPageOpen] = useState(false);
+
+  // Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+
+  // Mobile Navigation Sidebar State
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Dynamic Dual-PWA Manifest & Metadata Switching (Storefront vs. Admin)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let manifestLink = document.getElementById('app-manifest') as HTMLLinkElement | null;
+    if (!manifestLink) {
+      manifestLink = document.createElement('link');
+      manifestLink.id = 'app-manifest';
+      manifestLink.rel = 'manifest';
+      document.head.appendChild(manifestLink);
+    }
+
+    const themeMeta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement | null;
+
+    if (isAdminPageOpen) {
+      manifestLink.setAttribute('href', '/manifest-admin.webmanifest');
+      document.title = 'GLADYNS Admin Console';
+      if (themeMeta) themeMeta.setAttribute('content', '#090b10');
+      if (appleTitleMeta) appleTitleMeta.setAttribute('content', 'GLADYNS Admin');
+    } else {
+      manifestLink.setAttribute('href', '/manifest-store.webmanifest');
+      document.title = 'GLADYNS ALL ACROSS';
+      if (themeMeta) themeMeta.setAttribute('content', '#09090b');
+      if (appleTitleMeta) appleTitleMeta.setAttribute('content', 'GLADYNS');
+    }
+  }, [isAdminPageOpen]);
+
   useEffect(() => {
     const isPwa = typeof window !== 'undefined' && (
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -789,30 +846,6 @@ function AppContent() {
     }
   }, [products, isInitialBootLoading, isReady, formatPrice, isAdminPageOpen, triggerSystemNotification]);
 
-  // Dedicated Pages: Orders Page & Patron Profile Page & Section Sliding Hero Pages
-  const [isOrdersPageOpen, setIsOrdersPageOpen] = useState(false);
-  const [isProfilePageOpen, setIsProfilePageOpen] = useState(false);
-  const [profileTab, setProfileTab] = useState<'profile' | 'addresses' | 'loyalty'>('profile');
-  const [activeSectionPage, setActiveSectionPage] = useState<SectionType | null>(null);
-  const [sectionPageCategory, setSectionPageCategory] = useState<string>('all');
-  const [isCategoriesPageOpen, setIsCategoriesPageOpen] = useState(false);
-  const [isBrandPageOpen, setIsBrandPageOpen] = useState(false);
-  const [isAboutUsPageOpen, setIsAboutUsPageOpen] = useState(false);
-  const [isTermsPageOpen, setIsTermsPageOpen] = useState(false);
-  const [isRefundPolicyPageOpen, setIsRefundPolicyPageOpen] = useState(false);
-  const [isStoreLocatorPageOpen, setIsStoreLocatorPageOpen] = useState(false);
-  const [isCollectionsPageOpen, setIsCollectionsPageOpen] = useState(false);
-  const [isAdminPageOpen, setIsAdminPageOpen] = useState(false);
-  const [isCartPageOpen, setIsCartPageOpen] = useState(false);
-  const [isWishlistPageOpen, setIsWishlistPageOpen] = useState(false);
-
-  // Auth Modal State
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
-
-  // Mobile Navigation Sidebar State
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-
   // Wishlist State with LocalStorage + Cloud / Supabase persistence
   const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
     try {
@@ -963,7 +996,7 @@ function AppContent() {
     if (rawHash === 'about-us') {
       closeAllMainViews();
       setIsAboutUsPageOpen(true);
-    } else if (rawHash === 'admin') {
+    } else if (rawHash === 'admin' || rawHash.startsWith('admin')) {
       closeAllMainViews();
       setIsAdminPageOpen(true);
     } else if (rawHash === 'terms') {
@@ -1521,6 +1554,54 @@ function AppContent() {
       }
     });
   }, [customerNotifications, isInitialBootLoading, user, triggerSystemNotification]);
+
+  // Real-time Audio Chime & OS Notification alert for STORE OWNER / ADMIN when new orders arrive
+  const alertedAdminNotifIdsRef = useRef<Set<string>>((() => {
+    try {
+      const saved = sessionStorage.getItem('gls_alerted_admin_notif_ids');
+      if (saved) return new Set(JSON.parse(saved));
+    } catch (e) {}
+    return new Set<string>();
+  })());
+  const initialAdminNotifsAbsorbedRef = useRef(false);
+
+  useEffect(() => {
+    const isOwnerOrAdmin = isAdminPageOpen || getAdminActiveSession() !== null;
+    if (!isOwnerOrAdmin || !adminNotifications || adminNotifications.length === 0) return;
+
+    if (!initialAdminNotifsAbsorbedRef.current || isInitialBootLoading) {
+      adminNotifications.forEach(n => alertedAdminNotifIdsRef.current.add(n.id));
+      if (!isInitialBootLoading) {
+        initialAdminNotifsAbsorbedRef.current = true;
+        try {
+          sessionStorage.setItem('gls_alerted_admin_notif_ids', JSON.stringify(Array.from(alertedAdminNotifIdsRef.current)));
+        } catch (e) {}
+      }
+      return;
+    }
+
+    adminNotifications.forEach((n) => {
+      if (!n.read && !alertedAdminNotifIdsRef.current.has(n.id)) {
+        alertedAdminNotifIdsRef.current.add(n.id);
+        try {
+          sessionStorage.setItem('gls_alerted_admin_notif_ids', JSON.stringify(Array.from(alertedAdminNotifIdsRef.current)));
+        } catch (e) {}
+
+        const notifImg = n.image || (n.linkTarget ? products.find(p => p.id === n.linkTarget || p.slug === n.linkTarget)?.primaryImage : undefined);
+
+        // Notify Administrator with sound & system banner directing directly to the admin console
+        playPremiumChime();
+        const targetAdminUrl = n.linkTarget ? `/admin?tab=orders&order=${encodeURIComponent(n.linkTarget)}` : '/admin?tab=orders';
+        triggerSystemNotification(`🔔 Admin: ${formatCurrencyInText(n.title)}`, {
+          body: formatCurrencyInText(n.message),
+          tag: `admin-${n.id}`,
+          icon: notifImg || '/pwa-192x192.png',
+          image: notifImg,
+          data: { url: targetAdminUrl },
+        });
+      }
+    });
+  }, [adminNotifications, isAdminPageOpen, isInitialBootLoading, triggerSystemNotification, products]);
 
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {

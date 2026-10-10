@@ -24,7 +24,8 @@ self.addEventListener('push', (event) => {
 // Handle notification clicks — open the app and navigate to orders page
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || '/#orders';
+  const rawUrl = (event.notification.data && event.notification.data.url) || '/orders';
+  const targetUrl = new URL(rawUrl, self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {

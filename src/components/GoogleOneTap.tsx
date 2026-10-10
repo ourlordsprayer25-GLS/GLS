@@ -69,6 +69,12 @@ export const GoogleOneTap: React.FC = () => {
         // Generate cryptographic nonce for Supabase
         const { rawNonce, hashedNonce } = await generateNonce();
 
+        const isLocalHost = typeof window !== 'undefined' && (
+          window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1'
+        );
+        const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+
         // Modern Google Identity Services configuration compatible with FedCM and Supabase
         window.google.accounts.id.initialize({
           client_id: googleClientId,
@@ -78,15 +84,22 @@ export const GoogleOneTap: React.FC = () => {
             }
           },
           nonce: hashedNonce,
-          use_fedcm_for_prompt: true,
+          use_fedcm_for_prompt: isHttps && !isLocalHost,
           itp_support: true,
           auto_select: false,
           cancel_on_tap_outside: false,
           context: 'signin',
         });
 
-        // Prompt Google's native One Tap UI directly from Google servers
-        window.google.accounts.id.prompt();
+        // Prompt Google's native One Tap UI with moment status listener
+        window.google.accounts.id.prompt((notification: any) => {
+          if (notification?.isNotDisplayed?.()) {
+            const reason = notification.getNotDisplayedReason?.();
+            if (isLocalHost) {
+              console.info('[Google One Tap] Inactive on localhost (ensure http://localhost:2005 is in Google Cloud Console Authorized Origins):', reason);
+            }
+          }
+        });
       } catch (err) {
         console.warn('Google One Tap initialization error:', err);
       }
