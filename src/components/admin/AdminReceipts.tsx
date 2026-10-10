@@ -817,18 +817,18 @@ export const AdminReceipts: React.FC<AdminReceiptsProps> = ({
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="flex -space-x-2 overflow-hidden">
-                          {order.items.slice(0, 3).map((item, idx) => (
+                          {(order.items || []).slice(0, 3).map((item, idx) => (
                             <img
                               key={idx}
-                              src={item.selectedColor?.image || item.product.primaryImage}
-                              alt={item.product.name}
+                              src={item?.selectedColor?.image || item?.product?.primaryImage || '/pwa-192x192.png'}
+                              alt={item?.product?.name || 'Product'}
                               className="inline-block h-8 w-8 rounded-lg ring-2 ring-white object-cover bg-zinc-100 shadow-2xs"
-                              title={`${item.product.name} (x${item.quantity})`}
+                              title={`${item?.product?.name || 'Item'} (x${item?.quantity || 1})`}
                             />
                           ))}
                         </div>
                         <span className="text-[11px] font-bold text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded-md">
-                          {order.items.reduce((s, it) => s + it.quantity, 0)} {isFr ? 'art.' : 'items'}
+                          {(order.items || []).reduce((s, it) => s + (it?.quantity || 0), 0)} {isFr ? 'art.' : 'items'}
                         </span>
                       </div>
                     </td>

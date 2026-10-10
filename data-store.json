@@ -2218,6 +2218,16 @@
   ],
   "notifications": [
     {
+      "id": "notif-receipt-ord-1791627179656-1791630972733",
+      "title": "Official Receipt Ready: #GL-7945",
+      "message": "Your certified purchase receipt for Order #GL-7945 has been verified and released for download.",
+      "timestamp": 1791630972733,
+      "read": false,
+      "type": "order",
+      "linkTarget": "GL-7945",
+      "customerId": "14e982ce-18de-400d-918a-0f9790575f6e"
+    },
+    {
       "id": "notif-upd-1791624667223",
       "title": "Order Updated: GL-2023",
       "message": "Your order is now: Confirmed",
@@ -2780,5 +2790,5 @@
     "guest-1mmvwv3-1791295068330": [],
     "guest-yzyfo9g-1791567874709": []
   },
-  "lastUpdated": 1791630639255
+  "lastUpdated": 1791631289634
 }
