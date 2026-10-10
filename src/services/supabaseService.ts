@@ -1089,7 +1089,9 @@ export async function addRealtimeNotification(notification: StoreNotification) {
         payload: notification,
       }).catch(() => {});
 
-      const { error } = await supabase.from('notifications').upsert(notification);
+      // Omit client-only fields like 'image' so it strictly matches the Supabase database schema
+      const { image, ...dbNotification } = notification as any;
+      const { error } = await supabase.from('notifications').upsert(dbNotification);
       if (error) {
         console.error('Supabase add notification error:', error.message);
       }

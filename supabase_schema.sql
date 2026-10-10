@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS public.brands (
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS "customerId" text;
 ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS "customerId" text;
 ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS "isAdminOnly" boolean DEFAULT false;
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS "image" text;
 ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now();
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now();
 
