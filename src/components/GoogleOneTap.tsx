@@ -84,8 +84,7 @@ export const GoogleOneTap: React.FC = () => {
             }
           },
           nonce: hashedNonce,
-          use_fedcm_for_prompt: isHttps && !isLocalHost,
-          itp_support: true,
+          use_fedcm_for_prompt: false, // Prevent FedCM localhost rejection and NetworkError
           auto_select: false,
           cancel_on_tap_outside: false,
           context: 'signin',

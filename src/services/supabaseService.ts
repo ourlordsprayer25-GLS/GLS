@@ -189,28 +189,12 @@ export async function initServerSync(defaults: {
 /**
  * Ultra-Fast Product Fetcher using PostgreSQL RPC or standard select
  */
-let isRpcAvailable = true;
-
 export async function fetchProductsFast(): Promise<Product[] | null> {
   if (!isSupabaseConfigured) return null;
 
-  // Query Supabase with a strict 4.5-second timeout so a slow cloud response never hangs the app
+  // Query Supabase with streamlined columns
   try {
     const fetchPromise = (async () => {
-      // 1. Try PostgreSQL RPC procedure if available
-      if (isRpcAvailable) {
-        try {
-          const { data: rpcData, error: rpcError } = await supabase.rpc('get_store_products');
-          if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
-            return rpcData as Product[];
-          }
-          if (rpcError) isRpcAvailable = false;
-        } catch (_) {
-          isRpcAvailable = false;
-        }
-      }
-
-      // 2. Direct select query with streamlined columns (avoids downloading duplicate base64 image arrays)
       const { data, error } = await supabase
         .from('products')
         .select('id, slug, name, subtitle, tagline, price, originalPrice, category, categoryLabel, department, warranty, condition, specs, brand, brandOrigin, tag, isNewArrival, isHotDeal, discountPercentage, dealEndsIn, description, materials, care, primaryImage, images, colors, sizes, rating, reviewCount, featured, modelInfo, madeIn, sku, barcode, stockLevel, created_at')
