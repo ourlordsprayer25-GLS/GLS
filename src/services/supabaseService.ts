@@ -449,7 +449,10 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
           .from('orders')
           .select('*')
           .order('created_at', { ascending: false });
-        if (!error && Array.isArray(data)) {
+        if (error) {
+          throw error;
+        }
+        if (Array.isArray(data)) {
           wrappedOnUpdate(data as Order[]);
           try {
             await localFetch('/api/sync/orders/bulk-sync', {
@@ -460,6 +463,7 @@ export function subscribeToOrders(onUpdate: (orders: Order[]) => void) {
           } catch (e) {}
         }
       } catch (err) {
+        console.warn('Supabase orders fetch error, falling back to server:', err);
         try {
           const res = await localFetch('/api/sync/orders');
           const serverOrders = await res.json();
@@ -719,16 +723,53 @@ export function subscribeToSettings(defaultSettings: StoreSettings, onUpdate: (s
   };
 }
 
+function sanitizeProductForLineItem(p: any) {
+  if (!p) return p;
+  const primaryImg = p.primaryImage || (Array.isArray(p.images) && p.images[0]?.url) || '';
+  return {
+    id: p.id,
+    sku: p.sku || '',
+    name: p.name || 'Product',
+    price: typeof p.price === 'number' ? p.price : 0,
+    originalPrice: typeof p.originalPrice === 'number' ? p.originalPrice : p.price,
+    category: p.category || '',
+    categoryLabel: p.categoryLabel || '',
+    brand: p.brand || '',
+    primaryImage: primaryImg,
+    images: primaryImg ? [{ url: primaryImg, alt: p.name || '' }] : [],
+  };
+}
+
+export function sanitizeItemsForStorage(items: any[]) {
+  if (!Array.isArray(items)) return [];
+  return items.map((item) => {
+    if (!item) return item;
+    return {
+      id: item.id,
+      quantity: item.quantity || 1,
+      selectedColor: item.selectedColor,
+      selectedSize: item.selectedSize,
+      addedAt: item.addedAt || Date.now(),
+      product: sanitizeProductForLineItem(item.product),
+    };
+  });
+}
+
 /**
  * Data Mutations - Synced Everywhere
  */
 export async function addRealtimeOrder(order: Order) {
+  const sanitizedOrder = {
+    ...order,
+    items: sanitizeItemsForStorage(order.items),
+  };
+
   // Sync to Central Server
   try {
     await localFetch('/api/sync/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(order),
+      body: JSON.stringify(sanitizedOrder),
     });
   } catch (err) {
     console.warn('Server order sync error:', err);
@@ -737,7 +778,7 @@ export async function addRealtimeOrder(order: Order) {
   // Sync to Supabase
   if (isSupabaseConfigured && isLiveSyncEnabled()) {
     try {
-      const { error } = await supabase.from('orders').upsert(order);
+      const { error } = await supabase.from('orders').upsert(sanitizedOrder);
       if (error) {
         console.error('Supabase add order error:', error.message);
       }
@@ -1135,11 +1176,14 @@ export async function fetchRealtimeCart(userId: string): Promise<any[]> {
   if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase.from('users').select('cart_items').eq('id', userId).maybeSingle();
-      if (!error && data?.cart_items && Array.isArray(data.cart_items)) {
+      if (error) {
+        throw error;
+      }
+      if (data?.cart_items && Array.isArray(data.cart_items)) {
         return data.cart_items;
       }
     } catch (err) {
-      console.warn('Supabase fetch cart error:', err);
+      console.warn('Supabase fetch cart error, falling back to local server:', err);
     }
   }
 
@@ -1156,11 +1200,13 @@ export async function fetchRealtimeCart(userId: string): Promise<any[]> {
 }
 
 export async function saveRealtimeCart(userId: string, items: any[]) {
+  const sanitizedItems = sanitizeItemsForStorage(items);
+
   try {
     await localFetch(`/api/sync/cart/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items: sanitizedItems }),
     });
   } catch (err) {
     console.warn('Server save cart error:', err);
@@ -1170,7 +1216,7 @@ export async function saveRealtimeCart(userId: string, items: any[]) {
     try {
       await supabase.from('users').upsert({
         id: userId,
-        cart_items: items,
+        cart_items: sanitizedItems,
         updated_at: new Date().toISOString(),
       });
     } catch (err) {

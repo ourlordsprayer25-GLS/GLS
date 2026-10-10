@@ -36,8 +36,16 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Bypass API and dynamic websocket requests
-  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/events') || url.pathname.startsWith('/@vite')) {
+  // Bypass API, dynamic websocket, and Vite dev/HMR requests
+  if (
+    url.pathname.startsWith('/api') ||
+    url.pathname.startsWith('/events') ||
+    url.pathname.startsWith('/@') ||
+    url.pathname.startsWith('/src') ||
+    url.pathname.startsWith('/node_modules') ||
+    url.hostname === 'localhost' ||
+    url.hostname === '127.0.0.1'
+  ) {
     return;
   }
 
@@ -58,16 +66,23 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => {
-          return caches.match(event.request).then((cached) => {
-            if (cached) return cached;
-            // For navigation requests, fallback to offline index
-            if (event.request.mode === 'navigate') {
-              if (url.pathname.startsWith('/admin')) {
-                return caches.match('/admin') || caches.match('/');
-              }
-              return caches.match('/');
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          // For navigation requests, fallback to offline index
+          if (event.request.mode === 'navigate') {
+            if (url.pathname.startsWith('/admin')) {
+              const adminCached = await caches.match('/admin');
+              if (adminCached) return adminCached;
             }
+            const rootCached = await caches.match('/');
+            if (rootCached) return rootCached;
+          }
+          // Never resolve with undefined in event.respondWith — return valid Response
+          return new Response('Network offline and asset not cached', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'text/plain' },
           });
         })
     );
