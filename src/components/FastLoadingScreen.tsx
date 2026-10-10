@@ -59,32 +59,27 @@ export const FastLoadingScreen: React.FC<FastLoadingScreenProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
-  // Progressive, natural e-commerce loading timeline
+  // Progressive, blazing-fast e-commerce loading timeline
   useEffect(() => {
     const t1 = setTimeout(() => {
-      setProgress(45);
+      setProgress(55);
       setCurrentStep(1);
-    }, 180);
+    }, 60);
 
     const t2 = setTimeout(() => {
-      setProgress(78);
+      setProgress(85);
       setCurrentStep(2);
-    }, 380);
+    }, 120);
 
     const t3 = setTimeout(() => {
-      setProgress(94);
-      setCurrentStep(3);
-    }, 600);
-
-    const t4 = setTimeout(() => {
       setProgress(100);
-    }, 800);
+      setCurrentStep(3);
+    }, 200);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
-      clearTimeout(t4);
     };
   }, []);
 
@@ -93,11 +88,11 @@ export const FastLoadingScreen: React.FC<FastLoadingScreenProps> = ({
     if (progress >= 100) {
       const exitTimer = setTimeout(() => {
         setIsFadingOut(true);
-      }, 150);
+      }, 80);
 
       const finishTimer = setTimeout(() => {
         if (onFinish) onFinish();
-      }, 550);
+      }, 240);
 
       return () => {
         clearTimeout(exitTimer);

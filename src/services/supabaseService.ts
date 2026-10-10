@@ -194,31 +194,36 @@ let isRpcAvailable = true;
 export async function fetchProductsFast(): Promise<Product[] | null> {
   if (!isSupabaseConfigured) return null;
 
-  // 1. Try PostgreSQL RPC procedure if available
-  if (isRpcAvailable) {
-    try {
-      const { data: rpcData, error: rpcError } = await supabase.rpc('get_store_products');
-      if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
-        return rpcData as Product[];
-      }
-      if (rpcError) {
-        // If RPC failed (e.g. 500 type mismatch or not created), gracefully disable RPC for session
-        isRpcAvailable = false;
-      }
-    } catch (_) {
-      isRpcAvailable = false;
-    }
-  }
-
-  // 2. Standard select fallback (always reliable)
+  // Query Supabase with a strict 4.5-second timeout so a slow cloud response never hangs the app
   try {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (!error && Array.isArray(data) && data.length > 0) {
-      return data as Product[];
-    }
+    const fetchPromise = (async () => {
+      // 1. Try PostgreSQL RPC procedure if available
+      if (isRpcAvailable) {
+        try {
+          const { data: rpcData, error: rpcError } = await supabase.rpc('get_store_products');
+          if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
+            return rpcData as Product[];
+          }
+          if (rpcError) isRpcAvailable = false;
+        } catch (_) {
+          isRpcAvailable = false;
+        }
+      }
+
+      // 2. Direct select query (fast & ordered)
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return data as Product[];
+      }
+      return null;
+    })();
+
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 4500));
+    const result = await Promise.race([fetchPromise, timeoutPromise]);
+    if (result && result.length > 0) return result;
   } catch (err) {
     console.warn('Supabase products fetch fallback error:', err);
   }
@@ -653,8 +658,12 @@ export function subscribeToNotifications(onUpdate: (notifications: StoreNotifica
       })
       .subscribe();
 
-    // Fast 4-second background heartbeat to ensure notifications arrive without delay
-    pollInterval = setInterval(fetchNotifs, 4000);
+    // Throttled 20-second background check only when tab is active (real-time changes handled via WebSocket)
+    pollInterval = setInterval(() => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        fetchNotifs();
+      }
+    }, 20000);
   }
 
   return () => {
