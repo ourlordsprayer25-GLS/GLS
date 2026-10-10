@@ -46,7 +46,13 @@ export const GoogleOneTap: React.FC = () => {
       window.location.pathname.includes('admin')
     );
 
-    if (user || isAdminRoute) {
+    const isLocalHost = typeof window !== 'undefined' && (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname === '[::1]'
+    );
+
+    if (user || isAdminRoute || isLocalHost) {
       if (typeof window !== 'undefined' && window.google?.accounts?.id) {
         window.google.accounts.id.cancel();
       }
@@ -90,15 +96,8 @@ export const GoogleOneTap: React.FC = () => {
           context: 'signin',
         });
 
-        // Prompt Google's native One Tap UI with moment status listener
-        window.google.accounts.id.prompt((notification: any) => {
-          if (notification?.isNotDisplayed?.()) {
-            const reason = notification.getNotDisplayedReason?.();
-            if (isLocalHost) {
-              console.info('[Google One Tap] Inactive on localhost (ensure http://localhost:2005 is in Google Cloud Console Authorized Origins):', reason);
-            }
-          }
-        });
+        // Prompt Google's native One Tap UI (FedCM compliant invocation)
+        window.google.accounts.id.prompt();
       } catch (err) {
         console.warn('Google One Tap initialization error:', err);
       }

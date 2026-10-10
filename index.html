@@ -16,13 +16,24 @@
     <meta name="force-rendering" content="webkit" />
     <meta name="layoutmode" content="fitscreen" />
     <script>
-      // Gracefully suppress Vite HMR connection warnings in preview iframe
+      // Completely silence Google GSI_LOGGER, FedCM, and Vite HMR console noise forever
       (() => {
-        const origError = console.error;
-        console.error = (...args) => {
-          if (typeof args[0] === 'string' && args[0].includes('[vite]')) return;
-          origError.apply(console, args);
+        const isNoise = (args) => {
+          try {
+            const str = args.map((a) => (typeof a === 'string' ? a : (a && a.message ? a.message : ''))).join(' ');
+            return str.includes('GSI_LOGGER') || str.includes('FedCM') || str.includes('Google One Tap') || str.includes('[vite]');
+          } catch (_) {
+            return false;
+          }
         };
+
+        ['log', 'info', 'warn', 'error'].forEach((method) => {
+          const orig = console[method];
+          console[method] = (...args) => {
+            if (isNoise(args)) return;
+            orig.apply(console, args);
+          };
+        });
       })();
     </script>
     <title>GLADYNS ALL ACROSS</title>
