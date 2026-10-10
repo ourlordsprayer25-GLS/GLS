@@ -210,10 +210,10 @@ export async function fetchProductsFast(): Promise<Product[] | null> {
         }
       }
 
-      // 2. Direct select query (fast & ordered)
+      // 2. Direct select query with streamlined columns (avoids downloading duplicate base64 image arrays)
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('id, slug, name, subtitle, tagline, price, originalPrice, category, categoryLabel, department, warranty, condition, specs, brand, brandOrigin, tag, isNewArrival, isHotDeal, discountPercentage, dealEndsIn, description, materials, care, primaryImage, images, colors, sizes, rating, reviewCount, featured, modelInfo, madeIn, sku, barcode, stockLevel, created_at')
         .order('created_at', { ascending: false });
       if (!error && Array.isArray(data) && data.length > 0) {
         return data as Product[];
@@ -221,7 +221,7 @@ export async function fetchProductsFast(): Promise<Product[] | null> {
       return null;
     })();
 
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 4500));
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
     const result = await Promise.race([fetchPromise, timeoutPromise]);
     if (result && result.length > 0) return result;
   } catch (err) {
