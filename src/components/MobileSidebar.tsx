@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Product, UserProfile } from '../types/store';
 import { useLanguageCurrency } from '../context/LanguageCurrencyContext';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface MobileSidebarProps {
   products?: Product[];
@@ -442,8 +443,13 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({
               </button>
             )}
 
+            {/* Install PWA Button on Mobile */}
+            <div className="pt-2 pb-1 px-1">
+              <PWAInstallButton mode="store" />
+            </div>
+
             {/* SPECIAL OFFER Button */}
-            <div className="pt-3 pb-1 px-1">
+            <div className="pt-2 pb-1 px-1">
               <button
                 onClick={() => {
                   onClose();

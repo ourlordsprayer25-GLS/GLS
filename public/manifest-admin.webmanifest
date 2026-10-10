@@ -1,9 +1,9 @@
 {
-  "id": "/admin?pwa=admin",
-  "name": "GLADYNS Admin Console",
-  "short_name": "GLADYNS Admin",
+  "id": "/admin?app=admin",
+  "name": "MY ADMIN",
+  "short_name": "MY ADMIN",
   "description": "Enterprise administration portal for inventory, orders, customer tracking, analytics, and store configuration.",
-  "start_url": "/admin?pwa=admin",
+  "start_url": "/admin?app=admin",
   "scope": "/admin",
   "display": "standalone",
   "background_color": "#090b10",

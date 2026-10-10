@@ -379,14 +379,14 @@ function AppContent() {
 
     if (isAdminPageOpen) {
       manifestLink.setAttribute('href', '/manifest-admin.webmanifest');
-      document.title = 'GLADYNS Admin Console';
+      document.title = 'MY ADMIN';
       if (themeMeta) themeMeta.setAttribute('content', '#090b10');
-      if (appleTitleMeta) appleTitleMeta.setAttribute('content', 'GLADYNS Admin');
+      if (appleTitleMeta) appleTitleMeta.setAttribute('content', 'MY ADMIN');
     } else {
       manifestLink.setAttribute('href', '/manifest-store.webmanifest');
-      document.title = 'GLADYNS ALL ACROSS';
+      document.title = 'Gladyns Marketplace';
       if (themeMeta) themeMeta.setAttribute('content', '#09090b');
-      if (appleTitleMeta) appleTitleMeta.setAttribute('content', 'GLADYNS');
+      if (appleTitleMeta) appleTitleMeta.setAttribute('content', 'Gladyns Marketplace');
     }
   }, [isAdminPageOpen]);
 

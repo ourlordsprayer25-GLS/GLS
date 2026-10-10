@@ -93,14 +93,14 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'favicon-32x32.png', 'favicon-16x16.png', 'apple-touch-icon.png'],
         manifest: {
-          id: '/',
-          name: 'GLADYNS Marketplace',
-          short_name: 'GLADYNS',
+          id: '/?app=store',
+          name: 'Gladyns Marketplace',
+          short_name: 'Gladyns',
           description: 'A highly curated global marketplace uniting exceptional design and precision technology.',
           theme_color: '#09090b',
           background_color: '#ffffff',
           display: 'standalone',
-          start_url: '/',
+          start_url: '/?app=store',
           scope: '/',
           icons: [
             {

@@ -59,9 +59,14 @@
     <script>
       (function() {
         if (typeof window !== 'undefined') {
-          if (window.location.pathname.startsWith('/admin')) {
-            var mLink = document.getElementById('app-manifest');
-            if (mLink) mLink.setAttribute('href', '/manifest-admin.webmanifest');
+          var isAdmin = window.location.pathname.startsWith('/admin') || window.location.hash.includes('admin');
+          var mLink = document.getElementById('app-manifest');
+          if (mLink) {
+            mLink.setAttribute('href', isAdmin ? '/manifest-admin.webmanifest' : '/manifest-store.webmanifest');
+          }
+          if (isAdmin) {
+            var appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+            if (appleTitle) appleTitle.setAttribute('content', 'MY ADMIN');
           }
           if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {

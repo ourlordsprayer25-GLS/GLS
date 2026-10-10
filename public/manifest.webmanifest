@@ -1,7 +1,7 @@
 {
-  "id": "/?pwa=store",
-  "name": "GLADYNS Marketplace",
-  "short_name": "GLADYNS",
+  "id": "/?app=store",
+  "name": "Gladyns Marketplace",
+  "short_name": "Gladyns",
   "description": "Curated luxury marketplace with global delivery, live parcel tracking, and multi-currency checkout.",
   "start_url": "/?pwa=store",
   "scope": "/",

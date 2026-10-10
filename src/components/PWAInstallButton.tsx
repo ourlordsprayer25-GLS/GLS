@@ -29,13 +29,13 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ mode = 'stor
             ? "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs border border-emerald-500/40"
             : "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition-all cursor-pointer shadow-xs"
         }
-        title={isAdmin ? "Install GLADYNS Admin App" : "Install GLADYNS App"}
+        title={isAdmin ? "Install MY ADMIN" : "Install Gladyns Marketplace"}
       >
         <Download className="w-3.5 h-3.5" />
         <span>
           {isAdmin
-            ? (language === 'fr' ? 'Installer l\'App Admin' : 'Install Admin App')
-            : (language === 'fr' ? 'Installer l\'App' : 'Install App')}
+            ? (language === 'fr' ? 'Installer MY ADMIN' : 'Install MY ADMIN')
+            : (language === 'fr' ? 'Installer Gladyns Marketplace' : 'Install Gladyns Marketplace')}
         </span>
       </button>
     );
@@ -56,8 +56,8 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ mode = 'stor
           {isAdmin ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Smartphone className="w-3.5 h-3.5 text-blue-400" />}
           <span>
             {isAdmin
-              ? (language === 'fr' ? 'Installer Admin sur iOS' : 'Install Admin on iOS')
-              : (language === 'fr' ? 'Installer sur iOS' : 'Install on iOS')}
+              ? (language === 'fr' ? 'Installer MY ADMIN sur iOS' : 'Install MY ADMIN on iOS')
+              : (language === 'fr' ? 'Installer Gladyns sur iOS' : 'Install Gladyns on iOS')}
           </span>
         </button>
 
@@ -69,8 +69,8 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ mode = 'stor
                   {isAdmin ? <ShieldCheck className="w-4 h-4 text-emerald-600" /> : <Sparkles className="w-4 h-4 text-blue-600" />}
                   <span className="font-display font-bold text-sm text-zinc-950">
                     {isAdmin
-                      ? (language === 'fr' ? 'Installer GLADYNS Admin' : 'Install GLADYNS Admin')
-                      : (language === 'fr' ? 'Installer GLADYNS' : 'Install GLADYNS')}
+                      ? 'MY ADMIN'
+                      : 'Gladyns Marketplace'}
                   </span>
                 </div>
                 <button
@@ -86,11 +86,11 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ mode = 'stor
                 <p>
                   {isAdmin
                     ? (language === 'fr'
-                        ? 'Ajoutez GLADYNS Admin à votre écran d\'accueil pour gérer les commandes, stocks et clients en plein écran :'
-                        : 'Add GLADYNS Admin to your home screen for full-screen management of orders, inventory, and customer activity:')
+                        ? 'Ajoutez MY ADMIN à votre écran d\'accueil pour gérer les commandes, stocks et clients en plein écran :'
+                        : 'Add MY ADMIN to your home screen for full-screen management of orders, inventory, and customer activity:')
                     : (language === 'fr'
-                        ? 'Ajoutez GLADYNS à votre écran d\'accueil pour une expérience fluide et des notifications d\'expédition instantanées :'
-                        : 'Add GLADYNS to your home screen for seamless catalog browsing and instant shipping status notifications:')}
+                        ? 'Ajoutez Gladyns Marketplace à votre écran d\'accueil pour une expérience d\'achat fluide et des notifications d\'expédition :'
+                        : 'Add Gladyns Marketplace to your home screen for seamless catalog browsing and instant shipping status notifications:')}
                 </p>
                 <div className="bg-[#FAF9F6] p-3 rounded-xl border border-zinc-200/60 space-y-2">
                   <p>
