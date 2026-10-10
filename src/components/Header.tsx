@@ -372,22 +372,22 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Unified Search Input Bar with Category Filter & Search Button */}
-          <div className="flex-1 min-w-0 max-w-2xl mx-1 sm:mx-3 relative" ref={searchContainerRef}>
-            <div className="flex items-center bg-slate-100/90 hover:bg-slate-100 focus-within:bg-white rounded-full border border-slate-200/80 p-1 pl-3 sm:pl-4 transition-all shadow-2xs focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent">
+          <div className="flex-1 min-w-[200px] max-w-xl mx-2 lg:mx-4 relative" ref={searchContainerRef}>
+            <div className="flex items-center bg-slate-100/90 hover:bg-slate-100 focus-within:bg-white rounded-full border border-slate-200/80 p-1 pl-3 sm:pl-3.5 transition-all shadow-2xs focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent">
               
               {/* Left Category Dropdown (Desktop only) */}
-              <div className="relative shrink-0 pr-2 sm:pr-3 border-r border-slate-300/80 hidden sm:block" ref={categoriesDropdownRef}>
+              <div className="relative shrink-0 pr-2 border-r border-slate-300/80 hidden md:block" ref={categoriesDropdownRef}>
                 <button
                   type="button"
                   onClick={() => setIsCategoriesDropdownOpen(!isCategoriesDropdownOpen)}
                   className="flex items-center gap-1 text-xs font-bold text-slate-800 hover:text-blue-600 cursor-pointer"
                 >
-                  <span>{language === 'fr' ? 'Tout' : 'All'}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="truncate max-w-[80px]">{language === 'fr' ? 'Tout' : 'All'}</span>
+                  <ChevronDown className="w-3 h-3 text-slate-500" />
                 </button>
 
                 {isCategoriesDropdownOpen && (
-                  <div className="absolute left-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-2 z-50 text-xs animate-in fade-in zoom-in-95 max-h-80 overflow-y-auto">
+                  <div className="absolute left-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-2 z-50 text-xs animate-in fade-in zoom-in-95 max-h-80 overflow-y-auto">
                     <div className="px-3 py-2 border-b border-slate-100 font-bold text-slate-900">
                       {language === 'fr' ? 'Catégories' : 'Departments'}
                     </div>
@@ -440,19 +440,19 @@ export const Header: React.FC<HeaderProps> = ({
                     el?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                placeholder={language === 'fr' ? 'Rechercher ordinateurs, marques, specs...' : 'Search laptops, brands, specs...'}
-                className="w-full min-w-0 px-1.5 sm:px-3 py-1 sm:py-2 bg-transparent text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-sans truncate"
+                placeholder={language === 'fr' ? 'Rechercher un produit, marque...' : 'Search products, brands, specs...'}
+                className="w-full min-w-0 px-2 py-1 bg-transparent text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-sans truncate"
               />
 
               {/* Camera & Microphone icons (Desktop only) */}
-              <div className="hidden xl:flex items-center gap-1.5 text-slate-400 px-1 shrink-0">
+              <div className="hidden 2xl:flex items-center gap-1 text-slate-400 px-1 shrink-0">
                 <button
                   type="button"
                   aria-label="Voice Search"
                   onClick={startVoiceSearch}
                   className={`hover:text-blue-600 cursor-pointer p-1 transition-colors ${isListening ? 'text-red-600 animate-pulse' : ''}`}
                 >
-                  <Mic className="w-4 h-4" />
+                  <Mic className="w-3.5 h-3.5" />
                 </button>
               </div>
 
@@ -482,16 +482,16 @@ export const Header: React.FC<HeaderProps> = ({
                   const el = document.getElementById('catalog-section');
                   el?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-2 sm:px-4 sm:py-2 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2 sm:px-3.5 sm:py-1.5 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
               >
-                <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{language === 'fr' ? 'Rechercher' : 'Search'}</span>
+                <Search className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">{language === 'fr' ? 'Rechercher' : 'Search'}</span>
               </button>
             </div>
 
             {/* LIVE AUTOCOMPLETE DROPDOWN ATTACHED DIRECTLY UNDER SEARCH BAR (Desktop & Tablet) */}
             {isSearchOpen && (
-              <div className="hidden sm:block absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 z-[70] max-h-[75vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="hidden sm:block absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 z-[70] max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
                 {!searchQuery.trim() ? (
                   /* Empty query: Popular searches & Quick department shortcuts */
                   <div className="space-y-4">
@@ -571,7 +571,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                     {matchingProducts.length > 0 ? (
                       <div>
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-100">
                           <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                             {language === 'fr' ? 'Articles correspondants' : 'Matching Items'} ({matchingProducts.length})
                           </p>
@@ -579,7 +579,7 @@ export const Header: React.FC<HeaderProps> = ({
                             {language === 'fr' ? 'Cliquez pour ouvrir' : 'Click item to open'}
                           </span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto pr-1">
                           {matchingProducts.map((p) => (
                             <div
                               key={p.id}
@@ -588,20 +588,20 @@ export const Header: React.FC<HeaderProps> = ({
                                 setIsSearchOpen(false);
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                               }}
-                              className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-500 transition-all cursor-pointer group shadow-2xs text-left"
+                              className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50/80 hover:bg-blue-50 border border-slate-200/70 hover:border-blue-400 transition-all cursor-pointer group shadow-2xs text-left"
                             >
                               <img
                                 src={p.primaryImage}
                                 alt={p.name}
-                                className="w-12 h-12 object-cover rounded-lg bg-slate-200 shrink-0"
+                                className="w-10 h-10 object-cover rounded-lg bg-slate-200 shrink-0 border border-slate-200"
                               />
                               <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1">
                                   <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 truncate">
                                     {p.brand || p.categoryLabel}
                                   </span>
                                   {p.condition && (
-                                    <span className="text-[9px] font-medium text-slate-400 shrink-0">
+                                    <span className="text-[9px] text-slate-400 shrink-0">
                                       • {p.condition}
                                     </span>
                                   )}
@@ -613,7 +613,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   {formatPrice(p.price)}
                                 </p>
                               </div>
-                              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
+                              <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
                             </div>
                           ))}
                         </div>
@@ -1041,16 +1041,16 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Desktop Action Buttons (Wishlist, Cart, Language, User Sign In) - Visible on lg screens */}
-            <div className="hidden lg:flex items-center gap-2 shrink-0">
+            {/* Desktop Action Buttons (Wishlist, Cart, PWA, User Sign In) - Visible on lg screens */}
+            <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
               {/* 2. Wishlist / Favoris Button */}
               <button
                 onClick={onOpenWishlist}
                 aria-label="Favoris"
-                className="flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-rose-50 text-slate-800 hover:text-rose-600 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/90 shadow-2xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-slate-800 hover:text-rose-600 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/90 shadow-2xs"
               >
-                <Heart className={`w-4 h-4 ${wishlistCount > 0 ? 'fill-rose-500 text-rose-500' : 'text-slate-700'}`} />
-                <span>{language === 'fr' ? 'Favoris' : 'Wishlist'}</span>
+                <Heart className={`w-3.5 h-3.5 ${wishlistCount > 0 ? 'fill-rose-500 text-rose-500' : 'text-slate-700'}`} />
+                <span className="hidden xl:inline">{language === 'fr' ? 'Favoris' : 'Wishlist'}</span>
                 {wishlistCount > 0 && (
                   <span className="bg-rose-100 text-rose-700 rounded-full px-1.5 py-0.2 text-[10px] font-mono font-bold">
                     {wishlistCount}
@@ -1062,27 +1062,18 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onOpenCart}
                 aria-label="Panier"
-                className="flex items-center gap-2 px-3.5 py-2 bg-slate-100/90 hover:bg-blue-100 text-slate-800 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/60"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100/90 hover:bg-blue-100 text-slate-800 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/60"
               >
-                <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-mono font-bold text-[11px] shadow-2xs">
+                <div className="w-4.5 h-4.5 rounded-full bg-blue-600 text-white flex items-center justify-center font-mono font-bold text-[10px] shadow-2xs">
                   {cartItemCount}
                 </div>
                 <span>{language === 'fr' ? 'Panier' : 'Cart'}</span>
               </button>
 
               {/* PWA App Install Action */}
-              <div className="hidden sm:block">
+              <div className="hidden xl:block">
                 <PWAInstallButton />
               </div>
-
-              {/* 4. Language / EN Selector */}
-              <button
-                onClick={() => setIsSelectorModalOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100/90 hover:bg-slate-200 text-slate-800 rounded-full font-bold text-xs transition-colors cursor-pointer shrink-0 border border-slate-200/60"
-              >
-                <Globe className="w-4 h-4 text-cyan-600" />
-                <span className="uppercase">{language}</span>
-              </button>
 
             {/* 5. Connexion / S'inscrire or User Profile */}
             <div className="hidden sm:block relative" ref={userMenuRef}>
