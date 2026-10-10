@@ -192,27 +192,24 @@ export async function initServerSync(defaults: {
 export async function fetchProductsFast(): Promise<Product[] | null> {
   if (!isSupabaseConfigured) return null;
 
-  // Query Supabase with streamlined columns
+  // Query Supabase directly for live products
   try {
-    const fetchPromise = (async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, slug, name, subtitle, tagline, price, originalPrice, category, categoryLabel, department, warranty, condition, specs, brand, brandOrigin, tag, isNewArrival, isHotDeal, discountPercentage, dealEndsIn, description, materials, care, primaryImage, images, colors, sizes, rating, reviewCount, featured, modelInfo, madeIn, sku, barcode, stockLevel, created_at')
-        .order('created_at', { ascending: false });
-      if (!error && Array.isArray(data) && data.length > 0) {
-        return data as Product[];
-      }
-      return null;
-    })();
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, slug, name, subtitle, tagline, price, originalPrice, category, categoryLabel, department, warranty, condition, specs, brand, brandOrigin, tag, isNewArrival, isHotDeal, discountPercentage, dealEndsIn, description, materials, care, primaryImage, images, colors, sizes, rating, reviewCount, featured, modelInfo, madeIn, sku, barcode, stockLevel, created_at')
+      .order('created_at', { ascending: false });
 
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
-    const result = await Promise.race([fetchPromise, timeoutPromise]);
-    if (result && result.length > 0) return result;
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return data as Product[];
+    }
+    if (error) {
+      console.warn('Supabase products fetch error:', error.message);
+    }
   } catch (err) {
     console.warn('Supabase products fetch fallback error:', err);
   }
 
-  // 3. Centralized server endpoint fallback
+  // Centralized server endpoint fallback
   try {
     const res = await localFetch('/api/sync/products');
     if (res.ok) {
