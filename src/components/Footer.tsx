@@ -95,7 +95,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Info */}
           <div className="space-y-2 max-w-sm">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md shrink-0 border border-blue-500/30 bg-slate-900 shadow-blue-900/10">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm shrink-0">
                 <img src="/assets/logo-icon.png" alt="GLADYNS Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-lg font-display font-bold tracking-tight text-white block uppercase">

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Seamless Electric Blue Background exact hex #155dfc -->
+    <linearGradient id="electricBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1862ff" />
+      <stop offset="100%" stop-color="#155dfc" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base: Seamless squircle app icon -->
+  <rect width="512" height="512" rx="116" fill="url(#electricBlue)" />
+
+  <!-- Smooth Pure Milk-White Vector Monogram -->
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Perfect Outer Enclosing Circle -->
+    <circle cx="256" cy="256" r="182" stroke-width="18" />
+
+    <!-- Left Outer Wing / Swirl Arc -->
+    <path d="M 124 168 C 100 240 144 350 256 424" stroke-width="17" />
+
+    <!-- Inner Interlocking Cradle Arc -->
+    <path d="M 194 186 C 146 238 152 334 256 384 C 322 352 354 294 360 256" stroke-width="16" />
+
+    <!-- Pure Capital G Main Outer Spine & Arc -->
+    <path d="M 362 94 L 362 206 C 336 150 292 128 238 128 C 152 128 120 196 122 268 C 126 354 196 424 256 438" stroke-width="19" />
+
+    <!-- Sharp Elegant Horizontal Bar of G -->
+    <path d="M 248 256 L 398 256" stroke-width="21" />
+
+    <!-- Graceful Inner Serif Curve under G bar -->
+    <path d="M 292 256 C 334 286 342 338 322 376" stroke-width="18" />
+  </g>
+</svg>
