@@ -1488,7 +1488,9 @@ function AppContent() {
     });
     return Array.from(map.values());
   }, [notifications, user, products, dismissedNotificationIds]);
-  const adminNotifications = notifications.filter(n => n.isAdminOnly || n.type !== 'order' || !n.customerId);
+  const adminNotifications = useMemo(() => {
+    return notifications.filter(n => n.isAdminOnly || (n.type === 'order' && (!n.customerId || n.customerId === 'admin')));
+  }, [notifications]);
   const unreadNotificationCount = customerNotifications.filter((n) => !n.read).length;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const wishlistCount = wishlistIds.length;
@@ -1581,6 +1583,9 @@ function AppContent() {
     }
 
     adminNotifications.forEach((n) => {
+      // Do not blast OS desktop notifications to the admin for catalog/product events
+      if (n.type === 'product' || n.type === 'drop') return;
+
       if (!n.read && !alertedAdminNotifIdsRef.current.has(n.id)) {
         alertedAdminNotifIdsRef.current.add(n.id);
         try {
